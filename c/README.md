@@ -1,8 +1,14 @@
 # Portable C implementation
 
-This directory will contain the portable C implementation of the shared
-`rtd-acquire` behavioral contract and platform/HAL adapters.
+This directory contains the portable C side of the shared `rtd-acquire`
+behavioral contract and platform/HAL adapters.
 
-The C API is intentionally not scaffolded beyond this boundary yet. The first
-public structures and diagnostic identifiers should follow the pre-0.1
-diagnostic survey and contract freeze documented in `ROADMAP.md`.
+The first frozen C capability is the SPI HAL in
+`include/rtd_acquire/spi.h`. It mirrors the semantics of the Python SPI
+transport without requiring identical language-level APIs: one transfer call
+is one complete SPI transaction, the adapter owns chip select, and the driver
+can inspect the effective SPI settings.
+
+The initial compile/runtime contract test is `tests/test_spi_contract.c`. The
+MAX31865 C driver, caller-owned measurement/diagnostic structures, and HERO
+platform adapter remain 0.2 work.

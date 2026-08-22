@@ -86,6 +86,166 @@
           }
         ]
       }
+    },
+    {
+      "id": "max31865-low-threshold-warning",
+      "description": "Usable resistance with the RTD low-threshold bit set.",
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": 60.0,
+        "high_fault_threshold_ohms": null
+      },
+      "native_input": {
+        "rtd_register": 8193,
+        "fault_status_register": 64
+      },
+      "expected": {
+        "resistance_ohms": 53.75,
+        "status": "warning",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": [
+          {
+            "code": "resistance_low_threshold",
+            "severity": "warning",
+            "native_evidence": [
+              {
+                "identifier": "D6",
+                "message": "RTD Low Threshold"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "max31865-reference-input-above-threshold-fault",
+      "description": "REFIN- is above the MAX31865 fault-detection threshold.",
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": null,
+        "high_fault_threshold_ohms": null
+      },
+      "native_input": {
+        "rtd_register": 16385,
+        "fault_status_register": 32
+      },
+      "expected": {
+        "resistance_ohms": null,
+        "status": "fault",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": [
+          {
+            "code": "reference_input_above_threshold",
+            "severity": "fault",
+            "native_evidence": [
+              {
+                "identifier": "D5",
+                "message": "REFIN- > 0.85 x VBIAS"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "max31865-reference-input-below-threshold-fault",
+      "description": "REFIN- is below the MAX31865 fault-detection threshold during the documented FORCE- open check.",
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": null,
+        "high_fault_threshold_ohms": null
+      },
+      "native_input": {
+        "rtd_register": 16385,
+        "fault_status_register": 16
+      },
+      "expected": {
+        "resistance_ohms": null,
+        "status": "fault",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": [
+          {
+            "code": "reference_input_below_threshold",
+            "severity": "fault",
+            "native_evidence": [
+              {
+                "identifier": "D4",
+                "message": "REFIN- < 0.85 x VBIAS (FORCE- open)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "max31865-rtd-input-below-threshold-fault",
+      "description": "RTDIN- is below the MAX31865 fault-detection threshold during the documented FORCE- open check.",
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": null,
+        "high_fault_threshold_ohms": null
+      },
+      "native_input": {
+        "rtd_register": 16385,
+        "fault_status_register": 8
+      },
+      "expected": {
+        "resistance_ohms": null,
+        "status": "fault",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": [
+          {
+            "code": "rtd_input_below_threshold",
+            "severity": "fault",
+            "native_evidence": [
+              {
+                "identifier": "D3",
+                "message": "RTDIN- < 0.85 x VBIAS (FORCE- open)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "max31865-zero-ohm-low-threshold",
+      "description": "Zero ADC code remains a valid electrical resistance result when only the low-threshold warning is reported.",
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": 0.0,
+        "high_fault_threshold_ohms": null
+      },
+      "native_input": {
+        "rtd_register": 1,
+        "fault_status_register": 64
+      },
+      "expected": {
+        "resistance_ohms": 0.0,
+        "status": "warning",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": [
+          {
+            "code": "resistance_low_threshold",
+            "severity": "warning",
+            "native_evidence": [
+              {
+                "identifier": "D6",
+                "message": "RTD Low Threshold"
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

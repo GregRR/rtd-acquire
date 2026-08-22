@@ -21,6 +21,13 @@ def test_ok_measurement_has_resistance_and_no_diagnostics() -> None:
     assert measurement.diagnostics == ()
 
 
+def test_zero_resistance_is_representable() -> None:
+    measurement = Measurement(resistance_ohms=0.0)
+
+    assert measurement.status is MeasurementStatus.OK
+    assert measurement.resistance_ohms == 0.0
+
+
 def test_warning_measurement_keeps_usable_resistance() -> None:
     diagnostic = Diagnostic(
         code=DiagnosticCode.RESISTANCE_HIGH_THRESHOLD,
@@ -84,9 +91,9 @@ def test_zero_standard_uncertainty_is_representable() -> None:
     assert measurement.standard_uncertainty_ohms == 0.0
 
 
-@pytest.mark.parametrize("resistance", [0.0, -1.0, math.inf, -math.inf, math.nan])
+@pytest.mark.parametrize("resistance", [-1.0, math.inf, -math.inf, math.nan])
 def test_invalid_resistance_is_rejected(resistance: float) -> None:
-    with pytest.raises(ValueError, match="finite and greater than zero"):
+    with pytest.raises(ValueError, match="finite and non-negative"):
         Measurement(resistance_ohms=resistance)
 
 

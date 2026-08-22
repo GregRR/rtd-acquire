@@ -32,9 +32,9 @@ class Measurement:
         object.__setattr__(self, "diagnostics", diagnostics)
 
         if self.resistance_ohms is not None and (
-            not math.isfinite(self.resistance_ohms) or self.resistance_ohms <= 0.0
+            not math.isfinite(self.resistance_ohms) or self.resistance_ohms < 0.0
         ):
-            raise ValueError("resistance_ohms must be finite and greater than zero")
+            raise ValueError("resistance_ohms must be finite and non-negative")
 
         if self.standard_uncertainty_ohms is not None and (
             not math.isfinite(self.standard_uncertainty_ohms)

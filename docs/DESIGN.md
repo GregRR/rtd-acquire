@@ -138,12 +138,14 @@ This prevents contradictory states such as an `OK` measurement carrying a
 
 `resistance_ohms` is the acquisition system's best trustworthy estimate of the
 RTD element's electrical resistance, expressed in ohms. When present, it must
-be finite and greater than zero.
+be finite and non-negative.
 
 A failed acquisition uses no magic resistance value. If no trustworthy
 resistance is available, the resistance is absent rather than represented by
-zero, infinity, `NaN`, or another sentinel value. Raw or otherwise untrusted
-converter output belongs in a future debugging/inspection interface rather than
+infinity, `NaN`, or another sentinel value. Zero ohms is a valid electrical
+result when the acquisition hardware actually measures it; `rtd-acquire` does
+not reject that value merely because it would be invalid for a particular RTD
+model. Raw or otherwise untrusted converter output belongs in a future debugging/inspection interface rather than
 in `Measurement.resistance_ohms`.
 
 ### 4.2 Status
@@ -413,6 +415,30 @@ first driver can use documented conversion timing; optional data-ready GPIO
 support may be added later if it provides a meaningful benefit without becoming
 a required capability.
 
+### 5.3 MAX31865 native decode contract
+
+MAX31865 register interpretation is independent of SPI/platform code. The RTD
+register is a 16-bit wire value whose least-significant bit is the device fault
+flag; the resistance code is the remaining 15-bit value. `rtd-acquire` computes
+resistance as:
+
+```text
+R_RTD = (ADC code / 32768) * R_REF
+```
+
+A zero ADC code therefore represents a zero-ohm electrical result. The generic
+`Measurement` contract permits zero resistance so acquisition does not silently
+impose an RTD-model validity rule.
+
+Fault Status bits D7 through D2 are normalized at the specificity actually
+reported by the MAX31865. D7/D6 threshold crossings are warnings and retain the
+resistance result. D5/D4/D3 electrical comparison faults and D2 combined input
+voltage fault are faults and suppress the normal resistance result. Datasheet
+troubleshooting causes are not promoted into normalized diagnoses.
+
+The shared MAX31865 conformance vectors execute directly against this decode
+layer. SPI sequencing and conversion timing remain a separate driver concern.
+
 ## 6. Portable C architecture
 
 The embedded implementation is a portable C core. Arduino/HERO support is a
@@ -433,6 +459,25 @@ Design requirements:
 The initial embedded hardware platform is an Arduino-compatible HERO board.
 The core must remain suitable for other MCU families such as STM32, ESP32,
 RP2040, and similar platforms.
+
+### 6.1 Portable C SPI HAL contract
+
+The first capability-specific C HAL is `rtd_acquire_spi_t`. It carries:
+
+- caller-owned opaque context;
+- effective SPI settings corresponding to the Python `SpiSettings` semantics;
+- one transfer callback for a complete full-duplex transaction.
+
+The transfer callback owns chip-select assertion/deassertion for the entire
+transaction, matching the Python transport boundary. A platform adapter may use
+hardware chip select or manually drive a GPIO internally; the MAX31865 driver
+does not need to know which mechanism is used.
+
+The HAL reports host/platform transfer success separately from device-reported
+acquisition diagnostics. It requires no dynamic allocation and no
+Arduino-specific headers. The first contract test compiles and executes with an
+ordinary C11 host compiler so future HERO, STM32, ESP32, RP2040, and Linux
+adapters can implement the same capability.
 
 ## 7. Python and C relationship
 

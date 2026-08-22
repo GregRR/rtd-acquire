@@ -4,8 +4,11 @@ import json
 from pathlib import Path
 from typing import Literal, cast
 
+import pytest
+
 from rtd_acquire.core import DiagnosticCode, DiagnosticSeverity, MeasurementStatus
 from rtd_acquire.max31865 import MAX31865Config
+from rtd_acquire.max31865._decode import measurement_from_registers
 
 _CONFORMANCE_ROOT = Path(__file__).parents[1] / "conformance" / "v1"
 
@@ -87,7 +90,7 @@ def test_max31865_vectors_have_unique_ids_and_valid_contract_values() -> None:
 
         resistance = expected["resistance_ohms"]
         assert resistance is None or (
-            isinstance(resistance, (int, float)) and resistance > 0
+            isinstance(resistance, (int, float)) and resistance >= 0
         )
 
         uncertainty = expected["standard_uncertainty_ohms"]
@@ -152,3 +155,63 @@ def test_max31865_quarter_scale_reference_value_is_exact() -> None:
     resistance = (rtd_register >> 1) / 32768.0 * reference
 
     assert resistance == expected["resistance_ohms"] == 107.5
+
+
+def test_max31865_vectors_execute_against_python_decoder() -> None:
+    document = _load_json(_CONFORMANCE_ROOT / "max31865.json")
+    vectors = _list(document["vectors"])
+
+    for vector_value in vectors:
+        vector = _object(vector_value)
+        configuration = _object(vector["configuration"])
+        config = MAX31865Config(
+            reference_resistance_ohms=cast(
+                float, configuration["reference_resistance_ohms"]
+            ),
+            wire_count=cast(Literal[2, 3, 4], configuration["wire_count"]),
+            filter_frequency_hz=cast(
+                Literal[50, 60], configuration["filter_frequency_hz"]
+            ),
+            low_fault_threshold_ohms=cast(
+                float | None, configuration["low_fault_threshold_ohms"]
+            ),
+            high_fault_threshold_ohms=cast(
+                float | None, configuration["high_fault_threshold_ohms"]
+            ),
+        )
+        native_input = _object(vector["native_input"])
+        expected = _object(vector["expected"])
+
+        measurement = measurement_from_registers(
+            config,
+            rtd_register=cast(int, native_input["rtd_register"]),
+            fault_status_register=cast(
+                int, native_input["fault_status_register"]
+            ),
+        )
+
+        assert measurement.status.value == expected["status"]
+        expected_resistance = expected["resistance_ohms"]
+        if expected_resistance is None:
+            assert measurement.resistance_ohms is None
+        else:
+            assert measurement.resistance_ohms == pytest.approx(
+                cast(float, expected_resistance)
+            )
+
+        expected_diagnostics = _list(expected["diagnostics"])
+        assert len(measurement.diagnostics) == len(expected_diagnostics)
+        for actual, expected_value in zip(
+            measurement.diagnostics, expected_diagnostics, strict=True
+        ):
+            expected_diagnostic = _object(expected_value)
+            assert actual.code.value == expected_diagnostic["code"]
+            assert actual.severity.value == expected_diagnostic["severity"]
+            expected_native = _list(expected_diagnostic["native_evidence"])
+            assert len(actual.native_evidence) == len(expected_native)
+            for actual_evidence, expected_evidence_value in zip(
+                actual.native_evidence, expected_native, strict=True
+            ):
+                expected_evidence = _object(expected_evidence_value)
+                assert actual_evidence.identifier == expected_evidence["identifier"]
+                assert actual_evidence.message == expected_evidence["message"]

@@ -6,14 +6,14 @@ agnostic architecture, not simply to accumulate driver names.
 
 ## Pre-0.1 — Foundation and evidence
 
-- [ ] Complete the initial hardware catalog and `DIAGNOSTICS.md` native-
+- [x] Complete the initial hardware catalog and `DIAGNOSTICS.md` native-
       diagnostic survey, including exact native codes/messages, semantics,
       ambiguity, and source references for representative hobbyist, precision-
       ADC, HVAC, industrial-I/O, and industrial-transmitter families.
-- [ ] Group genuinely equivalent native diagnostics and document broader
+- [x] Group genuinely equivalent native diagnostics and document broader
       outliers separately; do not reduce commonly available specificity merely
       to accommodate a coarser device.
-- [ ] For every diagnostic intended for a backend, document the software-
+- [x] For every diagnostic intended for a backend, document the software-
       observable exposure path; do not confuse a device's internal/local fault
       detection with evidence actually available over SPI/HART/BACnet/EtherCAT/
       analog signaling.
@@ -37,12 +37,14 @@ agnostic architecture, not simply to accumulate driver names.
 - [x] Define the minimal Python SPI transaction/settings abstraction; keep
       chip select transport-owned so hardware-CS and GPIO-CS platforms share the
       same driver contract.
-- [ ] Define the equivalent capability-specific portable C SPI HAL before the
-      embedded implementation.
+- [x] Define the equivalent capability-specific portable C SPI HAL before the
+      embedded implementation, with settings, caller-owned context, and a
+      transaction callback that owns chip select.
 - [x] Define initial shared conformance-vector format and seed it with
       deterministic MAX31865 OK/WARNING/FAULT cases.
-- [ ] Establish quality gates: pytest, ruff, mypy strict, C build/tests, and
-      cross-language conformance checks where applicable.
+- [x] Establish quality gates for pytest, ruff, mypy strict, portable-C
+      compile/tests, `git diff --check`, and cross-language conformance when a C
+      implementation becomes applicable.
 
 ## 0.1 — Python + MAX31865
 
@@ -54,12 +56,16 @@ hardware while proving the core public contracts.
 - [x] Implement `AcquisitionDevice` and acquisition exceptions/errors.
 - [ ] Implement MAX31865 device behavior independently of a Raspberry Pi SPI
       library.
+  - [x] Decode the native RTD ratio and D7-D2 fault status into the locked
+        `Measurement`/diagnostic contract.
+  - [ ] Add SPI register access, configuration writes, and conversion timing.
 - [ ] Add Raspberry Pi 4 SPI/GPIO integration.
 - [ ] Support appropriate 2-/3-/4-wire MAX31865 configurations.
-- [ ] Preserve MAX31865 native diagnostic evidence without over-interpreting it.
+- [x] Preserve MAX31865 native diagnostic evidence without over-interpreting it.
 - [ ] Add deterministic MAX31865 register/fault emulation.
 - [ ] Add a generic simulated acquisition device.
-- [ ] Build shared deterministic MAX31865 conformance vectors.
+- [x] Build shared deterministic MAX31865 conformance vectors and execute them
+      against the Python register decoder.
 - [ ] Validate with real Pt100 hardware and known resistance references.
 - [ ] Publish a simple `rtd-sensor` integration example while keeping the
       packages architecturally independent.
