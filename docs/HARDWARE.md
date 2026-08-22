@@ -126,6 +126,27 @@ D7/D6 also show why vendor terminology does not set `rtd-acquire` severity: a
 threshold crossing can still accompany a usable resistance, while D2 halts ADC
 updates until the voltage fault clears.
 
+#### Locked initial configuration contract
+
+The first Python configuration requires the actual reference resistance,
+physical wire count, and 50/60 Hz filter selection. Optional low/high fault
+thresholds are expressed in ohms and translated by the driver to the native
+ratiometric register format.
+
+The contract deliberately does not contain a Pt/Ni model identity or
+temperature range. The MAX31865 reports the 15-bit ratio `RRTD / RREF`; the
+reference resistor therefore determines the electrical scaling, while
+`rtd-sensor` remains responsible for interpreting the resulting resistance.
+
+The datasheet's recommended DC operating range for `RREF` is 350 Ω to 10 kΩ.
+The device supports 2-, 3-, and 4-wire connections; only 3-wire mode requires
+the dedicated compensation bit. Its digital filter can reject either 50 Hz or
+60 Hz mains frequency and harmonics.
+
+BIAS, one-shot, fault-clear, and fault-detection-cycle bits are operational
+commands rather than static `MAX31865Config` fields. Their sequencing and
+settling requirements will be defined with the driver.
+
 Sources:
 
 - https://www.analog.com/en/products/max31865.html

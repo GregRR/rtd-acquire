@@ -33,7 +33,7 @@ agnostic architecture, not simply to accumulate driver names.
       messages are derived from `DiagnosticCode`.
 - [x] Freeze the first Python `Measurement` public contract around the locked
       diagnostic objects and derived status invariants.
-- [ ] Define the first MAX31865 configuration contract.
+- [x] Define the first MAX31865 configuration contract.
 - [ ] Define minimal SPI/GPIO abstractions for Python and portable C.
 - [ ] Define initial shared conformance-vector format.
 - [ ] Establish quality gates: pytest, ruff, mypy strict, C build/tests, and

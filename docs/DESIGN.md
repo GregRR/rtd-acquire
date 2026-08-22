@@ -324,6 +324,55 @@ Design requirements:
 A driver may use zero, one, or several lower-level capabilities; transport is
 therefore not a required property of every `AcquisitionDevice`.
 
+### 5.1 MAX31865 configuration contract
+
+The first MAX31865 public configuration is deliberately limited to stable
+electrical facts that are required to interpret the converter correctly:
+
+```python
+MAX31865Config(
+    reference_resistance_ohms=430.0,
+    wire_count=3,
+    filter_frequency_hz=60,
+    low_fault_threshold_ohms=None,
+    high_fault_threshold_ohms=None,
+)
+```
+
+The fields mean:
+
+- `reference_resistance_ohms` — the actual reference resistance used by the
+  acquisition circuit. The MAX31865 datasheet specifies 350 Ω through 10 kΩ
+  as its recommended reference-resistor operating range. No Pt100/Pt1000
+  default is assumed.
+- `wire_count` — the physical 2-, 3-, or 4-wire RTD connection. The MAX31865
+  uses a dedicated configuration bit only for 3-wire compensation; 2-wire and
+  4-wire operation share the other device setting, but the public contract
+  preserves the physical topology rather than collapsing them.
+- `filter_frequency_hz` — 50 or 60 Hz mains-rejection notch selection. This is
+  explicit rather than inferred from locale.
+- `low_fault_threshold_ohms` and `high_fault_threshold_ohms` — optional
+  resistance thresholds. The driver translates them to the device's
+  ratiometric threshold-register format. When omitted, the driver uses the
+  device's full-range defaults rather than inventing RTD-model limits.
+
+Thresholds are acquisition settings, not RTD-model validity limits. They must
+be within the converter's representable resistance range and, when both are
+provided, the low threshold must be below the high threshold.
+Invalid or unsupported values raise the public `ConfigurationError` used for
+caller-supplied acquisition configuration.
+
+The configuration intentionally contains no RTD family/model name, nominal
+`R0`, temperature range, or temperature-model coefficients. Those belong to
+`rtd-sensor`. A MAX31865 configuration is therefore reusable wherever the
+electrical resistance range and acquisition circuit are appropriate.
+
+BIAS control, one-shot commands, fault-status clearing, and master-initiated
+fault-detection-cycle command bits are operational device state rather than
+static circuit configuration and are not fields in this contract. Conversion
+policy and settling/timing behavior will be defined with the MAX31865 driver
+and transport/timing abstraction rather than encoded prematurely here.
+
 ## 6. Portable C architecture
 
 The embedded implementation is a portable C core. Arduino/HERO support is a
@@ -508,10 +557,6 @@ fine-grained module structure too early:
 ```text
 rtd-acquire/
 ├── README.md
-├── DESIGN.md
-├── ROADMAP.md
-├── HARDWARE.md
-├── CHANGELOG.md
 ├── LICENSE
 ├── pyproject.toml
 ├── src/rtd_acquire/      # Python implementation
@@ -519,7 +564,13 @@ rtd-acquire/
 ├── c/                    # portable C implementation and HAL adapters
 ├── conformance/          # language-neutral fixtures/vectors
 ├── examples/             # integration and hardware examples
-└── docs/                 # later user/reference documentation
+├── docs/
+│   ├── DESIGN.md
+│   ├── ROADMAP.md
+│   ├── HARDWARE.md
+│   ├── DIAGNOSTICS.md
+│   └── CHANGELOG.md
+└── .rtd-acquire-local/   # ignored local research/experiments
 ```
 
 Fine-grained driver/transport package layout should be introduced as real
@@ -529,9 +580,7 @@ implementation work requires it rather than pre-created speculatively.
 
 The following should remain explicit design work rather than hidden assumptions:
 
-- exact initial `DiagnosticCode` vocabulary and stable IDs after completing the
-  hardware diagnostic survey;
-- exact Python constructor/configuration object shapes;
+- exact constructor/configuration shapes for hardware families after MAX31865;
 - exact C HAL callback signatures and fixed diagnostic capacity;
 - exact binary64/binary32 conformance tolerances;
 - initial Python version floor before the first public release (the starter
