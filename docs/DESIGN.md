@@ -70,140 +70,173 @@ An `AcquisitionDevice` does not require or expose a particular transport.
 
 ## 4. Measurement contract
 
-The conceptual Python contract is:
+The locked Python contract is:
 
 ```python
-Measurement(
-    resistance_ohms=...,
-    status=...,
-    diagnostics=...,
-    standard_uncertainty_ohms=...,
-)
+class MeasurementStatus(StrEnum):
+    OK = "ok"
+    WARNING = "warning"
+    FAULT = "fault"
+
+
+@dataclass(frozen=True, slots=True)
+class Measurement:
+    resistance_ohms: float | None
+    diagnostics: tuple[Diagnostic, ...] = ()
+    standard_uncertainty_ohms: float | None = None
+
+    @property
+    def status(self) -> MeasurementStatus:
+        ...
 ```
 
-The exact implementation remains subject to normal pre-release refinement, but
-the semantics below are design requirements.
+`status` is derived from diagnostic severity rather than independently stored.
+This prevents contradictory states such as an `OK` measurement carrying a
+`FAULT` diagnostic.
 
 ### 4.1 Resistance
 
-`resistance_ohms` is the acquisition system's best estimate of the RTD element's
-electrical resistance, expressed in ohms.
+`resistance_ohms` is the acquisition system's best trustworthy estimate of the
+RTD element's electrical resistance, expressed in ohms. When present, it must
+be finite and greater than zero.
 
 A failed acquisition uses no magic resistance value. If no trustworthy
 resistance is available, the resistance is absent rather than represented by
-zero, infinity, or a sentinel value.
+zero, infinity, `NaN`, or another sentinel value. Raw or otherwise untrusted
+converter output belongs in a future debugging/inspection interface rather than
+in `Measurement.resistance_ohms`.
 
 ### 4.2 Status
 
 Every measurement has one of three statuses:
 
-- **OK** — a usable resistance is available and no known acquisition issue
-  requires attention.
-- **WARNING** — a usable resistance is available, but one or more acquisition
-  conditions should be reported.
-- **FAULT** — no trustworthy resistance is available.
+- **OK** — a usable resistance is available and there are no diagnostics.
+- **WARNING** — a usable resistance is available and one or more diagnostics
+  are present, all with `WARNING` severity.
+- **FAULT** — at least one diagnostic has `FAULT` severity and no trustworthy
+  resistance is available.
 
-`OK` and `WARNING` therefore imply a usable resistance. `FAULT` means the
-measurement must not be treated as a trustworthy resistance result.
+Status is derived deterministically:
+
+```text
+no diagnostics                -> OK
+WARNING diagnostics only      -> WARNING
+one or more FAULT diagnostics -> FAULT
+```
+
+A measurement with no resistance must therefore contain at least one `FAULT`
+diagnostic. A fault measurement must not expose `resistance_ohms` or a
+`standard_uncertainty_ohms` value as though either remained trustworthy.
+WARNING and FAULT diagnostics may coexist; FAULT takes precedence.
 
 ### 4.3 Diagnostics
 
-Diagnostics carry the specific acquisition-level reason or reasons behind a
-warning or fault.
+Diagnostics carry the acquisition-level reason or reasons behind a warning or
+fault. The diagnostic contract is deliberately split into a normalized
+`rtd-acquire` layer and optional device/protocol-native evidence.
 
-The diagnostic object shape is:
+The locked Python shape is:
 
 ```python
-Diagnostic(
-    code=...,
-    severity=...,
-    message=...,
-    native_code=...,
-    native_message=...,
-)
+class DiagnosticSeverity(StrEnum):
+    WARNING = "warning"
+    FAULT = "fault"
+
+
+@dataclass(frozen=True, slots=True)
+class NativeEvidence:
+    identifier: str | None = None
+    message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Diagnostic:
+    code: DiagnosticCode
+    severity: DiagnosticSeverity
+    native_evidence: tuple[NativeEvidence, ...] = ()
+
+    @property
+    def message(self) -> str:
+        return diagnostic_message(self.code)
 ```
 
-Where:
+Semantics:
 
-- `code` is the stable, machine-readable `rtd-acquire` diagnostic identity;
-- `severity` is `WARNING` or `FAULT`;
-- `message` is the normalized, plain-language `rtd-acquire` wording for that
-  diagnostic concept;
-- `native_code` optionally preserves the originating hardware/protocol code or
-  identifier;
-- `native_message` optionally preserves the manufacturer's/device's own wording
-  when the interface makes it available or the driver can identify it
-  unambiguously from published documentation.
+- `code` is the stable normalized machine-readable `rtd-acquire` diagnostic
+  identity.
+- `severity` is `WARNING` or `FAULT`. Normal operation does not create an `OK`
+  diagnostic.
+- `message` is the canonical `rtd-acquire` wording for `code`; it is derived
+  from the code rather than independently stored on each diagnostic.
+- `native_evidence` preserves zero, one, or multiple native observations that
+  support the normalized diagnosis.
+- `NativeEvidence.identifier` is a string so native identifiers serialize
+  consistently across Python, C-facing conformance data, and JSON. Preserve
+  recognizable vendor notation such as `D5`, `8A`, `REF_L0`, or `0x7FFD`
+  rather than coercing it into a project-specific numeric scheme.
+- `NativeEvidence.message` is the concise native diagnostic name or
+  device-specific wording useful for manufacturer documentation and debugging.
+- Each native-evidence item must contain at least a non-empty identifier or
+  message.
 
-Applications make decisions from `code`, not by parsing either message field.
-The normalized `message` is intended to be durable and consistent across
-hardware, but its text is not a machine-parsing API. Avoid gratuitous wording
-changes after release.
+A diagnostic may legitimately have no native evidence. For example, a driver
+may compare a device-supplied conversion CRC and emit `DATA_CRC_ERROR` when the
+comparison fails even though the device has no native CRC-error status bit.
 
-A measurement can carry more than one diagnostic.
+A normalized diagnosis may also require multiple native observations. For a
+backend where the manufacturer documents `Overrange + Error` as an open-circuit
+condition, represent those as two `NativeEvidence` entries. Never manufacture a
+fake combined native identifier that the device did not emit.
+
+Applications make decisions from `code`, not by parsing `message` or native
+text. Canonical messages should remain consistent, but message wording is not a
+machine-parsing contract.
 
 ### 4.4 Diagnostic normalization and no-inference rules
 
 `rtd-acquire` provides its own stable, easy-to-understand diagnostic vocabulary
-while preserving the originating device evidence in `native_code` and
-`native_message`.
+while preserving the originating device evidence in `native_evidence`.
 
 Normalization is evidence-based:
 
 1. Native conditions are grouped only when their documented meanings genuinely
    overlap.
-2. The normalized `rtd-acquire` code/message should preserve the greatest useful
+2. The normalized `rtd-acquire` code/message preserves the greatest useful
    specificity justified by that semantic group.
-3. A less-specific outlier device must not force a commonly available specific
+3. A less-specific outlier device does not force a commonly available specific
    diagnostic to become vague. The outlier receives an appropriately broader
    normalized code instead.
-4. Conversely, a driver must never map a broad or ambiguous native condition to
-   a more specific physical diagnosis than the evidence establishes.
+4. Conversely, a driver never maps a broad or ambiguous native condition to a
+   more specific physical diagnosis than the evidence establishes.
 5. Device-specific troubleshooting causes listed by a vendor are possibilities,
    not observed facts, unless the device explicitly reports that diagnosis.
 6. A condition that a device can detect internally is not automatically native
    evidence available to `rtd-acquire`. The backend must have a documented
    observation path—such as a register bit, protocol status/message, process
-   data flag, or defined analog fault signal—before it can emit that native
-   diagnostic.
-7. A normalized diagnostic may be established by a documented combination of
-   native states rather than a single vendor bit or code. When that happens,
-   preserve the contributing native states in `native_code`/`native_message`
-   evidence rather than pretending the device emitted a single native code it
-   does not actually have.
-8. Diagnostic specificity is a property of the **device + configuration +
-   observation interface**, not just the device model. If a transmitter can
-   distinguish two faults internally but the selected HART/BACnet/analog/etc.
-   exposure collapses them, the backend must use the broader observable
-   diagnosis. Conversely, a configured analog signaling scheme may preserve a
-   distinction that another interface on the same device does not.
+   data flag, or defined analog fault signal—before it can emit that evidence.
+7. Diagnostic specificity is a property of **device + configuration +
+   observation interface**, not just the device model.
+8. Device-internal SPI/ASIC/protocol diagnostics remain distinct from failure of
+   the host transport used by `rtd-acquire`; the latter belongs to the operation
+   error contract unless explicitly represented otherwise later.
+9. Native evidence is preserved as evidence, not rewritten into invented vendor
+   terminology.
+10. Canonical normalized messages never strengthen the claim beyond the
+    semantics of `code` and its supporting evidence.
 
-For example, if several devices explicitly and equivalently report a low
-reference condition, `rtd-acquire` may expose a specific normalized
-`REFERENCE_LOW` concept. A different device that only reports a broad reference
-failure should map to a broader `REFERENCE_FAULT` concept; the specific devices
-should not be degraded merely to accommodate the outlier.
+For example, several devices may explicitly and equivalently report a low
+reference condition and map to `REFERENCE_LOW`. A different device that reports
+only a broad reference failure maps to `REFERENCE_FAULT`; the specific devices
+are not degraded merely to accommodate the outlier.
 
-Likewise, a resistance-high threshold must not silently become a sensor-open
-code just because an open circuit is one possible cause. A normalized
-sensor-circuit-open diagnostic is appropriate only when the hardware/interface
-itself reports an open circuit at that level of specificity.
+Likewise, a resistance-high threshold does not become a sensor-open diagnosis
+just because an open circuit is one possible cause. `SENSOR_CIRCUIT_OPEN` is
+used only when the device/interface actually supports that level of diagnosis.
 
-A device's own internal communication/ASIC diagnostic is also distinct from an
-`rtd-acquire` transport operation failing to communicate with the device. The
-former is native device evidence; the latter belongs to the operation-error
-contract unless a later design decision explicitly mirrors it into a
-`Measurement` diagnostic.
-
-Diagnostic messages must not strengthen the evidence beyond the meaning of the
-machine-readable code and native evidence. Native vendor wording is retained
-where practical so users have an exact device-specific term to search in vendor
-documentation and troubleshooting resources.
-
-The initial `DiagnosticCode` vocabulary will be derived bottom-up from the
-actual capabilities of planned hardware families documented in `HARDWARE.md`
-and the native-diagnostic survey in `DIAGNOSTICS.md`; it will not be guessed
-in advance.
+The initial `DiagnosticCode` vocabulary is derived bottom-up from the hardware
+survey in `DIAGNOSTICS.md`. It is intentionally extensible: later hardware may
+add new codes, but existing codes must not be redefined to absorb unrelated
+semantics.
 
 ### 4.5 Standard uncertainty
 
@@ -215,7 +248,10 @@ uncertainty, excitation, amplifier gain/offset, quantization, noise, and
 acquisition calibration.
 
 Absence of a quantified uncertainty means that `rtd-acquire` is not providing a
-defensible value; it does not mean zero uncertainty.
+defensible value; it does not mean zero uncertainty. When present, standard
+uncertainty must be finite and non-negative. A fault measurement has no
+standard uncertainty because it has no trustworthy resistance result to which
+the uncertainty could apply.
 
 ## 5. Hardware and transport abstraction
 

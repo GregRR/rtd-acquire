@@ -24,14 +24,15 @@ agnostic architecture, not simply to accumulate driver names.
 - [x] Draft and cross-vendor-review a non-frozen candidate normalized vocabulary,
       separating mature semantic groups from provisional device-specific or
       model-range naming questions.
-- [ ] Resolve structured preservation of composite native evidence before
-      freezing `Diagnostic`; some normalized conditions are justified by more
-      than one native flag/state and must not be represented by an invented
-      vendor code.
-- [ ] Derive the first normalized `DiagnosticCode` vocabulary, durable
-      `rtd-acquire` messages, and stable identifiers from that survey.
-- [ ] Freeze the first Python `Measurement`/`Diagnostic` public contract,
-      including `native_code` and `native_message` preservation.
+- [x] Resolve structured preservation of composite native evidence with a
+      tuple of `NativeEvidence` items; do not invent combined vendor codes.
+- [x] Derive and freeze the first normalized `DiagnosticCode` vocabulary and
+      canonical `rtd-acquire` messages from the cross-vendor survey.
+- [x] Freeze the first Python diagnostic contract using `Diagnostic`,
+      `DiagnosticSeverity`, and composite-capable `NativeEvidence`; normalized
+      messages are derived from `DiagnosticCode`.
+- [x] Freeze the first Python `Measurement` public contract around the locked
+      diagnostic objects and derived status invariants.
 - [ ] Define the first MAX31865 configuration contract.
 - [ ] Define minimal SPI/GPIO abstractions for Python and portable C.
 - [ ] Define initial shared conformance-vector format.
@@ -43,8 +44,9 @@ agnostic architecture, not simply to accumulate driver names.
 Goal: deliver a useful Python acquisition library on real Raspberry Pi
 hardware while proving the core public contracts.
 
-- [ ] Implement `AcquisitionDevice`, `Measurement`, statuses, diagnostics, and
-      acquisition exceptions/errors.
+- [x] Implement the locked Python `Measurement`, status, and diagnostic core
+      contracts with invariant tests.
+- [ ] Implement `AcquisitionDevice` and acquisition exceptions/errors.
 - [ ] Implement MAX31865 device behavior independently of a Raspberry Pi SPI
       library.
 - [ ] Add Raspberry Pi 4 SPI/GPIO integration.

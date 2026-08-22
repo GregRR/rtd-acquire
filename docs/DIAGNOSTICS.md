@@ -679,11 +679,120 @@ Some superficially similar conditions should currently remain separate:
   can identify**; a single analog fault level may intentionally collapse several
   native/internal causes.
 
-## Candidate normalized vocabulary worksheet
+## Locked diagnostic object contract
 
-This is a naming/semantics worksheet, **not** the frozen `DiagnosticCode` enum.
-It exists so every proposed code and message can be challenged against the
-native evidence before becoming public API.
+The diagnostic object model is now frozen for the first public implementation:
+
+```python
+NativeEvidence(
+    identifier: str | None,
+    message: str | None,
+)
+
+Diagnostic(
+    code: DiagnosticCode,
+    severity: DiagnosticSeverity,
+    native_evidence: tuple[NativeEvidence, ...] = (),
+)
+```
+
+`Diagnostic.message` is not independent per-instance state. It is the canonical
+`rtd-acquire` message derived from `DiagnosticCode`. This prevents drivers from
+quietly creating different normalized wording for the same code.
+
+`NativeEvidence` deliberately contains only the native identifier and concise
+native wording. Register names, HART/BACnet/EtherCAT exposure paths, source
+manuals, and equivalence justification belong in this evidence ledger and the
+hardware/driver mapping documentation rather than in every runtime
+`Measurement`.
+
+Multiple native-evidence entries solve composite conditions without inventing a
+vendor identifier. A Beckhoff-style documented `Overrange + Error` open-circuit
+condition therefore preserves two native observations supporting one normalized
+`SENSOR_CIRCUIT_OPEN` diagnostic.
+
+## First `DiagnosticCode` vocabulary freeze
+
+The first enum freezes the well-grounded concepts below. The public token is the
+lowercase form shown by the Python string-valued enum. New codes may be added in
+future releases; an existing code must not be broadened or redefined merely to
+accommodate a newly supported device.
+
+### Sensor and RTD input circuit
+
+- `SENSOR_CIRCUIT_OPEN` (`sensor_circuit_open`)
+- `SENSOR_CIRCUIT_SHORT` (`sensor_circuit_short`)
+- `SENSOR_INPUT_FAULT` (`sensor_input_fault`)
+- `SENSOR_NOT_DETECTED` (`sensor_not_detected`)
+- `SENSOR_BURNOUT` (`sensor_burnout`)
+- `SENSOR_DRIFT` (`sensor_drift`)
+- `LEAD_RESISTANCE_HIGH` (`lead_resistance_high`)
+
+### Resistance and generic input range
+
+- `RESISTANCE_HIGH_THRESHOLD` (`resistance_high_threshold`)
+- `RESISTANCE_LOW_THRESHOLD` (`resistance_low_threshold`)
+- `INPUT_OVERRANGE` (`input_overrange`)
+- `INPUT_UNDERRANGE` (`input_underrange`)
+
+### Reference and MAX31865-style electrical checks
+
+- `REFERENCE_LOW` (`reference_low`)
+- `REFERENCE_FAULT` (`reference_fault`)
+- `REFERENCE_INPUT_ABOVE_THRESHOLD` (`reference_input_above_threshold`)
+- `REFERENCE_INPUT_BELOW_THRESHOLD` (`reference_input_below_threshold`)
+- `RTD_INPUT_BELOW_THRESHOLD` (`rtd_input_below_threshold`)
+- `INPUT_VOLTAGE_FAULT` (`input_voltage_fault`)
+
+### PGA, ADC, and power-monitor diagnostics
+
+- `PGA_POSITIVE_OUTPUT_NEAR_POSITIVE_RAIL`
+- `PGA_POSITIVE_OUTPUT_NEAR_NEGATIVE_RAIL`
+- `PGA_NEGATIVE_OUTPUT_NEAR_POSITIVE_RAIL`
+- `PGA_NEGATIVE_OUTPUT_NEAR_NEGATIVE_RAIL`
+- `POSITIVE_INPUT_OVERVOLTAGE`
+- `POSITIVE_INPUT_UNDERVOLTAGE`
+- `NEGATIVE_INPUT_OVERVOLTAGE`
+- `NEGATIVE_INPUT_UNDERVOLTAGE`
+- `ADC_SATURATION`
+- `CONVERSION_ERROR`
+- `CALIBRATION_ERROR`
+- `ANALOG_SUPPLY_FAULT`
+- `DIGITAL_SUPPLY_FAULT`
+- `LDO_DECOUPLING_FAULT`
+
+The string token for each of these is its lowercase enum name.
+
+### Data integrity and internal-device diagnostics
+
+- `DATA_CRC_ERROR` (`data_crc_error`)
+- `SPI_CRC_ERROR` (`spi_crc_error`)
+- `SPI_CLOCK_COUNT_ERROR` (`spi_clock_count_error`)
+- `SPI_READ_ERROR` (`spi_read_error`)
+- `SPI_WRITE_ERROR` (`spi_write_error`)
+- `SPI_WRITE_IGNORED` (`spi_write_ignored`)
+- `REGISTER_INTEGRITY_ERROR` (`register_integrity_error`)
+- `ROM_INTEGRITY_ERROR` (`rom_integrity_error`)
+- `NONVOLATILE_MEMORY_ERROR` (`nonvolatile_memory_error`)
+- `CONFIGURATION_ERROR` (`configuration_error`)
+- `HARDWARE_FAULT` (`hardware_fault`)
+
+This first freeze intentionally **does not** include every surveyed transmitter
+state. Sensor-model range alarms, corrosion, backup/redundancy states, internal
+reference drift, input-channel drift, ground-offset diagnostics, reset events,
+and active diagnostic-test outcomes remain documented candidates. They can be
+added later without changing the semantics of the frozen codes above.
+
+The freeze also does not create measurement diagnostics for host-side transport
+exceptions such as failure to open SPI or a Modbus timeout. Those remain part of
+the separate acquisition-operation error contract.
+
+## Normalization worksheet and deferred candidates
+
+This worksheet records how the frozen codes were derived and preserves
+additional concepts that may become additive future enum members. Entries
+already listed in the first freeze above are no longer provisional; the
+remaining working concepts stay research-only until explicitly added.
 
 Naming goals:
 
@@ -815,48 +924,31 @@ not required by the first MAX31865/ADS124S08 implementation. Their presence in
 the worksheet prevents later hardware from forcing unrelated native conditions
 into an already-frozen broad bucket.
 
-### Candidate maturity review
+### Post-freeze maturity review
 
-The broad survey is now stable enough to distinguish **mature semantic groups**
-from names that still need targeted review. This is still not an API freeze and
-no stable numeric IDs are assigned.
+The first enum now contains the concepts whose meaning was sufficiently stable
+for an initial public contract. This includes the first-driver MAX31865 and
+ADS124S08 conditions, recurring industrial sensor-circuit concepts, and the
+well-defined AD7124 integrity/electrical diagnostics recorded above.
 
-Strong candidates for the first enum because their semantics recur cleanly or
-are directly required by the first drivers:
+Some researched concepts remain deliberately **deferred** rather than being
+forced into the first enum:
 
-- `SENSOR_CIRCUIT_OPEN` and `SENSOR_CIRCUIT_SHORT`;
-- broad sibling `SENSOR_INPUT_FAULT`;
-- `SENSOR_DRIFT` and `LEAD_RESISTANCE_HIGH`;
-- `RESISTANCE_HIGH_THRESHOLD` / `RESISTANCE_LOW_THRESHOLD`;
-- `INPUT_OVERRANGE` / `INPUT_UNDERRANGE`;
-- `REFERENCE_LOW` with broader sibling `REFERENCE_FAULT`;
-- the four ADS124S08 PGA rail diagnoses;
-- `ADC_SATURATION`, `CONVERSION_ERROR`, and `CALIBRATION_ERROR` where native
-  hardware explicitly reports them;
-- `DATA_CRC_ERROR`, `SPI_CRC_ERROR`, `REGISTER_INTEGRITY_ERROR`,
-  `ROM_INTEGRITY_ERROR`, `CONFIGURATION_ERROR`, and broad `HARDWARE_FAULT`.
-
-Still-provisional names/semantics that deserve another targeted pass before
-freeze:
-
-- `SENSOR_BURNOUT`: explicit and valid for KFD0-TR-1, but the term is used
-  inconsistently elsewhere and must not become an alias for open circuit;
-- `SENSOR_NOT_DETECTED`: currently a clean Siemens EM1.8U concept but not yet a
-  broad cross-vendor group;
-- `SENSOR_RANGE_HIGH` / `SENSOR_RANGE_LOW`: real transmitter-native semantics,
-  but final naming must stay obviously distinct from `rtd-sensor` model-range
-  interpretation;
-- MAX31865-specific `REFERENCE_INPUT_ABOVE_THRESHOLD`,
-  `REFERENCE_INPUT_BELOW_THRESHOLD`, `RTD_INPUT_BELOW_THRESHOLD`, and
-  `INPUT_VOLTAGE_FAULT`: semantically grounded, but intentionally held open for
-  naming review because few surveyed devices expose the same fault-detection
-  architecture;
+- `SENSOR_RANGE_HIGH` / `SENSOR_RANGE_LOW`, because transmitter-defined sensor
+  ranges can easily be confused with `rtd-sensor` model-range interpretation;
+- backup/redundancy state, until the resistance-result semantics of those modes
+  are defined for a supported backend;
+- internal-reference drift, input-channel drift, and ground-offset concepts,
+  which are well documented but not required by the first implementation and
+  may benefit from additional cross-vendor naming review;
+- sensor-corrosion and similar maintenance diagnoses that are explicit on some
+  transmitters but are not yet needed by a raw-resistance acquisition backend;
 - device reset/restart events and active diagnostic-test outcomes, which may
-  belong in a later event/test API instead of ordinary `Measurement`
+  belong in a later event/test API rather than ordinary `Measurement`
   diagnostics.
 
-This maturity split lets implementation proceed on well-supported concepts
-without pretending the entire public vocabulary is frozen.
+Deferred concepts may be added later. They must not cause an existing frozen
+code to be broadened, renamed, or reinterpreted.
 
 ### State/facility observations currently excluded from the enum
 
@@ -872,17 +964,9 @@ does not currently justify ordinary `Measurement` diagnostic codes for them:
 - ADS124S08 calibration commands merely existing/completing;
 - MAX31865 fault-detection-cycle in-progress state.
 
-## Research still required before `DiagnosticCode` freeze
+## Research after the first `DiagnosticCode` freeze
 
-One API-shape issue also remains intentionally open. Some normalized diagnoses
-are justified by a **combination** of native states rather than one native
-identifier—for example Beckhoff's documented `Overrange + Error` open-circuit
-condition. The current singular `native_code`/`native_message` fields are easy
-for normal one-to-one mappings but do not provide an obviously clean structured
-representation for composite evidence. Before the `Diagnostic` contract is
-frozen, decide whether to permit multiple native-evidence items, emit multiple
-normalized diagnostics, or define another representation that does not invent a
-fake combined vendor code.
+The diagnostic object shape and first normalized vocabulary are now frozen. Remaining research is for additive future codes and backend-specific mappings; it must not redefine existing code semantics.
 
 The MAX31865 native fault/status map and ADS124S08 STATUS/facility map are now
 complete enough for first-pass normalized-vocabulary design. Remaining research
@@ -933,7 +1017,7 @@ Lower priority before 0.1 but useful before industrial releases:
 - whether stable numeric diagnostic IDs should reserve ranges by semantic
   family or simply remain a flat public enum.
 
-## Freeze criteria
+## Criteria used for the first freeze
 
 The first `DiagnosticCode` vocabulary can be frozen when:
 

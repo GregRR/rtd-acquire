@@ -1,0 +1,81 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rtd-acquire"
+version = "0.0.0"
+description = "Hardware-agnostic RTD resistance acquisition for embedded, SBC, laboratory, and industrial systems."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MPL-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Greg Roe" },
+]
+keywords = [
+    "rtd",
+    "pt100",
+    "pt500",
+    "pt1000",
+    "ni120",
+    "ni1000",
+    "max31865",
+    "ads124s08",
+    "resistance",
+    "data-acquisition",
+    "instrumentation",
+    "embedded",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "pytest",
+    "ruff",
+]
+
+[project.urls]
+Repository = "https://github.com/GregRR/rtd-acquire"
+Issues = "https://github.com/GregRR/rtd-acquire/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rtd_acquire"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "B",
+    "E",
+    "F",
+    "I",
+    "SIM",
+    "UP",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = [
+    "src",
+    "tests",
+]
