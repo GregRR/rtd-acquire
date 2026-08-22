@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "device": "max31865",
+  "vectors": [
+    {
+      "id": "max31865-quarter-scale-ok",
+      "description": "Quarter-scale RTD ratio with no reported faults.",
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": null,
+        "high_fault_threshold_ohms": null
+      },
+      "native_input": {
+        "rtd_register": 16384,
+        "fault_status_register": 0
+      },
+      "expected": {
+        "resistance_ohms": 107.5,
+        "status": "ok",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "max31865-high-threshold-warning",
+      "description": "Usable resistance with the RTD high-threshold bit set.",
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": null,
+        "high_fault_threshold_ohms": 100.0
+      },
+      "native_input": {
+        "rtd_register": 16385,
+        "fault_status_register": 128
+      },
+      "expected": {
+        "resistance_ohms": 107.5,
+        "status": "warning",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": [
+          {
+            "code": "resistance_high_threshold",
+            "severity": "warning",
+            "native_evidence": [
+              {
+                "identifier": "D7",
+                "message": "RTD High Threshold"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "max31865-input-voltage-fault",
+      "description": "Combined MAX31865 overvoltage/undervoltage fault.",
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": null,
+        "high_fault_threshold_ohms": null
+      },
+      "native_input": {
+        "rtd_register": 16385,
+        "fault_status_register": 4
+      },
+      "expected": {
+        "resistance_ohms": null,
+        "status": "fault",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": [
+          {
+            "code": "input_voltage_fault",
+            "severity": "fault",
+            "native_evidence": [
+              {
+                "identifier": "D2",
+                "message": "Overvoltage/undervoltage fault"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

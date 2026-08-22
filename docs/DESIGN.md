@@ -450,8 +450,16 @@ raw/native device states should produce semantically equivalent:
 - acquisition uncertainty calculations when implemented.
 
 Shared deterministic conformance vectors will exercise both implementations.
-Numeric acceptance will distinguish binary64 Python behavior from embedded
-binary32 behavior where necessary rather than requiring bit-for-bit equality.
+The version-1 language-neutral JSON format records public configuration,
+raw/native device state, and expected normalized `Measurement` semantics.
+Canonical normalized diagnostic messages are derived from `DiagnosticCode` and
+therefore are not duplicated in vectors. Composite native evidence remains a
+list of individual observations rather than an invented combined vendor code.
+
+Numeric expected values in vectors are reference values. Acceptance tolerances
+belong to the conformance runner/profile so binary64 Python and embedded
+binary32 implementations can use appropriate numeric policies without
+forking the fixture data.
 
 Real-hardware Python-vs-C comparison supplements but does not replace
 deterministic conformance testing.

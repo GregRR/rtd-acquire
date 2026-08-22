@@ -39,7 +39,8 @@ agnostic architecture, not simply to accumulate driver names.
       same driver contract.
 - [ ] Define the equivalent capability-specific portable C SPI HAL before the
       embedded implementation.
-- [ ] Define initial shared conformance-vector format.
+- [x] Define initial shared conformance-vector format and seed it with
+      deterministic MAX31865 OK/WARNING/FAULT cases.
 - [ ] Establish quality gates: pytest, ruff, mypy strict, C build/tests, and
       cross-language conformance checks where applicable.
 

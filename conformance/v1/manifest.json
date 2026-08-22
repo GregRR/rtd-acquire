@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "vector_sets": [
+    {
+      "device": "max31865",
+      "path": "max31865.json"
+    }
+  ]
+}
