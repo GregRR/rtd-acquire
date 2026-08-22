@@ -147,6 +147,12 @@ BIAS, one-shot, fault-clear, and fault-detection-cycle bits are operational
 commands rather than static `MAX31865Config` fields. Their sequencing and
 settling requirements will be defined with the driver.
 
+The serial interface transfers address/data bytes MSB first. CPHA must be 1,
+while either CPOL=0 or CPOL=1 is supported. CS is active low and remains low
+across a multi-byte transaction; the specified SCLK range extends to 5 MHz.
+`rtd-acquire` therefore models one SPI transfer as a transaction that owns CS
+rather than requiring the MAX31865 driver to manipulate a generic GPIO pin.
+
 Sources:
 
 - https://www.analog.com/en/products/max31865.html

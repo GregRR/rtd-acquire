@@ -34,7 +34,11 @@ agnostic architecture, not simply to accumulate driver names.
 - [x] Freeze the first Python `Measurement` public contract around the locked
       diagnostic objects and derived status invariants.
 - [x] Define the first MAX31865 configuration contract.
-- [ ] Define minimal SPI/GPIO abstractions for Python and portable C.
+- [x] Define the minimal Python SPI transaction/settings abstraction; keep
+      chip select transport-owned so hardware-CS and GPIO-CS platforms share the
+      same driver contract.
+- [ ] Define the equivalent capability-specific portable C SPI HAL before the
+      embedded implementation.
 - [ ] Define initial shared conformance-vector format.
 - [ ] Establish quality gates: pytest, ruff, mypy strict, C build/tests, and
       cross-language conformance checks where applicable.

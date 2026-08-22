@@ -373,6 +373,46 @@ static circuit configuration and are not fields in this contract. Conversion
 policy and settling/timing behavior will be defined with the MAX31865 driver
 and transport/timing abstraction rather than encoded prematurely here.
 
+### 5.2 SPI transport contract
+
+SPI drivers receive a configured per-device `SpiDevice` capability rather than
+importing a platform SPI library directly. The transport exposes its effective
+settings and one full-duplex transaction operation:
+
+```python
+class SpiDevice(Protocol):
+    @property
+    def settings(self) -> SpiSettings:
+        ...
+
+    def transfer(self, tx: bytes, /) -> bytes:
+        ...
+```
+
+One `transfer()` call is one contiguous SPI transaction. The transport owns
+chip-select assertion/deassertion and must keep chip select active for the whole
+call. A successful transaction returns exactly one received byte for every
+transmitted byte. Platform adapters translate host I/O failures into the public
+acquisition-operation error boundary.
+
+Chip select is intentionally not modeled as a separate generic GPIO operation
+for the first driver. Raspberry Pi SPI controllers commonly manage CS as part of
+the SPI peripheral, while Arduino-class adapters can implement the same
+transaction contract by asserting/deasserting their chosen CS GPIO around the
+transfer. This keeps device logic independent of that platform distinction.
+
+`SpiSettings` records the electrical/protocol settings a driver may need to
+validate: CPOL, CPHA, clock frequency, bit order, bits per word, and chip-select
+polarity. Device-specific limits remain in device drivers rather than in the
+generic SPI contract. For MAX31865 specifically, the datasheet permits either
+CPOL value, requires CPHA=1, transfers MSB first, uses active-low CS, and
+specifies SCLK up to 5 MHz.
+
+The MAX31865 `DRDY` signal is not part of the initial transport contract. The
+first driver can use documented conversion timing; optional data-ready GPIO
+support may be added later if it provides a meaningful benefit without becoming
+a required capability.
+
 ## 6. Portable C architecture
 
 The embedded implementation is a portable C core. Arduino/HERO support is a
