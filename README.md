@@ -42,7 +42,10 @@ See:
 
 ## Status
 
-Pre-implementation design scaffold. Public APIs are not yet released or stable.
+Pre-release development. The core measurement/diagnostic contracts and the
+platform-independent MAX31865 driver are implemented; Raspberry Pi integration
+and physical hardware validation are still pending. Public APIs are not yet
+released or stable.
 
 ## License
 

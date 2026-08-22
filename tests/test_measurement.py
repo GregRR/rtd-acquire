@@ -10,6 +10,7 @@ from rtd_acquire.core import (
     DiagnosticSeverity,
     Measurement,
     MeasurementStatus,
+    NativeEvidence,
 )
 
 
@@ -71,6 +72,40 @@ def test_fault_status_wins_when_warnings_are_also_present() -> None:
     )
 
     assert measurement.status is MeasurementStatus.FAULT
+
+
+def test_duplicate_diagnostic_codes_are_rejected() -> None:
+    first = Diagnostic(
+        code=DiagnosticCode.REFERENCE_LOW,
+        severity=DiagnosticSeverity.WARNING,
+        native_evidence=(NativeEvidence(identifier="FL_REF_L0"),),
+    )
+    second = Diagnostic(
+        code=DiagnosticCode.REFERENCE_LOW,
+        severity=DiagnosticSeverity.WARNING,
+        native_evidence=(NativeEvidence(identifier="FL_REF_L1"),),
+    )
+
+    with pytest.raises(ValueError, match="must not contain duplicate codes"):
+        Measurement(resistance_ohms=109.73, diagnostics=(first, second))
+
+
+def test_one_diagnostic_can_preserve_multiple_native_evidence_items() -> None:
+    diagnostic = Diagnostic(
+        code=DiagnosticCode.REFERENCE_LOW,
+        severity=DiagnosticSeverity.WARNING,
+        native_evidence=(
+            NativeEvidence(identifier="FL_REF_L0"),
+            NativeEvidence(identifier="FL_REF_L1"),
+        ),
+    )
+    measurement = Measurement(
+        resistance_ohms=109.73,
+        diagnostics=(diagnostic,),
+    )
+
+    assert measurement.diagnostics == (diagnostic,)
+    assert len(measurement.diagnostics[0].native_evidence) == 2
 
 
 def test_standard_uncertainty_is_allowed_for_usable_measurement() -> None:

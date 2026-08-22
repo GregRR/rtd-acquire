@@ -81,6 +81,13 @@ object satisfies the contract by providing a compatible `read()` operation.
 This keeps drivers, simulations, application test doubles, and future protocol-
 based backends substitutable without imposing an inheritance hierarchy.
 
+The base `AcquisitionDevice` contract does **not** require `read()` to be
+thread-safe or reentrant. Callers must serialize operations on a device instance
+unless that implementation explicitly documents a stronger guarantee. Likewise,
+if multiple device instances share one stateful transport, serialization belongs
+to the caller, transport, or platform adapter rather than being silently added
+to every acquisition driver.
+
 ### 3.1 Operation errors
 
 Device-reported acquisition conditions are represented in a `Measurement`,
@@ -212,6 +219,10 @@ Semantics:
   from the code rather than independently stored on each diagnostic.
 - `native_evidence` preserves zero, one, or multiple native observations that
   support the normalized diagnosis.
+- A `Measurement` contains at most one `Diagnostic` for each `DiagnosticCode`.
+  When several native observations support the same normalized condition, they
+  are combined in that diagnostic's `native_evidence` tuple rather than emitted
+  as duplicate normalized diagnostics.
 - `NativeEvidence.identifier` is a string so native identifiers serialize
   consistently across Python, C-facing conformance data, and JSON. Preserve
   recognizable vendor notation such as `D5`, `8A`, `REF_L0`, or `0x7FFD`
@@ -437,7 +448,48 @@ voltage fault are faults and suppress the normal resistance result. Datasheet
 troubleshooting causes are not promoted into normalized diagnoses.
 
 The shared MAX31865 conformance vectors execute directly against this decode
-layer. SPI sequencing and conversion timing remain a separate driver concern.
+layer.
+
+### 5.4 MAX31865 one-shot acquisition sequence
+
+The first public MAX31865 driver uses documented one-shot conversion timing and
+runs a fresh automatic fault-detection cycle for every `read()`. Each read is
+therefore deterministic with respect to driver-owned registers rather than
+assuming that a previous process left the converter configured correctly.
+
+The operation is:
+
+1. write the high/low threshold registers from `MAX31865Config`, restoring the
+   device full-range defaults when application thresholds are omitted;
+2. write the static wire/filter bits, enable VBIAS, and clear latched faults;
+3. allow the input network to settle;
+4. run the documented automatic fault-detection cycle so D5-D3 evidence is
+   refreshed;
+5. allow the input network to settle again after fault detection;
+6. trigger one one-shot conversion and wait the datasheet maximum conversion
+   time for the selected 50/60 Hz filter;
+7. read the two RTD data bytes and, when their fault flag is set, read the Fault
+   Status register;
+8. return VBIAS to off;
+9. pass the captured native registers to the platform-independent decode layer.
+
+Threshold conversion is directional. High thresholds round upward and low
+thresholds round downward to the nearest representable 15-bit ratio code so
+quantization does not make a fault trigger *inside* the resistance window the
+caller requested.
+
+`MAX31865Timing` models the external input-filter time constant separately from
+static converter configuration. The default is 1 ms, matching the conservative
+time constant used in the datasheet startup characterization. Hardware with a
+larger external RC time constant must supply its actual value. Bias settling is
+computed as 10.5 time constants plus 1 ms; post-fault settling uses five time
+constants plus 1 ms. Automatic fault detection waits its 600 us datasheet
+maximum, and one-shot conversion waits 55 ms for the 60 Hz notch or 66 ms for
+the 50 Hz notch.
+
+The driver validates that its injected `SpiDevice` uses CPHA=1, MSB-first
+8-bit words, active-low chip select, and a clock no faster than 5 MHz. Either
+CPOL value remains valid. SPI response-shape violations are acquisition errors.
 
 ## 6. Portable C architecture
 
@@ -557,19 +609,16 @@ manufacturer support.
 
 As a project-level goal, `rtd-acquire` should provide at least one supported and
 validated acquisition path for every RTD family supported by `rtd-sensor`.
-Individual devices may legitimately support only a subset.
+Individual devices may legitimately support only a subset. The canonical list of
+current parity targets lives in `HARDWARE.md`; it is intentionally not duplicated
+here.
 
-Current `rtd-sensor` built-ins to track are:
-
-- Pt100;
-- Pt500;
-- Pt1000;
-- Ni120 6720;
-- Ni1000 6180;
-- Ni1000 TK5000.
-
-A future RTD family added to `rtd-sensor` creates a corresponding compatibility
-and validation task for `rtd-acquire`.
+A future RTD family added to `rtd-sensor` creates a compatibility and validation
+review in `rtd-acquire`. That review defaults to classifying existing acquisition
+paths for manufacturer support, electrical compatibility, and project validation.
+It does **not** by itself require a new hardware driver. New driver work is added
+only when existing acquisition paths cannot provide suitable practical coverage
+or when the normal roadmap criteria independently justify it.
 
 Acquisition compatibility should be reasoned about electrically—primarily in
 terms of resistance range and acquisition topology—not by embedding
@@ -662,6 +711,7 @@ rtd-acquire/
 │   ├── ROADMAP.md
 │   ├── HARDWARE.md
 │   ├── DIAGNOSTICS.md
+│   ├── REFERENCES.md
 │   └── CHANGELOG.md
 └── .rtd-acquire-local/   # ignored local research/experiments
 ```

@@ -82,10 +82,12 @@ public diagnostic vocabulary.
 | ABB TTH300 | Universal temperature transmitter | 4–20 mA / HART / fieldbus variants | RTD/resistance; explicit wire-break, short, lead-resistance, drift and range diagnostics | High-value diagnostic/reference target |
 | Yokogawa YTA610/YTA710 | Universal temperature transmitter | 4–20 mA / HART / FOUNDATION Fieldbus | RTD/ohms; model-specific sensor-failure/short/drift diagnostics | High-value diagnostic/reference target |
 
-## Current rtd-sensor parity targets
+## Canonical current rtd-sensor parity targets
 
-The project should maintain at least one validated acquisition path for each
-current built-in `rtd-sensor` family:
+This table is the canonical `rtd-acquire` list of current `rtd-sensor` parity
+targets. The project should maintain at least one validated acquisition path for
+each listed built-in family and reconcile this table whenever `rtd-sensor` adds
+or removes a supported family:
 
 | RTD model | Nominal R0 | rtd-acquire obligation |
 | --- | ---: | --- |
@@ -96,7 +98,9 @@ current built-in `rtd-sensor` family:
 | Ni1000 6180 | 1000 Ω | Required |
 | Ni1000 TK5000 | 1000 Ω | Required |
 
-A device need not support all models. Project-wide coverage is the goal.
+A device need not support all models. Project-wide coverage is the goal. A new
+family first triggers a compatibility/validation review of existing acquisition
+paths; it does not automatically require a new device driver.
 
 ## Diagnostic capability survey
 

@@ -13,6 +13,20 @@ git diff --check
 
 `pytest` includes the Python-side conformance-vector checks.
 
+## Citation and provenance
+
+`docs/REFERENCES.md` is the canonical bibliography for external technical
+sources used by the project. When a change materially relies on a standard,
+manufacturer data sheet/manual, industry document, application note, research
+paper, validation dataset, or other external engineering source, add or verify
+that source in `docs/REFERENCES.md` in the same change.
+
+Keep short source comments at implementation or test points when they materially
+improve traceability, but keep the full citation and project-role description
+in `docs/REFERENCES.md`. Research sources retained for future hardware or
+diagnostic work must be labeled as such and do not become an implementation
+basis merely by being listed.
+
 ## Portable C contract checks
 
 Until a full C build system is justified, compile and run the portable C

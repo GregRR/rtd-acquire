@@ -54,13 +54,15 @@ hardware while proving the core public contracts.
 - [x] Implement the locked Python `Measurement`, status, and diagnostic core
       contracts with invariant tests.
 - [x] Implement `AcquisitionDevice` and acquisition exceptions/errors.
-- [ ] Implement MAX31865 device behavior independently of a Raspberry Pi SPI
+- [x] Implement MAX31865 device behavior independently of a Raspberry Pi SPI
       library.
   - [x] Decode the native RTD ratio and D7-D2 fault status into the locked
         `Measurement`/diagnostic contract.
-  - [ ] Add SPI register access, configuration writes, and conversion timing.
-- [ ] Add Raspberry Pi 4 SPI/GPIO integration.
-- [ ] Support appropriate 2-/3-/4-wire MAX31865 configurations.
+  - [x] Add SPI register access, configuration writes, automatic fault-cycle
+        refresh, and one-shot conversion timing.
+- [ ] Add Raspberry Pi 4/5 Linux SPI integration; hardware-validate Pi 4 and
+      keep Pi 5 explicitly unvalidated until tested on physical hardware.
+- [x] Support appropriate 2-/3-/4-wire MAX31865 configurations.
 - [x] Preserve MAX31865 native diagnostic evidence without over-interpreting it.
 - [ ] Add deterministic MAX31865 register/fault emulation.
 - [ ] Add a generic simulated acquisition device.
@@ -170,5 +172,10 @@ industrial protocols without making `rtd-acquire` a general automation stack.
 ## Ongoing compatibility rule
 
 Whenever `rtd-sensor` adds a supported RTD family, open a corresponding
-`rtd-acquire` compatibility task. The goal is at least one documented,
-validated acquisition path for every RTD family supported by `rtd-sensor`.
+`rtd-acquire` compatibility and validation review. First classify existing
+acquisition paths for manufacturer support, electrical compatibility, and
+project validation. A new RTD family does not automatically create a new-driver
+task; add driver work only when existing paths cannot provide suitable coverage
+or the normal roadmap criteria independently justify it. The goal remains at
+least one documented, validated acquisition path for every RTD family supported
+by `rtd-sensor`.

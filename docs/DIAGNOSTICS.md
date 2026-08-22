@@ -706,10 +706,11 @@ manuals, and equivalence justification belong in this evidence ledger and the
 hardware/driver mapping documentation rather than in every runtime
 `Measurement`.
 
+A `Measurement` contains at most one `Diagnostic` for each `DiagnosticCode`.
 Multiple native-evidence entries solve composite conditions without inventing a
-vendor identifier. A Beckhoff-style documented `Overrange + Error` open-circuit
-condition therefore preserves two native observations supporting one normalized
-`SENSOR_CIRCUIT_OPEN` diagnostic.
+vendor identifier or duplicating a normalized code. A Beckhoff-style documented
+`Overrange + Error` open-circuit condition therefore preserves two native
+observations supporting one normalized `SENSOR_CIRCUIT_OPEN` diagnostic.
 
 ## First `DiagnosticCode` vocabulary freeze
 

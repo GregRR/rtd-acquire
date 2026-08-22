@@ -29,6 +29,9 @@ class Measurement:
         diagnostics = tuple(self.diagnostics)
         if not all(isinstance(item, Diagnostic) for item in diagnostics):
             raise TypeError("diagnostics must contain only Diagnostic items")
+        diagnostic_codes = [diagnostic.code for diagnostic in diagnostics]
+        if len(diagnostic_codes) != len(set(diagnostic_codes)):
+            raise ValueError("diagnostics must not contain duplicate codes")
         object.__setattr__(self, "diagnostics", diagnostics)
 
         if self.resistance_ohms is not None and (

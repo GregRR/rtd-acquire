@@ -7,4 +7,5 @@ here.
 - [ROADMAP.md](ROADMAP.md) — implementation sequence
 - [HARDWARE.md](HARDWARE.md) — acquisition hardware catalog
 - [DIAGNOSTICS.md](DIAGNOSTICS.md) — native diagnostic evidence and normalization
+- [REFERENCES.md](REFERENCES.md) — canonical external technical bibliography
 - [CHANGELOG.md](CHANGELOG.md) — project changes

@@ -1,4 +1,8 @@
-"""Configuration contract for MAX31865 acquisition."""
+"""Configuration contract for MAX31865 acquisition.
+
+Implementation basis: Analog Devices (2015), MAX31865 data sheet; see
+``docs/REFERENCES.md``.
+"""
 
 from __future__ import annotations
 

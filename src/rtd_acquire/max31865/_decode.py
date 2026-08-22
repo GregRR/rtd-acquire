@@ -1,4 +1,8 @@
-"""MAX31865 register decoding independent of any SPI implementation."""
+"""MAX31865 register decoding independent of any SPI implementation.
+
+Implementation basis: Analog Devices (2015), MAX31865 data sheet; see
+``docs/REFERENCES.md``.
+"""
 
 from __future__ import annotations
 
