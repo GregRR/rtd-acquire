@@ -68,6 +68,46 @@ Terminology:
 
 An `AcquisitionDevice` does not require or expose a particular transport.
 
+The locked Python abstraction uses structural typing:
+
+```python
+class AcquisitionDevice(Protocol):
+    def read(self) -> Measurement:
+        ...
+```
+
+Hardware implementations do not have to inherit from a common base class. An
+object satisfies the contract by providing a compatible `read()` operation.
+This keeps drivers, simulations, application test doubles, and future protocol-
+based backends substitutable without imposing an inheritance hierarchy.
+
+### 3.1 Operation errors
+
+Device-reported acquisition conditions are represented in a `Measurement`,
+including `FAULT` measurements. Exceptions are reserved for cases where the
+requested software operation itself cannot complete and therefore cannot return
+a measurement.
+
+The initial exception hierarchy is:
+
+```text
+RtdAcquireError
+├── ConfigurationError
+└── AcquisitionError
+```
+
+- `ConfigurationError` means caller-supplied acquisition configuration is
+  invalid or unsupported. It is distinct from
+  `DiagnosticCode.CONFIGURATION_ERROR`, which means the acquisition device
+  itself reported a configuration fault.
+- `AcquisitionError` means `read()` or another acquisition operation could not
+  complete far enough to return a `Measurement`, such as a host-side I/O or
+  transport failure. More specific transport/backend exceptions may subclass it
+  later.
+
+This distinction prevents software-operation failures from being disguised as
+device-reported diagnostic evidence.
+
 ## 4. Measurement contract
 
 The locked Python contract is:

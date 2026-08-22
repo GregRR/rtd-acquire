@@ -46,7 +46,7 @@ hardware while proving the core public contracts.
 
 - [x] Implement the locked Python `Measurement`, status, and diagnostic core
       contracts with invariant tests.
-- [ ] Implement `AcquisitionDevice` and acquisition exceptions/errors.
+- [x] Implement `AcquisitionDevice` and acquisition exceptions/errors.
 - [ ] Implement MAX31865 device behavior independently of a Raspberry Pi SPI
       library.
 - [ ] Add Raspberry Pi 4 SPI/GPIO integration.
