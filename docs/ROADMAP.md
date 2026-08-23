@@ -62,8 +62,9 @@ hardware while proving the core public contracts.
         refresh, and one-shot conversion timing.
 - [x] Add Raspberry Pi 4/5 Linux `spidev` integration without SoC-specific
       register access.
-- [ ] Hardware-validate the Linux SPI path on Raspberry Pi 4; keep Raspberry
-      Pi 5 explicitly unvalidated until tested on physical hardware.
+- [ ] Hardware-validate the Linux SPI path on Raspberry Pi 4 using the
+      procedure in `HARDWARE_VALIDATION.md`; keep Raspberry Pi 5 explicitly
+      unvalidated until tested on physical hardware.
 - [x] Support appropriate 2-/3-/4-wire MAX31865 configurations.
 - [x] Preserve MAX31865 native diagnostic evidence without over-interpreting it.
 - [x] Add deterministic MAX31865 register/fault emulation through the real
@@ -72,9 +73,11 @@ hardware while proving the core public contracts.
       replay measurements and explicit acquisition-operation failures.
 - [x] Build shared deterministic MAX31865 conformance vectors and execute them
       against the Python register decoder.
-- [ ] Validate with real Pt100 hardware and known resistance references.
-- [ ] Publish a simple `rtd-sensor` integration example while keeping the
-      packages architecturally independent.
+- [ ] Validate with real Pt100 hardware and known resistance references using
+      the acceptance procedure in `HARDWARE_VALIDATION.md`.
+- [x] Publish a simple `rtd-sensor` integration example while keeping the
+      packages architecturally independent and without adding a runtime
+      dependency between them.
 
 ## 0.2 — Portable C + HERO
 

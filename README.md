@@ -92,6 +92,25 @@ This generic simulator works at the measurement boundary. The separate
 `MAX31865SpiEmulator` exercises MAX31865 register/SPI behavior through the real
 driver. Neither simulator performs RTD temperature-model interpretation.
 
+## Integration with rtd-sensor
+
+`rtd-acquire` and `rtd-sensor` remain independent packages. Applications pass
+the acquired resistance explicitly into the desired RTD model:
+
+```python
+from rtd_sensor import pt100
+
+measurement = device.read()
+if measurement.resistance_ohms is not None:
+    temperature_c = pt100.resistance_to_celsius(measurement.resistance_ohms)
+```
+
+See `examples/rtd_sensor_pt100.py` for a runnable hardware-free example.
+`rtd-sensor` is not an `rtd-acquire` runtime dependency.
+
+Physical MAX31865 validation is tracked separately in
+`docs/HARDWARE_VALIDATION.md`.
+
 See:
 
 - [DESIGN.md](docs/DESIGN.md) — architecture and project contracts

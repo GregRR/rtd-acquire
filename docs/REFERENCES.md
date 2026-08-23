@@ -89,6 +89,17 @@ that retain chip select for a transaction. Version 3.8 is the initial minimum
 because it introduced `open_path()` for caller-selected device paths and stable
 udev symlinks.
 
+## Companion software interface
+
+Roe, G. (2026). *rtd-sensor* [Python software]. GitHub.
+https://github.com/GregRR/rtd-sensor
+
+**Project use:** Integration-interface reference for the explicit package
+boundary demonstrated by `examples/rtd_sensor_pt100.py`. The example passes a
+trustworthy acquired resistance to `rtd_sensor.pt100.resistance_to_celsius()`;
+`rtd-sensor` remains a separate package rather than an `rtd-acquire` runtime
+dependency.
+
 ## Precision ADC and converter research
 
 Texas Instruments. (2017). *ADS124S0x low-power, low-noise, highly integrated,
