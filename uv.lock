@@ -330,6 +330,11 @@ name = "rtd-acquire"
 version = "0.0.0"
 source = { editable = "." }
 
+[package.optional-dependencies]
+raspberry-pi = [
+    { name = "spidev" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
@@ -338,6 +343,8 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "spidev", marker = "extra == 'raspberry-pi'", specifier = ">=3.8,<4" }]
+provides-extras = ["raspberry-pi"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -370,6 +377,12 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a3/03/e724450f621698117f9aa6dd241c94d0274ae96781378dc86745ae29f0e7/ruff-0.16.4-py3-none-win_amd64.whl", hash = "sha256:05d9d27a18c4bcbefada602480ec9e01e0bc949d432e0ced5df77edac195919c", size = 10567657, upload-time = "2026-08-20T17:43:54.78Z" },
     { url = "https://files.pythonhosted.org/packages/0e/fe/da8b9e1347696bb22120b77280ec5ce25d500ca5cb39d5ad6e5c18de19c1/ruff-0.16.4-py3-none-win_arm64.whl", hash = "sha256:a3a61621c9b6f6a89573e938a080e648f1695baa3f58570a3a707bc51ff65a21", size = 10451579, upload-time = "2026-08-20T17:43:57.135Z" },
 ]
+
+[[package]]
+name = "spidev"
+version = "3.8"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/67/87/039b6eeea781598015b538691bc174cc0bf77df9d4d2d3b8bf9245c0de8c/spidev-3.8.tar.gz", hash = "sha256:2bc02fb8c6312d519ebf1f4331067427c0921d3f77b8bcaf05189a2e8b8382c0", size = 13893, upload-time = "2025-09-15T18:56:20.672Z" }
 
 [[package]]
 name = "typing-extensions"

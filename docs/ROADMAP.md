@@ -60,8 +60,10 @@ hardware while proving the core public contracts.
         `Measurement`/diagnostic contract.
   - [x] Add SPI register access, configuration writes, automatic fault-cycle
         refresh, and one-shot conversion timing.
-- [ ] Add Raspberry Pi 4/5 Linux SPI integration; hardware-validate Pi 4 and
-      keep Pi 5 explicitly unvalidated until tested on physical hardware.
+- [x] Add Raspberry Pi 4/5 Linux `spidev` integration without SoC-specific
+      register access.
+- [ ] Hardware-validate the Linux SPI path on Raspberry Pi 4; keep Raspberry
+      Pi 5 explicitly unvalidated until tested on physical hardware.
 - [x] Support appropriate 2-/3-/4-wire MAX31865 configurations.
 - [x] Preserve MAX31865 native diagnostic evidence without over-interpreting it.
 - [ ] Add deterministic MAX31865 register/fault emulation.

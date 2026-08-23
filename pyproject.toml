@@ -40,6 +40,11 @@ classifiers = [
 ]
 dependencies = []
 
+[project.optional-dependencies]
+raspberry-pi = [
+    "spidev>=3.8,<4",
+]
+
 [dependency-groups]
 dev = [
     "mypy",

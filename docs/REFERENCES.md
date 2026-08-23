@@ -62,6 +62,33 @@ automatic fault-detection cycle, input-settling guidance, and one-shot
 conversion timing. It is also the implementation basis for the initial
 MAX31865 conformance vectors and native diagnostic evidence.
 
+Raspberry Pi Ltd. (n.d.). *Raspberry Pi computer hardware: Serial peripheral
+interface (SPI)* [Documentation].
+https://www.raspberrypi.com/documentation/computers/raspberry-pi.html
+
+**Project use:** Implementation basis for Raspberry Pi SPI enablement, standard
+SPI0 header pin mapping, supported SPI mode bits, and use of the Linux `spidev`
+userspace interface. It supports the platform design in which Pi 4 and Pi 5 use
+the kernel SPI stack rather than `rtd-acquire` directly accessing SoC
+peripheral registers.
+
+The Linux Kernel Developers. (n.d.). *SPI userspace API* [Documentation].
+https://docs.kernel.org/spi/spidev.html
+
+**Project use:** Implementation basis for `/dev/spidevB.C`, userspace SPI
+configuration, full-duplex `SPI_IOC_MESSAGE` transactions, and the rule that a
+full transaction can retain chip select rather than splitting command and data
+into separate read/write operations.
+
+Python Spidev project. (2025). *Python Spidev 3.8* [Software documentation].
+https://pypi.org/project/spidev/
+
+**Project use:** Implementation basis for the optional Python Linux transport,
+including `SpiDev.open_path()`, SPI setting attributes, and `xfer2()` semantics
+that retain chip select for a transaction. Version 3.8 is the initial minimum
+because it introduced `open_path()` for caller-selected device paths and stable
+udev symlinks.
+
 ## Precision ADC and converter research
 
 Texas Instruments. (2017). *ADS124S0x low-power, low-noise, highly integrated,

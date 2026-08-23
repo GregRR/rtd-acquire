@@ -102,6 +102,35 @@ A device need not support all models. Project-wide coverage is the goal. A new
 family first triggers a compatibility/validation review of existing acquisition
 paths; it does not automatically require a new device driver.
 
+## Host-platform adapters
+
+### Raspberry Pi 4/5 through Linux `spidev`
+
+The first Python host adapter is intentionally built on the Linux kernel
+`spidev` userspace API rather than direct Raspberry Pi peripheral-register
+access. Raspberry Pi documents SPI0 on the standard 40-pin header and supports
+userspace SPI through `spidev`; the Python `spidev` package wraps that kernel
+API and provides `open_path()` plus full-duplex `xfer2()` transactions.
+
+For the standard SPI0 header mapping, MOSI is pin 19 (GPIO10), MISO is pin 21
+(GPIO9), SCLK is pin 23 (GPIO11), CE0 is pin 24 (GPIO8), and CE1 is pin 26
+(GPIO7). SPI0 is disabled by default on Raspberry Pi OS and must be enabled, for
+example through `raspi-config` or `dtparam=spi=on`.
+
+`rtd-acquire` does not depend on BCM2711- or RP1-specific register access. The
+Linux adapter is therefore the same implementation for Raspberry Pi 4 and 5.
+Support and validation remain separate claims:
+
+- Raspberry Pi 4: implementation supported; physical validation pending on the
+  project's available Pi 4 Model B.
+- Raspberry Pi 5: implementation expected to use the same Linux interface;
+  explicitly unvalidated until tested on physical Pi 5 hardware.
+- Other Linux systems exposing a compatible `spidev` device: architecturally
+  compatible, but not automatically claimed as project-validated platforms.
+
+The adapter accepts a device path rather than assuming `/dev/spidev0.0`, which
+also permits stable udev symlinks on systems where SPI bus numbering may vary.
+
 ## Diagnostic capability survey
 
 ### Analog Devices MAX31865

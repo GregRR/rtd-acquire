@@ -426,6 +426,32 @@ first driver can use documented conversion timing; optional data-ready GPIO
 support may be added later if it provides a meaningful benefit without becoming
 a required capability.
 
+#### 5.2.1 Linux `spidev` adapter
+
+`LinuxSpidevDevice` implements `SpiDevice` through the Linux kernel `spidev`
+userspace interface. It opens a caller-selected device node or stable symlink
+with Python `spidev` 3.8+ `open_path()`, applies the requested `SpiSettings`, and
+uses one `xfer2()` call for each `transfer()` so chip select remains asserted
+for the complete transaction. Host/kernel failures are translated to the public
+`AcquisitionError` boundary.
+
+The adapter is Linux-generic rather than Raspberry-Pi-specific. Raspberry Pi 4
+and Raspberry Pi 5 reach the same userspace `/dev/spidev*` contract through
+their respective kernel controller drivers, so `rtd-acquire` does not inspect
+BCM2711/RP1 registers or branch on Pi model. This makes the implementation
+architecturally suitable for both generations while allowing physical
+validation status to remain explicit and separate.
+
+The first documented Pi connection uses SPI0 with its standard 40-pin-header
+MOSI/MISO/SCLK/CE lines. SPI must be enabled by the operating system before the
+device node is available. The adapter accepts a full device path rather than
+hard-coding `/dev/spidev0.0`, permitting alternate chip selects and stable udev
+symlinks where bus numbering is not guaranteed.
+
+The `spidev` Python package is an optional dependency. Importing
+`rtd_acquire.transports` does not require it; a missing backend is reported only
+when `LinuxSpidevDevice` is instantiated.
+
 ### 5.3 MAX31865 native decode contract
 
 MAX31865 register interpretation is independent of SPI/platform code. The RTD
