@@ -217,27 +217,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  github-assets:
-    name: Attach distributions to GitHub release
-    if: github.event_name == 'release'
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download distributions
-        uses: actions/download-artifact@v8
-        with:
-          name: python-package-distributions
-          path: dist/
-
-      - name: Upload release assets
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "${RELEASE_TAG}" dist/* --clobber
-
   publish:
     name: Publish distributions to PyPI
     if: github.event_name == 'release'
