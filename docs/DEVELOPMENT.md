@@ -55,3 +55,40 @@ exist.
 
 Hardware-in-the-loop validation is a release/milestone gate, not a requirement
 for every source commit.
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs the Python test suite on every supported Python
+minor version, currently 3.11 through 3.14. The Python 3.14 job also runs Ruff,
+mypy strict, the portable C11 SPI contract test, tracked-file whitespace
+validation, and a clean-tree check.
+
+The release candidate should pass the same local gates before a tag is created;
+CI is an independent confirmation, not a substitute for local artifact testing.
+
+## Release automation
+
+`.github/workflows/release.yml` validates a release tag, rebuilds the wheel and
+source distribution with `uv build --no-sources`, inspects their contents, and
+installs both artifacts into clean Python 3.11 and 3.14 environments for smoke
+testing. It also verifies that the Raspberry Pi optional extra resolves and can
+import its `spidev` dependency.
+
+A manual `workflow_dispatch` run against a commit SHA, branch, or tag is
+deliberately build-only. It can be used as a safe pre-tag release-workflow dry
+run and does not publish to PyPI or modify a GitHub release.
+
+Publishing occurs only for GitHub's `release: published` event. That event is
+used for stable releases and prereleases. After validation succeeds, the
+workflow attaches the wheel and source distribution to the existing GitHub
+release and publishes the same artifacts to PyPI through Trusted Publishing.
+
+Before the first PyPI release, configure the PyPI pending Trusted Publisher for:
+
+- owner: `GregRR`;
+- repository: `rtd-acquire`;
+- workflow: `release.yml`;
+- environment: `pypi`.
+
+The `pypi` GitHub environment should use appropriate protection rules. No PyPI
+API token is required when Trusted Publishing is configured correctly.

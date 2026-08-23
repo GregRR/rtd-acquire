@@ -1,0 +1,262 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit SHA, branch, or tag to validate"
+        required: true
+        default: "main"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Validate and build distributions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.ref }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.3"
+          enable-cache: true
+
+      - name: Install supported smoke-test Pythons
+        run: uv python install 3.11 3.14
+
+      - name: Check lockfile consistency
+        run: uv lock --check
+
+      - name: Sync locked development environment
+        run: uv sync --locked --dev --python 3.14
+
+      - name: Read project version
+        id: project
+        run: |
+          version="$(uv run --locked python - <<'PY'
+          import tomllib
+          from pathlib import Path
+
+          with Path("pyproject.toml").open("rb") as file:
+              print(tomllib.load(file)["project"]["version"])
+          PY
+          )"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify release tag matches project version
+        if: github.event_name == 'release'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          PROJECT_VERSION: ${{ steps.project.outputs.version }}
+        run: |
+          expected_tag="v${PROJECT_VERSION}"
+          if [[ "${RELEASE_TAG}" != "${expected_tag}" ]]; then
+            echo "release tag ${RELEASE_TAG} does not match ${expected_tag}"
+            exit 1
+          fi
+
+      - name: Run tests
+        run: uv run --locked pytest
+
+      - name: Run Ruff lint
+        run: uv run --locked ruff check src tests
+
+      - name: Run mypy
+        run: uv run --locked mypy --strict src tests
+
+      - name: Run portable C contract test
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror -pedantic \
+            -I c/include \
+            c/tests/test_spi_contract.c \
+            -o /tmp/rtd-acquire-c-contract-tests
+          /tmp/rtd-acquire-c-contract-tests
+
+      - name: Check tracked files for whitespace errors
+        run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD
+
+      - name: Confirm checks did not modify the tree
+        run: test -z "$(git status --short)"
+
+      - name: Build distributions without uv source overrides
+        run: uv build --no-sources
+
+      - name: Inspect distribution contents
+        run: |
+          uv run --locked python - <<'PY'
+          from pathlib import Path
+          import tarfile
+          import zipfile
+
+          wheels = list(Path("dist").glob("*.whl"))
+          sdists = list(Path("dist").glob("*.tar.gz"))
+          if len(wheels) != 1 or len(sdists) != 1:
+              raise SystemExit(
+                  f"expected one wheel and one sdist, got {wheels!r} and {sdists!r}"
+              )
+
+          with zipfile.ZipFile(wheels[0]) as archive:
+              names = set(archive.namelist())
+          if "rtd_acquire/py.typed" not in names:
+              raise SystemExit("wheel is missing rtd_acquire/py.typed")
+          if not any(name.endswith(".dist-info/METADATA") for name in names):
+              raise SystemExit("wheel is missing package metadata")
+          if not any(name.endswith(".dist-info/licenses/LICENSE") for name in names):
+              raise SystemExit("wheel is missing MPL-2.0 license file")
+
+          with tarfile.open(sdists[0], "r:gz") as archive:
+              names = {
+                  "/".join(name.split("/")[1:])
+                  for name in archive.getnames()
+                  if "/" in name
+              }
+          required = {
+              "LICENSE",
+              "README.md",
+              "pyproject.toml",
+              "src/rtd_acquire/py.typed",
+              "conformance/v1/manifest.json",
+              "c/include/rtd_acquire/spi.h",
+          }
+          missing = sorted(required - names)
+          if missing:
+              raise SystemExit(f"sdist is missing required files: {missing!r}")
+          PY
+
+      - name: Smoke-test wheel and sdist on supported endpoints
+        env:
+          EXPECTED_VERSION: ${{ steps.project.outputs.version }}
+        run: |
+          index=0
+          for artifact in dist/*.whl dist/*.tar.gz; do
+            for python_version in 3.11 3.14; do
+              env_dir=".release-smoke-${python_version}-${index}"
+              uv venv --python "${python_version}" "${env_dir}"
+              uv pip install --python "${env_dir}/bin/python" "${artifact}"
+              SMOKE_PYTHON_VERSION="${python_version}" \
+                "${env_dir}/bin/python" - <<'PY'
+          import importlib.metadata
+          import os
+          import sys
+
+          from rtd_acquire import Measurement, MeasurementStatus
+          from rtd_acquire.max31865 import MAX31865Config
+          from rtd_acquire.simulation import SimulatedAcquisitionDevice
+
+          expected_python = tuple(
+              int(part) for part in os.environ["SMOKE_PYTHON_VERSION"].split(".")
+          )
+          if sys.version_info[:2] != expected_python:
+              raise SystemExit(
+                  f"smoke environment uses Python {sys.version_info[:2]!r}, "
+                  f"expected {expected_python!r}"
+              )
+
+          expected_version = os.environ["EXPECTED_VERSION"]
+          actual_version = importlib.metadata.version("rtd-acquire")
+          if actual_version != expected_version:
+              raise SystemExit(
+                  f"installed version {actual_version!r} does not match "
+                  f"release version {expected_version!r}"
+              )
+
+          measurement = SimulatedAcquisitionDevice(
+              [Measurement(resistance_ohms=100.0)]
+          ).read()
+          if measurement.status is not MeasurementStatus.OK:
+              raise SystemExit("installed simulation smoke check failed")
+          if measurement.resistance_ohms != 100.0:
+              raise SystemExit("installed resistance smoke check failed")
+
+          config = MAX31865Config(
+              reference_resistance_ohms=430.0,
+              wire_count=3,
+              filter_frequency_hz=60,
+          )
+          if config.reference_resistance_ohms != 430.0:
+              raise SystemExit("installed MAX31865 config smoke check failed")
+          PY
+              rm -rf "${env_dir}"
+            done
+            index=$((index + 1))
+          done
+
+      - name: Smoke-test Raspberry Pi optional dependency metadata
+        run: |
+          wheel_path="$(find dist -maxdepth 1 -type f -name '*.whl' -print -quit)"
+          uv venv --python 3.14 .release-smoke-raspberry-pi
+          uv pip install \
+            --python .release-smoke-raspberry-pi/bin/python \
+            "${wheel_path}[raspberry-pi]"
+          .release-smoke-raspberry-pi/bin/python - <<'PY'
+          import spidev
+          from rtd_acquire.transports import LinuxSpidevDevice
+
+          if spidev is None or LinuxSpidevDevice is None:
+              raise SystemExit("Raspberry Pi optional dependency smoke check failed")
+          PY
+          rm -rf .release-smoke-raspberry-pi
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-package-distributions
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  github-assets:
+    name: Attach distributions to GitHub release
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "${RELEASE_TAG}" dist/* --clobber
+
+  publish:
+    name: Publish distributions to PyPI
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/rtd-acquire
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

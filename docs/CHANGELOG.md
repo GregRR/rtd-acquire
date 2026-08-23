@@ -2,9 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-The project has not yet made a public release.
+The first public alpha release is `0.1.0a1`.
 
 ## Unreleased
+
+## 0.1.0a1 - 2026-08-22
 
 ### Added
 
@@ -19,6 +21,9 @@ The project has not yet made a public release.
   reproducible real-hardware validation procedure.
 - Add a simple `rtd-sensor` Pt100 integration example without creating a runtime
   dependency between the projects.
+- Add CI across Python 3.11–3.14 and release automation that validates,
+  smoke-tests, attaches, and publishes wheel/source distributions.
+- Add public alpha installation and hardware-free quickstart instructions.
 
 ### Changed
 

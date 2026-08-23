@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.3"
+          enable-cache: true
+
+      - name: Install Python ${{ matrix.python-version }}
+        run: uv python install "${{ matrix.python-version }}"
+
+      - name: Check lockfile consistency
+        run: uv lock --check
+
+      - name: Install project and development dependencies
+        run: uv sync --locked --dev --python "${{ matrix.python-version }}"
+
+      - name: Run tests
+        run: uv run --locked pytest
+
+      - name: Run Ruff lint
+        if: matrix.python-version == '3.14'
+        run: uv run --locked ruff check src tests
+
+      - name: Run mypy
+        if: matrix.python-version == '3.14'
+        run: uv run --locked mypy --strict src tests
+
+      - name: Run portable C contract test
+        if: matrix.python-version == '3.14'
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror -pedantic \
+            -I c/include \
+            c/tests/test_spi_contract.c \
+            -o /tmp/rtd-acquire-c-contract-tests
+          /tmp/rtd-acquire-c-contract-tests
+
+      - name: Check tracked files for whitespace errors
+        if: matrix.python-version == '3.14'
+        run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD
+
+      - name: Confirm checks did not modify the tree
+        if: matrix.python-version == '3.14'
+        run: test -z "$(git status --short)"

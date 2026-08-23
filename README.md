@@ -33,15 +33,41 @@ The second planned hardware family is the TI ADS124S08 precision ADC/front end.
 Later targets cover industrial resistance inputs, 4–20 mA transmitters,
 industrial digital interfaces, and configurable custom acquisition circuits.
 
+## Installation
+
+`rtd-acquire` requires Python 3.11 or later. While the project is in alpha,
+install the latest prerelease explicitly:
+
+```sh
+python -m pip install --pre rtd-acquire
+```
+
+A minimal hardware-free acquisition uses the deterministic simulator:
+
+```python
+from rtd_acquire import Measurement
+from rtd_acquire.simulation import SimulatedAcquisitionDevice
+
+device = SimulatedAcquisitionDevice([Measurement(resistance_ohms=100.0)])
+measurement = device.read()
+print(measurement.resistance_ohms)
+```
+
+For Raspberry Pi/Linux SPI support, install the optional backend dependency:
+
+```sh
+python -m pip install --pre "rtd-acquire[raspberry-pi]"
+```
+
+Developers working from a source checkout can instead use `uv sync`; see
+[`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) for the project quality gates.
+
 ## Raspberry Pi Linux SPI
 
 The Python Raspberry Pi path uses the normal Linux `spidev` userspace API, not
-direct SoC register access. Install the optional backend dependency with the
-`raspberry-pi` extra. In a source checkout using `uv`:
-
-```sh
-uv sync --extra raspberry-pi
-```
+direct SoC register access. Install the `raspberry-pi` extra shown above before
+using this backend. In a development checkout, the equivalent command is
+`uv sync --extra raspberry-pi`.
 
 A MAX31865 on SPI0/CE0 can then be wired through the generic Linux adapter:
 
@@ -117,13 +143,18 @@ See:
 - [ROADMAP.md](docs/ROADMAP.md) — implementation sequence
 - [HARDWARE.md](docs/HARDWARE.md) — acquisition hardware catalog
 - [DIAGNOSTICS.md](docs/DIAGNOSTICS.md) — native diagnostic survey and normalization research
+- [HARDWARE_VALIDATION.md](docs/HARDWARE_VALIDATION.md) — physical validation gate
+- [REFERENCES.md](docs/REFERENCES.md) — external technical bibliography
+- [DEVELOPMENT.md](docs/DEVELOPMENT.md) — development and release automation gates
+- [CHANGELOG.md](docs/CHANGELOG.md) — release history
 
 ## Status
 
-Pre-release development. The core measurement/diagnostic contracts, the
-platform-independent MAX31865 driver, and the Linux `spidev` adapter are
-implemented. Raspberry Pi physical hardware validation is still pending. Public
-APIs are not yet released or stable.
+`0.1.0a1` is the first public alpha release. The core measurement/diagnostic
+contracts, the platform-independent MAX31865 driver, Linux `spidev` adapter,
+simulation/emulation support, and shared conformance vectors are implemented.
+Raspberry Pi/MAX31865 physical hardware validation is still pending, and public
+APIs may change before `0.1.0`.
 
 ## License
 

@@ -239,6 +239,40 @@ universal-input modes and for BACnet reliability/status exposure. The current
 research establishes a software-visible validity path but does not yet establish
 which sensor-specific reliability states are exposed for each resistance mode.
 
+## Packaging and release automation
+
+Astral Software. (n.d.). *Building and publishing a Python package with uv*
+[Documentation].
+https://docs.astral.sh/uv/guides/package/
+
+**Project use:** Implementation basis for building publishable wheel and source
+distributions with `uv build --no-sources` so release artifacts do not depend
+on development-only uv source overrides.
+
+GitHub. (n.d.). *Events that trigger workflows: release* [Documentation].
+https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
+
+**Project use:** Implementation basis for the release workflow trigger. The
+`release: published` activity is deliberately used because GitHub documents it
+as firing for both stable releases and prereleases, including prereleases
+published from drafts.
+
+Python Package Index. (n.d.). *Creating a PyPI project with a Trusted
+Publisher* [Documentation].
+https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/
+
+**Project use:** Implementation basis for the first `rtd-acquire` PyPI release.
+A pending GitHub Trusted Publisher can create the PyPI project on first publish,
+without first uploading a package manually or storing a long-lived API token.
+
+Python Package Index. (n.d.). *Publishing with a Trusted Publisher*
+[Documentation].
+https://docs.pypi.org/trusted-publishers/using-a-publisher/
+
+**Project use:** Implementation basis for OIDC-based PyPI publishing from
+GitHub Actions with job-scoped `id-token: write` permission and the PyPA
+`gh-action-pypi-publish` action.
+
 ## Data interchange and conformance design sources
 
 Bray, T. (2017). *The JavaScript Object Notation (JSON) data interchange
