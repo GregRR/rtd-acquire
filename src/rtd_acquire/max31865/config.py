@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from ..core.errors import ConfigurationError
+from ._thresholds import encode_high_threshold_register
 
 _MIN_REFERENCE_RESISTANCE_OHMS = 350.0
 _MAX_REFERENCE_RESISTANCE_OHMS = 10_000.0
@@ -52,6 +53,11 @@ class MAX31865Config:
             "high_fault_threshold_ohms",
             self.high_fault_threshold_ohms,
             allow_zero=False,
+        )
+
+        encode_high_threshold_register(
+            self.high_fault_threshold_ohms,
+            self.reference_resistance_ohms,
         )
 
         if (

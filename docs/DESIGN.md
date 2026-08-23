@@ -371,9 +371,14 @@ The fields mean:
 
 Thresholds are acquisition settings, not RTD-model validity limits. They must
 be within the converter's representable resistance range and, when both are
-provided, the low threshold must be below the high threshold.
-Invalid or unsupported values raise the public `ConfigurationError` used for
-caller-supplied acquisition configuration.
+provided, the low threshold must be below the high threshold. Low thresholds
+round downward and high thresholds round upward so quantization cannot move a
+native threshold into the caller's requested diagnostic-free window. Because
+the 15-bit native threshold code has no value above 32767, a high threshold in
+the final unrepresentable band below `R_REF` is rejected rather than silently
+clamped downward. Invalid, unsupported, or directionally unrepresentable values
+raise the public `ConfigurationError` used for caller-supplied acquisition
+configuration.
 
 The configuration intentionally contains no RTD family/model name, nominal
 `R0`, temperature range, or temperature-model coefficients. Those belong to
@@ -452,6 +457,15 @@ The `spidev` Python package is an optional dependency. Importing
 `rtd_acquire.transports` does not require it; a missing backend is reported only
 when `LinuxSpidevDevice` is instantiated.
 
+`SpiSettings` and device drivers raise `ConfigurationError` for incompatibilities
+they can determine before touching the operating-system backend. Once
+`LinuxSpidevDevice` asks the kernel/backend to open or apply settings, a failure
+is treated as an operational `AcquisitionError`: the adapter does not infer from
+platform-specific errno values whether the root cause was permissions, device
+availability, controller capability, or a rejected setting. A future backend may
+provide a more specific subclass only when it has a documented and portable
+distinction.
+
 ### 5.3 MAX31865 native decode contract
 
 MAX31865 register interpretation is independent of SPI/platform code. The RTD
@@ -473,8 +487,11 @@ resistance result. D5/D4/D3 electrical comparison faults and D2 combined input
 voltage fault are faults and suppress the normal resistance result. Datasheet
 troubleshooting causes are not promoted into normalized diagnoses.
 
-The shared MAX31865 conformance vectors execute directly against this decode
-layer.
+The shared MAX31865 measurement-decode conformance vectors execute directly
+against this decode layer. A separate language-neutral threshold-encoding vector
+set pins configuration-to-register behavior, including directional rounding and
+the unrepresentable high-threshold boundary, for reuse by the portable-C
+implementation.
 
 ### 5.4 MAX31865 one-shot acquisition sequence
 

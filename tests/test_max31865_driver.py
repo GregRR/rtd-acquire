@@ -190,6 +190,25 @@ def test_threshold_quantization_does_not_trigger_inside_requested_window() -> No
     assert low == 4096
 
 
+def test_high_threshold_highest_representable_value_encodes_without_clamp() -> None:
+    spi = ScriptedSpi(
+        responses=[bytes(5), bytes(2), bytes(2), bytes(2), b"\x00\x40\x00", bytes(2)]
+    )
+    reference = 430.0
+    device = MAX31865(
+        spi,
+        _config(
+            reference_resistance_ohms=reference,
+            high_fault_threshold_ohms=reference * 32767 / 32768,
+        ),
+        sleep=lambda _: None,
+    )
+
+    device.read()
+
+    assert spi.transactions[0] == b"\x83\xff\xfe\x00\x00"
+
+
 def test_timing_can_model_larger_external_input_filter() -> None:
     timing = MAX31865Timing(input_filter_time_constant_seconds=0.002)
 

@@ -6,6 +6,36 @@ The project has not yet made a public release.
 
 ## Unreleased
 
+### Added
+
+- Implement the platform-independent MAX31865 one-shot acquisition driver,
+  native register decoder, and deterministic SPI/register emulator.
+- Add a Linux `spidev` transport designed for Raspberry Pi 4/5 without
+  SoC-specific register access; physical validation remains tracked separately.
+- Add the deterministic generic `SimulatedAcquisitionDevice`.
+- Add shared MAX31865 measurement-decode and threshold-encoding conformance
+  vectors for independent Python/C implementations.
+- Add development quality gates, technical-reference provenance policy, and a
+  reproducible real-hardware validation procedure.
+- Add a simple `rtd-sensor` Pt100 integration example without creating a runtime
+  dependency between the projects.
+
+### Changed
+
+- Permit zero-ohm `Measurement` results when acquisition hardware reports a
+  trustworthy electrical zero instead of imposing an RTD-model rule.
+- Require each `Measurement` to contain at most one normalized `DiagnosticCode`;
+  composite native observations belong in one diagnostic's evidence tuple.
+- Define `AcquisitionDevice.read()` as non-reentrant/non-thread-safe unless an
+  implementation explicitly documents a stronger guarantee.
+- Reject MAX31865 high thresholds that cannot be encoded without rounding the
+  native threshold below the caller's requested value.
+- Define runtime Linux backend open/setting failures as `AcquisitionError` while
+  keeping statically detectable caller configuration failures as
+  `ConfigurationError`.
+
+### Earlier foundation work
+
 - Freeze the first normalized diagnostic object contract around `Diagnostic`,
   `DiagnosticSeverity`, and composite-capable `NativeEvidence`.
 - Derive canonical diagnostic messages from `DiagnosticCode` instead of storing
@@ -44,7 +74,7 @@ The project has not yet made a public release.
 - Preserve both normalized `rtd-acquire` wording and native device
   code/message evidence.
 
-### Added
+### Foundation additions
 
 - Initial project architecture and design scaffold.
 - Hardware and diagnostic-capability catalog.

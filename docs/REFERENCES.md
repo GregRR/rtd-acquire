@@ -58,8 +58,9 @@ https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31865.pdf
 **Project use:** Implementation basis for the first MAX31865 backend, including
 the 15-bit RTD/reference resistance ratio, configuration and threshold
 registers, 2-/3-/4-wire behavior, SPI mode and clock limits, fault-status bits,
-automatic fault-detection cycle, input-settling guidance, and one-shot
-conversion timing. It is also the implementation basis for the initial
+automatic fault-detection cycle, input-settling guidance (including the
+five-time-constant plus 1 ms post-fault stabilization recommendation), and
+one-shot conversion timing. It is also the implementation basis for the
 MAX31865 conformance vectors and native diagnostic evidence.
 
 Raspberry Pi Ltd. (n.d.). *Raspberry Pi computer hardware: Serial peripheral

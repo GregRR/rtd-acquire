@@ -71,8 +71,9 @@ hardware while proving the core public contracts.
       SPI/driver path.
 - [x] Add a generic deterministic simulated acquisition device that can
       replay measurements and explicit acquisition-operation failures.
-- [x] Build shared deterministic MAX31865 conformance vectors and execute them
-      against the Python register decoder.
+- [x] Build shared deterministic MAX31865 conformance vectors for measurement
+      decoding and threshold-register encoding, and execute them against the
+      Python implementation.
 - [ ] Validate with real Pt100 hardware and known resistance references using
       the acceptance procedure in `HARDWARE_VALIDATION.md`.
 - [x] Publish a simple `rtd-sensor` integration example while keeping the

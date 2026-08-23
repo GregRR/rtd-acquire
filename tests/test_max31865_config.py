@@ -150,3 +150,30 @@ def test_low_fault_threshold_must_be_below_high_threshold() -> None:
             low_fault_threshold_ohms=160.0,
             high_fault_threshold_ohms=160.0,
         )
+
+
+def test_high_fault_threshold_highest_representable_value_is_accepted() -> None:
+    reference = 430.0
+    highest = reference * 32767 / 32768
+
+    config = MAX31865Config(
+        reference_resistance_ohms=reference,
+        wire_count=3,
+        filter_frequency_hz=60,
+        high_fault_threshold_ohms=highest,
+    )
+
+    assert config.high_fault_threshold_ohms == highest
+
+
+def test_high_fault_threshold_unrepresentable_top_band_is_rejected() -> None:
+    with pytest.raises(
+        ConfigurationError,
+        match="cannot be represented without rounding below",
+    ):
+        MAX31865Config(
+            reference_resistance_ohms=430.0,
+            wire_count=3,
+            filter_frequency_hz=60,
+            high_fault_threshold_ohms=429.99,
+        )

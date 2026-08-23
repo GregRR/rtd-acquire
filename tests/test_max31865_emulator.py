@@ -122,6 +122,20 @@ def test_emulator_rejects_invalid_fault_status(value: object) -> None:
         )
 
 
+def test_emulator_requires_bias_for_fault_cycle() -> None:
+    emulator = MAX31865SpiEmulator(rtd_code=8192, fault_status_register=0x80)
+
+    with pytest.raises(AcquisitionError, match="fault cycle requires VBIAS"):
+        emulator.transfer(b"\x80\x04")
+
+
+def test_emulator_requires_bias_for_one_shot_conversion() -> None:
+    emulator = MAX31865SpiEmulator(rtd_code=8192)
+
+    with pytest.raises(AcquisitionError, match="one-shot conversion requires VBIAS"):
+        emulator.transfer(b"\x80\x20")
+
+
 def test_emulator_requires_one_shot_before_rtd_data_read() -> None:
     emulator = MAX31865SpiEmulator(rtd_code=8192)
 

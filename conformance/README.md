@@ -3,10 +3,10 @@
 This directory contains language-neutral deterministic vectors used to compare
 independent `rtd-acquire` implementations.
 
-The first format is versioned under `conformance/v1/`. The vector files describe
-public configuration, raw/native device state, and the expected normalized
-measurement semantics. They intentionally do not encode a language-specific API
-shape.
+The first format is versioned under `conformance/v1/`. Vector sets describe
+public configuration plus operation-specific native inputs and expected behavior,
+including normalized measurement decoding and hardware-register encoding. They
+intentionally do not encode a language-specific API shape.
 
 Numeric expected values are reference values. Comparison tolerances belong to
 the conformance runner/profile, not to individual vectors, so Python binary64

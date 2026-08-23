@@ -6,9 +6,14 @@ from typing import Literal, cast
 
 import pytest
 
+from rtd_acquire import ConfigurationError
 from rtd_acquire.core import DiagnosticCode, DiagnosticSeverity, MeasurementStatus
 from rtd_acquire.max31865 import MAX31865Config
 from rtd_acquire.max31865._decode import measurement_from_registers
+from rtd_acquire.max31865._thresholds import (
+    encode_high_threshold_register,
+    encode_low_threshold_register,
+)
 
 _CONFORMANCE_ROOT = Path(__file__).parents[1] / "conformance" / "v1"
 
@@ -29,6 +34,24 @@ def _load_json(path: Path) -> dict[str, object]:
     return _object(value)
 
 
+def _max31865_config(configuration: dict[str, object]) -> MAX31865Config:
+    return MAX31865Config(
+        reference_resistance_ohms=cast(
+            float, configuration["reference_resistance_ohms"]
+        ),
+        wire_count=cast(Literal[2, 3, 4], configuration["wire_count"]),
+        filter_frequency_hz=cast(
+            Literal[50, 60], configuration["filter_frequency_hz"]
+        ),
+        low_fault_threshold_ohms=cast(
+            float | None, configuration["low_fault_threshold_ohms"]
+        ),
+        high_fault_threshold_ohms=cast(
+            float | None, configuration["high_fault_threshold_ohms"]
+        ),
+    )
+
+
 def test_manifest_lists_existing_version_one_vector_sets() -> None:
     manifest = _load_json(_CONFORMANCE_ROOT / "manifest.json")
 
@@ -39,6 +62,7 @@ def test_manifest_lists_existing_version_one_vector_sets() -> None:
     for entry_value in vector_sets:
         entry = _object(entry_value)
         assert isinstance(entry["device"], str)
+        assert entry["operation"] in {"measurement_decode", "threshold_encoding"}
         path = entry["path"]
         assert isinstance(path, str)
         assert (_CONFORMANCE_ROOT / path).is_file()
@@ -49,6 +73,7 @@ def test_max31865_vectors_have_unique_ids_and_valid_contract_values() -> None:
 
     assert document["schema_version"] == 1
     assert document["device"] == "max31865"
+    assert document["operation"] == "measurement_decode"
     vectors = _list(document["vectors"])
     ids: set[str] = set()
 
@@ -215,3 +240,43 @@ def test_max31865_vectors_execute_against_python_decoder() -> None:
                 expected_evidence = _object(expected_evidence_value)
                 assert actual_evidence.identifier == expected_evidence["identifier"]
                 assert actual_evidence.message == expected_evidence["message"]
+
+
+def test_max31865_threshold_vectors_execute_against_python_encoder() -> None:
+    document = _load_json(_CONFORMANCE_ROOT / "max31865_threshold_encoding.json")
+
+    assert document["schema_version"] == 1
+    assert document["device"] == "max31865"
+    assert document["operation"] == "threshold_encoding"
+    vectors = _list(document["vectors"])
+    ids: set[str] = set()
+
+    for vector_value in vectors:
+        vector = _object(vector_value)
+        vector_id = vector["id"]
+        assert isinstance(vector_id, str)
+        assert vector_id not in ids
+        ids.add(vector_id)
+
+        configuration = _object(vector["configuration"])
+        expected = _object(vector["expected"])
+        outcome = expected["outcome"]
+        assert outcome in {"registers", "configuration_error"}
+
+        if outcome == "configuration_error":
+            with pytest.raises(ConfigurationError):
+                _max31865_config(configuration)
+            continue
+
+        config = _max31865_config(configuration)
+        high = encode_high_threshold_register(
+            config.high_fault_threshold_ohms,
+            config.reference_resistance_ohms,
+        )
+        low = encode_low_threshold_register(
+            config.low_fault_threshold_ohms,
+            config.reference_resistance_ohms,
+        )
+
+        assert high == expected["high_threshold_register"]
+        assert low == expected["low_threshold_register"]

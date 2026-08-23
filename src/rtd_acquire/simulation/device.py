@@ -61,12 +61,12 @@ class SimulatedAcquisitionDevice:
 
     @property
     def read_count(self) -> int:
-        """Number of attempted scripted reads since construction or reset."""
+        """Number of scripted entries consumed since construction or reset."""
 
         return self._read_count
 
     def reset(self) -> None:
-        """Restart the script and reset the attempted-read counter."""
+        """Restart the script and reset the consumed-entry counter."""
 
         self._index = 0
         self._read_count = 0

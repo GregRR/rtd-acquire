@@ -15,6 +15,10 @@ from dataclasses import dataclass
 from ..core import AcquisitionError, ConfigurationError, Measurement
 from ..transports import SpiBitOrder, SpiDevice
 from ._decode import measurement_from_registers
+from ._thresholds import (
+    encode_high_threshold_register,
+    encode_low_threshold_register,
+)
 from .config import MAX31865Config
 
 _MAX_SPI_CLOCK_HZ = 5_000_000
@@ -34,7 +38,6 @@ _CONFIG_AUTO_FAULT_CYCLE = 0x04
 _CONFIG_CLEAR_FAULTS = 0x02
 _CONFIG_FILTER_50HZ = 0x01
 
-_MAX_ADC_CODE = 0x7FFF
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,7 +68,7 @@ class MAX31865Timing:
 
     @property
     def post_fault_settle_seconds(self) -> float:
-        """Minimum delay after fault detection before restarting the ADC."""
+        """Minimum datasheet delay after fault detection before ADC restart."""
 
         return 5.0 * self.input_filter_time_constant_seconds + 0.001
 
@@ -143,32 +146,18 @@ class MAX31865:
         return value
 
     def _write_thresholds(self) -> None:
-        high = self._encode_high_threshold(self._config.high_fault_threshold_ohms)
-        low = self._encode_low_threshold(self._config.low_fault_threshold_ohms)
+        high = encode_high_threshold_register(
+            self._config.high_fault_threshold_ohms,
+            self._config.reference_resistance_ohms,
+        )
+        low = encode_low_threshold_register(
+            self._config.low_fault_threshold_ohms,
+            self._config.reference_resistance_ohms,
+        )
         self._write_registers(
             _HIGH_THRESHOLD_WRITE,
             high.to_bytes(2, "big") + low.to_bytes(2, "big"),
         )
-
-    def _encode_high_threshold(self, resistance_ohms: float | None) -> int:
-        if resistance_ohms is None:
-            return 0xFFFF
-        raw_code = math.ceil(
-            resistance_ohms
-            / self._config.reference_resistance_ohms
-            * (_MAX_ADC_CODE + 1)
-        )
-        return min(raw_code, _MAX_ADC_CODE) << 1
-
-    def _encode_low_threshold(self, resistance_ohms: float | None) -> int:
-        if resistance_ohms is None:
-            return 0x0000
-        raw_code = math.floor(
-            resistance_ohms
-            / self._config.reference_resistance_ohms
-            * (_MAX_ADC_CODE + 1)
-        )
-        return max(raw_code, 0) << 1
 
     def _write_config(self, value: int) -> None:
         self._write_registers(_CONFIG_WRITE, bytes((value,)))

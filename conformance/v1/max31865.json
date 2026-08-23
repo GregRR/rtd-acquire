@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "device": "max31865",
+  "operation": "measurement_decode",
   "vectors": [
     {
       "id": "max31865-quarter-scale-ok",

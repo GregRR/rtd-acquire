@@ -3,7 +3,13 @@
   "vector_sets": [
     {
       "device": "max31865",
+      "operation": "measurement_decode",
       "path": "max31865.json"
+    },
+    {
+      "device": "max31865",
+      "operation": "threshold_encoding",
+      "path": "max31865_threshold_encoding.json"
     }
   ]
 }

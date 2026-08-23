@@ -3,19 +3,22 @@
 Version 1 uses UTF-8 JSON and is intended to be readable by Python, C-side host
 test harnesses, and other future implementations.
 
-`manifest.json` lists the available vector sets. Each vector-set file contains:
+`manifest.json` lists the available vector sets. Each manifest entry identifies
+a device, an `operation`, and the vector-set path. Each vector-set file contains:
 
 - `schema_version` — integer format version; currently `1`;
 - `device` — stable device-family identifier;
+- `operation` — the language-neutral behavior exercised by that vector set;
 - `vectors` — ordered deterministic cases.
 
-Each vector contains:
+Every vector contains a stable `id`, a short `description`, public
+`configuration`, and operation-specific expected behavior. Version 1 currently
+defines two MAX31865 operations:
 
-- `id` — unique stable case identifier within the repository;
-- `description` — short human-readable purpose;
-- `configuration` — public, language-neutral acquisition configuration;
-- `native_input` — raw device/register state presented to the driver/emulator;
-- `expected` — normalized `Measurement` semantics.
+- `measurement_decode` — raw device/register state to normalized `Measurement`;
+- `threshold_encoding` — public threshold configuration to native threshold
+  registers, including configuration rejection when directional rounding cannot
+  be preserved.
 
 The expected measurement contains:
 
@@ -35,15 +38,16 @@ combined vendor identifiers must not be invented.
 
 ## Numeric comparison
 
-Numeric values in vectors are reference values, not universal bit-for-bit
+Floating-point values in vectors are reference values, not universal bit-for-bit
 requirements. A conformance runner selects the numeric acceptance profile. The
 initial Python implementation uses binary64 arithmetic; the later embedded C
 implementation may use binary32. Acceptance profiles will be frozen before C
-cross-language conformance is declared complete.
+cross-language conformance is declared complete. Integer register outcomes and
+configuration-error outcomes are exact semantic requirements.
 
-## MAX31865 native input
+## MAX31865 measurement-decode vectors
 
-The initial MAX31865 vectors use two native fields:
+The MAX31865 `measurement_decode` vectors use two native fields:
 
 - `rtd_register` — the complete 16-bit value formed by registers `01h` and
   `02h`, including the RTD-LSB fault-summary bit;
@@ -59,3 +63,20 @@ R_RTD = (rtd_register >> 1) / 32768 * R_REF
 The low fault-summary bit is evidence that one or more native faults were
 latched; normalized diagnostics are derived from the specific Fault Status
 register bits rather than duplicating the summary bit as another diagnostic.
+
+## MAX31865 threshold-encoding vectors
+
+The MAX31865 `threshold_encoding` vectors pin the language-neutral conversion
+from ohm-valued public thresholds to the converter's 16-bit threshold-register
+values. Low thresholds round downward and high thresholds round upward so
+quantization does not move a native threshold inside the caller's requested
+diagnostic-free window.
+
+A high threshold in the final unrepresentable band below `R_REF` cannot preserve
+that upward-rounding guarantee because the 15-bit threshold code has no value
+above 32767. Such a configuration has the expected outcome
+`configuration_error` rather than being silently clamped downward.
+
+Register outcomes use the complete 16-bit register value, including the unused
+least-significant bit position, so implementations do not need to infer whether
+the fixture contains an ADC code or a wire/register value.

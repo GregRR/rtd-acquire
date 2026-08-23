@@ -18,6 +18,7 @@ _RTD_READ = 0x01
 _HIGH_THRESHOLD_WRITE = 0x83
 _FAULT_STATUS_READ = 0x07
 
+_CONFIG_BIAS = 0x80
 _CONFIG_ONE_SHOT = 0x20
 _CONFIG_AUTO_FAULT_CYCLE = 0x04
 _CONFIG_CLEAR_FAULTS = 0x02
@@ -118,8 +119,16 @@ class MAX31865SpiEmulator:
         if value & _CONFIG_CLEAR_FAULTS:
             self._latched_fault_status = 0
         if value & _CONFIG_AUTO_FAULT_CYCLE:
+            if not value & _CONFIG_BIAS:
+                raise AcquisitionError(
+                    "MAX31865 emulator fault cycle requires VBIAS enabled"
+                )
             self._latched_fault_status = self._configured_fault_status
         if value & _CONFIG_ONE_SHOT:
+            if not value & _CONFIG_BIAS:
+                raise AcquisitionError(
+                    "MAX31865 emulator one-shot conversion requires VBIAS enabled"
+                )
             self._conversion_ready = True
 
     def _read(self, address: int, count: int) -> bytes:
