@@ -66,7 +66,8 @@ hardware while proving the core public contracts.
       Pi 5 explicitly unvalidated until tested on physical hardware.
 - [x] Support appropriate 2-/3-/4-wire MAX31865 configurations.
 - [x] Preserve MAX31865 native diagnostic evidence without over-interpreting it.
-- [ ] Add deterministic MAX31865 register/fault emulation.
+- [x] Add deterministic MAX31865 register/fault emulation through the real
+      SPI/driver path.
 - [ ] Add a generic simulated acquisition device.
 - [x] Build shared deterministic MAX31865 conformance vectors and execute them
       against the Python register decoder.

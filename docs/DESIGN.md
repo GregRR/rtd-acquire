@@ -517,6 +517,27 @@ The driver validates that its injected `SpiDevice` uses CPHA=1, MSB-first
 8-bit words, active-low chip select, and a clock no faster than 5 MHz. Either
 CPOL value remains valid. SPI response-shape violations are acquisition errors.
 
+### 5.5 Deterministic MAX31865 SPI emulator
+
+`MAX31865SpiEmulator` is a device-specific deterministic test transport that
+implements the same `SpiDevice` contract consumed by the real driver. It takes
+a native 15-bit RTD code and an optional native D7-D2 Fault Status value, then
+models the register transactions used by the current driver: threshold writes,
+fault clearing, automatic fault-cycle re-latching, one-shot RTD reads, and
+Fault Status reads.
+
+The emulator deliberately accepts native converter state rather than a
+temperature or RTD model. It does not infer why a fault bit is present and does
+not simulate analog settling, noise, temperature, or physical sensor behavior.
+That keeps it useful for exercising the real register/driver path without
+turning a deterministic fake into an unvalidated electrical model.
+
+The fault-clear/fault-cycle distinction is intentional. A configured native
+fault condition is cleared when the driver issues the documented clear command
+and is re-latched when the subsequent automatic fault-detection cycle runs.
+This lets CI exercise the actual driver sequence rather than bypassing it with
+a scripted list of SPI responses.
+
 ## 6. Portable C architecture
 
 The embedded implementation is a portable C core. Arduino/HERO support is a
