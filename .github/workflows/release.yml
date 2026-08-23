@@ -76,13 +76,19 @@ jobs:
       - name: Run mypy
         run: uv run --locked mypy --strict src tests
 
-      - name: Run portable C contract test
+      - name: Run portable C contract tests
         run: |
           cc -std=c11 -Wall -Wextra -Werror -pedantic \
             -I c/include \
             c/tests/test_spi_contract.c \
-            -o /tmp/rtd-acquire-c-contract-tests
-          /tmp/rtd-acquire-c-contract-tests
+            -o /tmp/rtd-acquire-c-spi-contract-test
+          /tmp/rtd-acquire-c-spi-contract-test
+
+          cc -std=c11 -Wall -Wextra -Werror -pedantic \
+            -I c/include \
+            c/tests/test_delay_contract.c \
+            -o /tmp/rtd-acquire-c-delay-contract-test
+          /tmp/rtd-acquire-c-delay-contract-test
 
       - name: Check tracked files for whitespace errors
         run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD

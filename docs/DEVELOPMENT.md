@@ -36,8 +36,14 @@ contract tests directly with a C11 compiler:
 cc -std=c11 -Wall -Wextra -Werror -pedantic \
   -I c/include \
   c/tests/test_spi_contract.c \
-  -o /tmp/rtd-acquire-c-contract-tests
-/tmp/rtd-acquire-c-contract-tests
+  -o /tmp/rtd-acquire-c-spi-contract-test
+/tmp/rtd-acquire-c-spi-contract-test
+
+cc -std=c11 -Wall -Wextra -Werror -pedantic \
+  -I c/include \
+  c/tests/test_delay_contract.c \
+  -o /tmp/rtd-acquire-c-delay-contract-test
+/tmp/rtd-acquire-c-delay-contract-test
 ```
 
 The C gate will expand as the portable implementation grows. It must remain
@@ -60,7 +66,7 @@ for every source commit.
 
 `.github/workflows/ci.yml` runs the Python test suite on every supported Python
 minor version, currently 3.11 through 3.14. The Python 3.14 job also runs Ruff,
-mypy strict, the portable C11 SPI contract test, tracked-file whitespace
+mypy strict, the portable C11 HAL contract tests, tracked-file whitespace
 validation, and a clean-tree check.
 
 The release candidate should pass the same local gates before a tag is created;

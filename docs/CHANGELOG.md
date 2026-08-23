@@ -6,6 +6,11 @@ The first public alpha release is `0.1.0a1`.
 
 ## Unreleased
 
+### Added
+
+- Add a portable C11 blocking-delay HAL with caller-owned context and integral
+  microsecond durations, plus a host-side contract test and CI/release gates.
+
 ## 0.1.0a1 - 2026-08-22
 
 ### Added

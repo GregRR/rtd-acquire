@@ -89,8 +89,11 @@ pre-`0.1.0` gates.
 Goal: implement the same acquisition semantics in portable embedded C and
 validate them independently against Python.
 
+- [x] Define capability-specific C HAL interfaces required by MAX31865.
+  - [x] Use the frozen SPI transaction/settings HAL for converter I/O.
+  - [x] Add a caller-owned blocking microsecond delay HAL for required settling,
+        fault-cycle, and conversion waits.
 - [ ] Define caller-owned C measurement/diagnostic storage.
-- [ ] Define capability-specific C HAL interfaces required by MAX31865.
 - [ ] Implement the MAX31865 driver in portable C without mandatory heap use.
 - [ ] Add an Arduino-compatible HERO platform adapter.
 - [ ] Run shared conformance vectors against Python and C implementations.

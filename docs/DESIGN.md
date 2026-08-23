@@ -618,6 +618,30 @@ Arduino-specific headers. The first contract test compiles and executes with an
 ordinary C11 host compiler so future HERO, STM32, ESP32, RP2040, and Linux
 adapters can implement the same capability.
 
+### 6.2 Portable C delay HAL contract
+
+The MAX31865 core needs one additional platform capability: a blocking relative
+delay. It does not require a wall clock, monotonic timestamp source, timer
+allocation, or a generic GPIO API for the first implementation.
+
+`rtd_acquire_delay_t` therefore contains only caller-owned opaque context and a
+`delay_us` callback. Durations are unsigned integer microseconds rather than
+floating-point seconds so the HAL has a deterministic language- and
+platform-neutral unit and does not force an embedded adapter to provide
+floating-point timing support.
+
+A successful callback return means the requested interval has elapsed; an
+adapter may delay longer but must not return early. The future MAX31865 C driver
+will conservatively round any computed minimum delay upward to whole
+microseconds before calling the HAL. Platform inability to perform the delay is
+reported through the HAL result and remains an API/acquisition-operation error,
+not a device diagnostic.
+
+The delay HAL requires no dynamic allocation or Arduino-specific headers. A
+HERO adapter may implement it with Arduino-compatible timing facilities, while
+desktop tests can inject a fake callback that records requested durations
+without sleeping.
+
 ## 7. Python and C relationship
 
 Python and C are independent implementations of a shared behavioral
@@ -811,7 +835,8 @@ implementation work requires it rather than pre-created speculatively.
 The following should remain explicit design work rather than hidden assumptions:
 
 - exact constructor/configuration shapes for hardware families after MAX31865;
-- exact C HAL callback signatures and fixed diagnostic capacity;
+- fixed C diagnostic capacity and exact HAL signatures for capabilities beyond
+  the frozen SPI and delay interfaces;
 - exact binary64/binary32 conformance tolerances;
 - initial Python version floor before the first public release (the starter
   scaffold provisionally aligns with `rtd-sensor` at Python >=3.11);
