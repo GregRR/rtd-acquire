@@ -1,5 +1,11 @@
 # rtd-acquire
 
+[![PyPI version](https://img.shields.io/pypi/v/rtd-acquire.svg)](https://pypi.org/project/rtd-acquire/)
+[![Python versions](https://img.shields.io/pypi/pyversions/rtd-acquire.svg)](https://pypi.org/project/rtd-acquire/)
+[![CI](https://github.com/GregRR/rtd-acquire/actions/workflows/ci.yml/badge.svg)](https://github.com/GregRR/rtd-acquire/actions/workflows/ci.yml)
+[![License](https://img.shields.io/pypi/l/rtd-acquire.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://gregrr.github.io/rtd-acquire/)
+
 `rtd-acquire` is a hardware-agnostic acquisition layer for resistance
 temperature detectors (RTDs). Its job is to obtain the best trustworthy
 estimate of an RTD element's resistance from real or simulated acquisition
@@ -7,7 +13,8 @@ hardware and report acquisition-level diagnostics.
 
 It intentionally stops at resistance. RTD characteristic interpretation,
 resistance-to-temperature conversion, tolerance, model calibration, and
-model-level uncertainty belong in `rtd-sensor`.
+model-level uncertainty belong in
+[`rtd-sensor`](https://github.com/GregRR/rtd-sensor).
 
 ```text
 physical RTD
@@ -35,7 +42,8 @@ industrial digital interfaces, and configurable custom acquisition circuits.
 
 ## Installation
 
-`rtd-acquire` requires Python 3.11 or later. While the project is in alpha,
+`rtd-acquire` requires Python 3.11 or later and is published on
+[PyPI](https://pypi.org/project/rtd-acquire/). While the project is in alpha,
 install the latest prerelease explicitly:
 
 ```sh

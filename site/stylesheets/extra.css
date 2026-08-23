@@ -1,0 +1,51 @@
+/* Learn rtd-acquire site customizations.
+ *
+ * Keep project-specific visual changes here rather than editing generated
+ * files under site/.
+ */
+
+:root > * {
+  --rtd-primary: #0b7285;
+  --rtd-primary-hover: #075766;
+  --rtd-docs: #6f42c1;
+  --rtd-docs-hover: #59359a;
+}
+
+/*
+ * Teal is reserved for RTD Playground / experiment calls to action across the
+ * RTD documentation sites. Keep explicit colors for reliable text contrast.
+ */
+.md-typeset .md-button--primary {
+  color: #fff;
+  background-color: var(--rtd-primary);
+  border-color: var(--rtd-primary);
+}
+.md-typeset .md-button--primary a {
+  color: #fff;
+}
+.md-typeset .md-button--primary:is(:hover, :focus) {
+  color: #fff;
+  background-color: var(--rtd-primary-hover);
+  border-color: var(--rtd-primary-hover);
+}
+.md-typeset .md-button--primary:is(:hover, :focus) a {
+  color: #fff;
+}
+
+/* Purple is reserved for full-documentation calls to action. */
+.md-typeset .md-button--docs {
+  color: #fff;
+  background-color: var(--rtd-docs);
+  border-color: var(--rtd-docs);
+}
+.md-typeset .md-button--docs a {
+  color: #fff;
+}
+.md-typeset .md-button--docs:is(:hover, :focus) {
+  color: #fff;
+  background-color: var(--rtd-docs-hover);
+  border-color: var(--rtd-docs-hover);
+}
+.md-typeset .md-button--docs:is(:hover, :focus) a {
+  color: #fff;
+}
