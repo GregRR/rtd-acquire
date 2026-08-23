@@ -68,6 +68,30 @@ SPI must first be enabled in Raspberry Pi OS. The implementation targets the
 same Linux interface on Raspberry Pi 4 and 5; physical validation is currently
 pending on Pi 4 and has not yet been performed on Pi 5.
 
+## Deterministic simulation
+
+Applications can exercise the same `AcquisitionDevice` contract without
+hardware by replaying validated measurements and explicit acquisition failures:
+
+```python
+from rtd_acquire import Measurement
+from rtd_acquire.simulation import SimulatedAcquisitionDevice
+
+simulated = SimulatedAcquisitionDevice(
+    [
+        Measurement(resistance_ohms=100.0),
+        Measurement(resistance_ohms=101.0, standard_uncertainty_ohms=0.02),
+    ],
+    repeat=True,
+)
+
+measurement = simulated.read()
+```
+
+This generic simulator works at the measurement boundary. The separate
+`MAX31865SpiEmulator` exercises MAX31865 register/SPI behavior through the real
+driver. Neither simulator performs RTD temperature-model interpretation.
+
 See:
 
 - [DESIGN.md](docs/DESIGN.md) — architecture and project contracts

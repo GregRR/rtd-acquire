@@ -538,6 +538,29 @@ and is re-latched when the subsequent automatic fault-detection cycle runs.
 This lets CI exercise the actual driver sequence rather than bypassing it with
 a scripted list of SPI responses.
 
+### 5.6 Generic simulated acquisition device
+
+`SimulatedAcquisitionDevice` operates at the public `AcquisitionDevice` layer
+rather than pretending to be any particular converter or transport. It replays
+a deterministic non-empty script whose entries are either validated
+`Measurement` objects or explicit `SimulatedAcquisitionFailure` records.
+
+A measurement entry is returned unchanged, preserving its resistance,
+diagnostics, and quantified acquisition uncertainty. A simulated acquisition
+failure raises `AcquisitionError` and then advances the script, matching the
+same operation-error boundary used by real drivers. Reading beyond a finite
+script raises `AcquisitionError` by default; callers may request deterministic
+repetition of the entire script. The simulator can also be reset to its first
+entry.
+
+This generic simulator is complementary to `MAX31865SpiEmulator`: the latter
+exercises the real device driver through native register/SPI behavior, while
+the former gives applications a hardware-free acquisition source without any
+device emulation. Neither layer simulates an RTD temperature model or physical
+process. Future noise, drift, clipping, or other acquisition-behavior models may
+build on this boundary, but stochastic behavior should be explicitly controlled
+and reproducible rather than silently introduced into the base simulator.
+
 ## 6. Portable C architecture
 
 The embedded implementation is a portable C core. Arduino/HERO support is a

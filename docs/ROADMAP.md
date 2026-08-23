@@ -68,7 +68,8 @@ hardware while proving the core public contracts.
 - [x] Preserve MAX31865 native diagnostic evidence without over-interpreting it.
 - [x] Add deterministic MAX31865 register/fault emulation through the real
       SPI/driver path.
-- [ ] Add a generic simulated acquisition device.
+- [x] Add a generic deterministic simulated acquisition device that can
+      replay measurements and explicit acquisition-operation failures.
 - [x] Build shared deterministic MAX31865 conformance vectors and execute them
       against the Python register decoder.
 - [ ] Validate with real Pt100 hardware and known resistance references.
