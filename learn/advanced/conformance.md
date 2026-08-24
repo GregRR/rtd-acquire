@@ -14,8 +14,19 @@ For the current MAX31865 work, vectors can describe operations such as:
 - native measurement/register decoding; and
 - resistance-threshold encoding.
 
-A Python implementation and a future C implementation can consume the same
-cases and be compared against the same expected semantics.
+Python and C consume the same threshold-encoding cases and are compared against
+the same exact register outputs. Measurement-decode vectors still execute only
+against Python until the C native decoder is implemented.
+
+## Portable C threshold conformance
+
+**Introduced in:** `rtd-acquire 0.2.0`
+
+The threshold vector family is the first active cross-language conformance
+gate. It covers directional rounding, zero-ohm low thresholds, the highest
+representable high threshold, and rejection of the unrepresentable top band.
+Because the observable outputs are exact 16-bit register values, this family
+does not need the later binary64/binary32 resistance tolerance profile.
 
 ## What conformance does not prove
 

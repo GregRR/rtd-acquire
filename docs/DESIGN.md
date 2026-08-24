@@ -685,6 +685,33 @@ The mutable initialized/reset state is assembly storage, not itself a completed
 valid `Measurement`; a driver fills it and returns only a semantically valid
 result or a separate execution/storage error.
 
+### 6.4 Portable C MAX31865 configuration layer
+
+The first MAX31865 C implementation slice is pure device logic with no HAL side
+effects. `rtd_acquire_max31865_config_t` mirrors the electrical facts in the
+Python `MAX31865Config` contract using explicit presence flags for optional
+thresholds. It validates the same reference-resistance range, 2-/3-/4-wire
+topologies, 50/60 Hz filter choices, threshold ordering, and high-threshold
+representability rule.
+
+The layer also derives the static MAX31865 configuration bits for three-wire
+compensation and 50 Hz filtering. Operational bits such as BIAS, one-shot,
+fault-cycle control, and fault clearing remain the responsibility of the later
+acquisition-sequencing slice rather than being stored as static configuration.
+
+Threshold encoding preserves the shared directional rule: low thresholds round
+downward and high thresholds round upward so quantization cannot move a native
+threshold inside the caller's requested diagnostic-free window. A high
+threshold in the final unrepresentable band below `R_REF` is rejected rather
+than clamped downward. Disabled thresholds use the device defaults `0x0000`
+(low) and `0xFFFF` (high).
+
+This threshold behavior is exact at the 16-bit register-output boundary, so the
+existing language-neutral threshold vectors can execute against both Python and
+C without waiting for a floating-point resistance tolerance profile. Numeric
+tolerances remain required for later measurement-decoding comparisons where
+Python binary64 and embedded-oriented C `float` values may differ.
+
 ## 7. Python and C relationship
 
 Python and C are independent implementations of a shared behavioral

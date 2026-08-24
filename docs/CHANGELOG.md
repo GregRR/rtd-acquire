@@ -8,6 +8,9 @@ The first public alpha release is `0.1.0a1`.
 
 ### Added
 
+- Add the first portable C MAX31865 layer with configuration validation,
+  static configuration-byte encoding, directional threshold-register encoding,
+  and shared threshold-vector execution against both Python and C.
 - Add caller-owned portable C `Measurement`/`Diagnostic` result storage,
   derived status and invariant validation without a project-wide fixed
   diagnostic-capacity limit.

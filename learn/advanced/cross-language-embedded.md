@@ -36,5 +36,8 @@ targets will prefer or default to binary32. The project therefore treats
 numeric acceptance as an explicit conformance topic rather than assuming
 bit-for-bit equality across every target.
 
-Cross-language claims should be made feature-by-feature as the C implementation
-actually consumes the corresponding shared vectors.
+Cross-language claims are made feature-by-feature as the C implementation
+actually consumes the corresponding shared vectors. MAX31865 threshold-register
+encoding is the first vector family executed against both Python and C and has
+exact integer register outputs. Measurement decoding remains pending and will use
+explicit numeric tolerances for resistance values.

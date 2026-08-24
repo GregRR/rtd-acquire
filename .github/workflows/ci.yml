@@ -67,6 +67,12 @@ jobs:
             -o /tmp/rtd-acquire-c-core-contract-test
           /tmp/rtd-acquire-c-core-contract-test
 
+          cc -std=c11 -Wall -Wextra -Werror -pedantic \
+            -I c/include \
+            c/src/max31865.c c/tests/test_max31865_config.c \
+            -o /tmp/rtd-acquire-c-max31865-config-test
+          /tmp/rtd-acquire-c-max31865-config-test
+
       - name: Check tracked files for whitespace errors
         if: matrix.python-version == '3.14'
         run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD

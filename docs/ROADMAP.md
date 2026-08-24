@@ -95,8 +95,14 @@ validate them independently against Python.
         fault-cycle, and conversion waits.
 - [x] Define caller-owned C measurement/diagnostic storage.
 - [ ] Implement the MAX31865 driver in portable C without mandatory heap use.
+  - [x] Implement configuration validation, static configuration-byte encoding,
+        and directional threshold-register encoding.
+  - [ ] Implement native RTD/fault-register decoding into the C result contract.
+  - [ ] Implement the SPI/delay-driven fault-checked one-shot acquisition sequence.
 - [ ] Add an Arduino-compatible HERO platform adapter.
 - [ ] Run shared conformance vectors against Python and C implementations.
+  - [x] Run MAX31865 threshold-encoding vectors against both implementations.
+  - [ ] Run MAX31865 measurement-decode vectors against both implementations.
 - [ ] Define binary64/binary32 numeric acceptance profiles.
 - [ ] Perform real-hardware Python/Raspberry Pi vs C/HERO comparison.
 - [ ] Add an optional thin Arduino/C++ convenience wrapper only if it improves

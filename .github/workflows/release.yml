@@ -96,6 +96,12 @@ jobs:
             -o /tmp/rtd-acquire-c-core-contract-test
           /tmp/rtd-acquire-c-core-contract-test
 
+          cc -std=c11 -Wall -Wextra -Werror -pedantic \
+            -I c/include \
+            c/src/max31865.c c/tests/test_max31865_config.c \
+            -o /tmp/rtd-acquire-c-max31865-config-test
+          /tmp/rtd-acquire-c-max31865-config-test
+
       - name: Check tracked files for whitespace errors
         run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD
 
@@ -140,7 +146,12 @@ jobs:
               "pyproject.toml",
               "src/rtd_acquire/py.typed",
               "conformance/v1/manifest.json",
+              "c/include/rtd_acquire/core.h",
+              "c/include/rtd_acquire/delay.h",
+              "c/include/rtd_acquire/max31865.h",
               "c/include/rtd_acquire/spi.h",
+              "c/src/core.c",
+              "c/src/max31865.c",
           }
           missing = sorted(required - names)
           if missing:

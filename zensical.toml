@@ -66,6 +66,7 @@ nav = [
       { "Overview" = "api/c/index.md" },
       { "Core result contracts" = "api/c/core.md" },
       { "HAL interfaces" = "api/c/hal.md" },
+      { "MAX31865" = "api/c/max31865.md" },
     ] },
   ] },
   { "Project" = "project/index.md" },

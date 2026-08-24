@@ -30,6 +30,8 @@ interfaces are not mixed into the Python module reference.
   and native-evidence storage.
 - [HAL interfaces](c/hal.md) — capability-specific SPI and blocking-delay
   contracts.
+- [MAX31865](c/max31865.md) — portable C electrical configuration and threshold
+  register encoding.
 
 !!! note "Development API"
     `0.2.0` is under development. The portable C interfaces documented here are
