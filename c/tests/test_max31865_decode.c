@@ -229,6 +229,36 @@ static void test_reserved_fault_bits_are_ignored(void)
     assert(rtd_acquire_measurement_is_valid(&measurement));
 }
 
+static void test_reserved_fault_bits_are_ignored_with_warning(void)
+{
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_diagnostic_t diagnostics[1];
+    rtd_acquire_native_evidence_t evidence[1];
+    rtd_acquire_measurement_t measurement = make_measurement(
+        diagnostics,
+        1U,
+        evidence,
+        1U
+    );
+
+    assert(
+        rtd_acquire_max31865_measurement_from_registers(
+            &config,
+            0x4001U,
+            0x83U,
+            &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
+    assert(measurement.has_resistance);
+    assert(measurement.resistance_ohms == 107.5F);
+    assert(measurement.diagnostic_count == 1U);
+    assert(
+        diagnostics[0].code
+        == RTD_ACQUIRE_DIAGNOSTIC_CODE_RESISTANCE_HIGH_THRESHOLD
+    );
+    assert(rtd_acquire_measurement_is_valid(&measurement));
+}
+
 static void test_insufficient_storage_is_rejected_without_reset(void)
 {
     rtd_acquire_max31865_config_t config = make_config();
@@ -321,6 +351,7 @@ int main(void)
     test_fault_removes_resistance();
     test_all_known_fault_bits_keep_datasheet_order();
     test_reserved_fault_bits_are_ignored();
+    test_reserved_fault_bits_are_ignored_with_warning();
     test_insufficient_storage_is_rejected_without_reset();
     test_unusable_storage_is_invalid_argument();
     test_invalid_arguments_are_rejected();

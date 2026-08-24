@@ -5,9 +5,12 @@
 #include <stdint.h>
 
 #include "rtd_acquire/core.h"
+#include "rtd_acquire/delay.h"
+#include "rtd_acquire/spi.h"
 
 #define RTD_ACQUIRE_MAX31865_MAX_DIAGNOSTICS 6U
 #define RTD_ACQUIRE_MAX31865_MAX_NATIVE_EVIDENCE 6U
+#define RTD_ACQUIRE_MAX31865_DEFAULT_INPUT_FILTER_TIME_CONSTANT_US 1000U
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,9 +18,9 @@ extern "C" {
 
 /*
  * Public MAX31865 operation results. Configuration errors include invalid
- * electrical configuration and, for the later acquisition sequence,
- * incompatible SPI settings. SPI and delay failures are acquisition-operation
- * failures; insufficient storage is specific to caller-owned C result buffers.
+ * electrical configuration and incompatible SPI settings. SPI and delay
+ * failures are acquisition-operation failures; insufficient storage is
+ * specific to caller-owned C result buffers.
  */
 typedef enum {
     RTD_ACQUIRE_MAX31865_RESULT_OK = 0,
@@ -38,6 +41,11 @@ typedef struct {
     bool has_high_fault_threshold;
     rtd_acquire_real_t high_fault_threshold_ohms;
 } rtd_acquire_max31865_config_t;
+
+/* External input-filter timing policy, expressed without floating-point time. */
+typedef struct {
+    uint32_t input_filter_time_constant_us;
+} rtd_acquire_max31865_timing_t;
 
 /* Return true only when config is a valid static MAX31865 configuration. */
 bool rtd_acquire_max31865_config_is_valid(
@@ -66,6 +74,19 @@ rtd_acquire_max31865_result_t rtd_acquire_max31865_measurement_from_registers(
     const rtd_acquire_max31865_config_t *config,
     uint16_t rtd_register,
     uint8_t fault_status_register,
+    rtd_acquire_measurement_t *measurement
+);
+
+/*
+ * Perform one fault-checked one-shot acquisition through caller-owned SPI and
+ * delay capabilities. The result storage is modified only after device I/O and
+ * bias shutdown complete successfully and native registers are ready to decode.
+ */
+rtd_acquire_max31865_result_t rtd_acquire_max31865_read(
+    const rtd_acquire_spi_t *spi,
+    const rtd_acquire_delay_t *delay,
+    const rtd_acquire_max31865_config_t *config,
+    const rtd_acquire_max31865_timing_t *timing,
     rtd_acquire_measurement_t *measurement
 );
 

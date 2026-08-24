@@ -62,6 +62,12 @@ cc -std=c11 -Wall -Wextra -Werror -pedantic \
   c/src/core.c c/src/max31865.c c/tests/test_max31865_decode.c \
   -o /tmp/rtd-acquire-c-max31865-decode-test
 /tmp/rtd-acquire-c-max31865-decode-test
+
+cc -std=c11 -Wall -Wextra -Werror -pedantic \
+  -I c/include \
+  c/src/core.c c/src/max31865.c c/tests/test_max31865_sequence.c \
+  -o /tmp/rtd-acquire-c-max31865-sequence-test
+/tmp/rtd-acquire-c-max31865-sequence-test
 ```
 
 The C gate will expand as the portable implementation grows. It must remain

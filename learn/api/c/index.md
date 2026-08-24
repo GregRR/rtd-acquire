@@ -18,8 +18,9 @@ The C core is designed around:
   of the core.
 
 The current public C development contracts include the SPI and blocking-delay
-HALs, caller-owned core measurement/diagnostic result storage, and MAX31865
-configuration, threshold-encoding, and native register-decoding layers.
+HALs, caller-owned core measurement/diagnostic result storage, and the portable
+MAX31865 driver: configuration, threshold encoding, native register decoding,
+and fault-checked one-shot acquisition.
 
 Continue with:
 

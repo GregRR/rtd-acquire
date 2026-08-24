@@ -767,6 +767,49 @@ cross-language gate does not define the general numeric acceptance profile. That
 profile remains a separate 0.2 requirement before broader non-exact numeric
 conformance cases are accepted.
 
+### 6.6 Portable C MAX31865 one-shot acquisition sequence
+
+The portable C MAX31865 driver completes the same fault-checked one-shot
+operation defined for Python while consuming only the frozen SPI and blocking-
+delay HALs. `rtd_acquire_max31865_read()` accepts caller-owned SPI, delay,
+configuration, timing, and measurement objects; it allocates no storage.
+
+The C timing policy stores the external input-filter time constant as whole
+microseconds. Callers whose physical time constant is not an integral number of
+microseconds must round upward before supplying it. The driver then requests
+the same conservative minimum delays as Python: 10.5 time constants plus 1 ms
+after enabling VBIAS, 600 us for automatic fault detection, five time constants
+plus 1 ms after fault detection, and 55 ms or 66 ms for 60 Hz or 50 Hz one-shot
+conversion respectively. Half-microsecond results from the 10.5 multiplier are
+rounded upward before reaching the integer delay HAL. Timing values whose
+required waits cannot be represented by `uint32_t` are rejected as configuration
+errors before I/O.
+
+Before the first transfer, the acquisition entry point validates the SPI HAL and
+its effective settings: CPOL must be 0 or 1, CPHA must be 1, clock frequency
+must be greater than zero and no more than 5 MHz, transfers must be MSB-first
+with 8-bit words, and chip select must be active low. Incompatible settings are
+configuration errors rather than SPI I/O failures. Operational register
+addresses and BIAS/one-shot/fault-cycle masks remain private implementation
+constants.
+
+Each read restores threshold registers, enables VBIAS while clearing faults,
+waits for settling, performs automatic fault detection, waits again, triggers
+one conversion, reads the RTD register, conditionally reads Fault Status when
+the RTD fault flag is set, and writes the static base configuration to turn
+VBIAS off before decoding the captured registers.
+
+If SPI or delay execution fails after the driver has started the biased
+sequence, it makes a best-effort write of the static base configuration to turn
+VBIAS off while preserving the original `SPI_IO_ERROR` or `DELAY_ERROR`. A
+failure of the normal final bias-off write is itself `SPI_IO_ERROR`. The caller's
+`Measurement` is not rewritten for SPI, delay, or final-bias-off failures;
+decoding occurs only after I/O and normal bias shutdown complete. If the native
+fault state requires more diagnostics/evidence than the caller supplied, the
+completed I/O operation can still return `INSUFFICIENT_STORAGE`; the decoder
+leaves the previous measurement contents untouched rather than truncating
+evidence.
+
 ## 7. Python and C relationship
 
 Python and C are independent implementations of a shared behavioral

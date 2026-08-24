@@ -94,14 +94,14 @@ validate them independently against Python.
   - [x] Add a caller-owned blocking microsecond delay HAL for required settling,
         fault-cycle, and conversion waits.
 - [x] Define caller-owned C measurement/diagnostic storage.
-- [ ] Implement the MAX31865 driver in portable C without mandatory heap use.
+- [x] Implement the MAX31865 driver in portable C without mandatory heap use.
   - [x] Implement configuration validation, static configuration-byte encoding,
         and directional threshold-register encoding.
   - [x] Implement native RTD/fault-register decoding into the C result contract.
   - [x] Define discriminated MAX31865 C operation results before acquisition
         sequencing instead of collapsing configuration/storage/execution
         failures into one Boolean.
-  - [ ] Implement the SPI/delay-driven fault-checked one-shot acquisition sequence.
+  - [x] Implement the SPI/delay-driven fault-checked one-shot acquisition sequence.
 - [ ] Add an Arduino-compatible HERO platform adapter.
 - [x] Run shared conformance vectors against Python and C implementations.
   - [x] Run MAX31865 threshold-encoding vectors against both implementations.

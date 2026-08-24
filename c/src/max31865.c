@@ -13,6 +13,18 @@
 #define RTD_ACQUIRE_MAX31865_MAX_ADC_CODE 32767U
 #define RTD_ACQUIRE_MAX31865_CONFIG_THREE_WIRE 0x10U
 #define RTD_ACQUIRE_MAX31865_CONFIG_FILTER_50HZ 0x01U
+#define RTD_ACQUIRE_MAX31865_MAX_SPI_CLOCK_HZ 5000000U
+#define RTD_ACQUIRE_MAX31865_CONFIG_WRITE 0x80U
+#define RTD_ACQUIRE_MAX31865_RTD_READ 0x01U
+#define RTD_ACQUIRE_MAX31865_HIGH_THRESHOLD_WRITE 0x83U
+#define RTD_ACQUIRE_MAX31865_FAULT_STATUS_READ 0x07U
+#define RTD_ACQUIRE_MAX31865_CONFIG_BIAS 0x80U
+#define RTD_ACQUIRE_MAX31865_CONFIG_ONE_SHOT 0x20U
+#define RTD_ACQUIRE_MAX31865_CONFIG_AUTO_FAULT_CYCLE 0x04U
+#define RTD_ACQUIRE_MAX31865_CONFIG_CLEAR_FAULTS 0x02U
+#define RTD_ACQUIRE_MAX31865_FAULT_CYCLE_MAX_US 600U
+#define RTD_ACQUIRE_MAX31865_CONVERSION_50HZ_US 66000U
+#define RTD_ACQUIRE_MAX31865_CONVERSION_60HZ_US 55000U
 
 typedef struct {
     uint8_t mask;
@@ -367,4 +379,263 @@ rtd_acquire_max31865_result_t rtd_acquire_max31865_measurement_from_registers(
         return RTD_ACQUIRE_MAX31865_RESULT_INTERNAL_ERROR;
     }
     return RTD_ACQUIRE_MAX31865_RESULT_OK;
+}
+
+static bool rtd_acquire_max31865_spi_settings_are_compatible(
+    const rtd_acquire_spi_settings_t *settings
+)
+{
+    if (settings == NULL) {
+        return false;
+    }
+
+    return settings->clock_polarity <= 1U
+        && settings->clock_phase == 1U
+        && settings->clock_frequency_hz > 0U
+        && settings->clock_frequency_hz <= RTD_ACQUIRE_MAX31865_MAX_SPI_CLOCK_HZ
+        && settings->bit_order == RTD_ACQUIRE_SPI_MSB_FIRST
+        && settings->bits_per_word == 8U
+        && settings->chip_select_active_low;
+}
+
+static rtd_acquire_max31865_result_t rtd_acquire_max31865_timing_delays(
+    const rtd_acquire_max31865_timing_t *timing,
+    uint32_t *bias_settle_us,
+    uint32_t *post_fault_settle_us
+)
+{
+    uint32_t tau;
+    uint32_t half_tau_rounded_up;
+
+    if (timing == NULL || bias_settle_us == NULL
+        || post_fault_settle_us == NULL) {
+        return RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT;
+    }
+
+    tau = timing->input_filter_time_constant_us;
+    half_tau_rounded_up = tau / 2U + tau % 2U;
+
+    if (half_tau_rounded_up > UINT32_MAX - 1000U
+        || tau > (UINT32_MAX - 1000U - half_tau_rounded_up) / 10U
+        || tau > (UINT32_MAX - 1000U) / 5U) {
+        return RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR;
+    }
+
+    *bias_settle_us = 10U * tau + half_tau_rounded_up + 1000U;
+    *post_fault_settle_us = 5U * tau + 1000U;
+    return RTD_ACQUIRE_MAX31865_RESULT_OK;
+}
+
+static rtd_acquire_max31865_result_t rtd_acquire_max31865_spi_transfer(
+    const rtd_acquire_spi_t *spi,
+    const uint8_t *tx,
+    uint8_t *rx,
+    size_t length
+)
+{
+    if (spi->transfer(spi->context, tx, rx, length) != RTD_ACQUIRE_SPI_OK) {
+        return RTD_ACQUIRE_MAX31865_RESULT_SPI_IO_ERROR;
+    }
+    return RTD_ACQUIRE_MAX31865_RESULT_OK;
+}
+
+static rtd_acquire_max31865_result_t rtd_acquire_max31865_write_config(
+    const rtd_acquire_spi_t *spi,
+    uint8_t value
+)
+{
+    const uint8_t tx[2] = {RTD_ACQUIRE_MAX31865_CONFIG_WRITE, value};
+    uint8_t rx[2];
+
+    return rtd_acquire_max31865_spi_transfer(spi, tx, rx, sizeof(tx));
+}
+
+static void rtd_acquire_max31865_best_effort_bias_off(
+    const rtd_acquire_spi_t *spi,
+    uint8_t base_config
+)
+{
+    (void)rtd_acquire_max31865_write_config(spi, base_config);
+}
+
+static rtd_acquire_max31865_result_t rtd_acquire_max31865_delay(
+    const rtd_acquire_delay_t *delay,
+    uint32_t duration_us
+)
+{
+    if (delay->delay_us(delay->context, duration_us) != RTD_ACQUIRE_DELAY_OK) {
+        return RTD_ACQUIRE_MAX31865_RESULT_DELAY_ERROR;
+    }
+    return RTD_ACQUIRE_MAX31865_RESULT_OK;
+}
+
+rtd_acquire_max31865_result_t rtd_acquire_max31865_read(
+    const rtd_acquire_spi_t *spi,
+    const rtd_acquire_delay_t *delay,
+    const rtd_acquire_max31865_config_t *config,
+    const rtd_acquire_max31865_timing_t *timing,
+    rtd_acquire_measurement_t *measurement
+)
+{
+    rtd_acquire_max31865_result_t result;
+    uint8_t base_config;
+    uint16_t high_threshold;
+    uint16_t low_threshold;
+    uint32_t bias_settle_us;
+    uint32_t post_fault_settle_us;
+    uint32_t conversion_us;
+    uint8_t threshold_tx[5];
+    uint8_t threshold_rx[5];
+    uint8_t rtd_tx[3] = {RTD_ACQUIRE_MAX31865_RTD_READ, 0U, 0U};
+    uint8_t rtd_rx[3];
+    uint8_t fault_tx[2] = {RTD_ACQUIRE_MAX31865_FAULT_STATUS_READ, 0U};
+    uint8_t fault_rx[2];
+    uint16_t rtd_register;
+    uint8_t fault_status_register = 0U;
+
+    if (spi == NULL || delay == NULL || config == NULL || timing == NULL
+        || measurement == NULL || spi->transfer == NULL
+        || delay->delay_us == NULL) {
+        return RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT;
+    }
+    if (!rtd_acquire_max31865_spi_settings_are_compatible(&spi->settings)) {
+        return RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR;
+    }
+
+    result = rtd_acquire_max31865_measurement_storage_result(
+        measurement,
+        0U,
+        0U
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        return result;
+    }
+    result = rtd_acquire_max31865_base_config_byte(config, &base_config);
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        return result;
+    }
+    result = rtd_acquire_max31865_encode_threshold_registers(
+        config,
+        &high_threshold,
+        &low_threshold
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        return result;
+    }
+    result = rtd_acquire_max31865_timing_delays(
+        timing,
+        &bias_settle_us,
+        &post_fault_settle_us
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        return result;
+    }
+
+    conversion_us = config->filter_frequency_hz == 50U
+        ? RTD_ACQUIRE_MAX31865_CONVERSION_50HZ_US
+        : RTD_ACQUIRE_MAX31865_CONVERSION_60HZ_US;
+
+    threshold_tx[0] = RTD_ACQUIRE_MAX31865_HIGH_THRESHOLD_WRITE;
+    threshold_tx[1] = (uint8_t)(high_threshold >> 8U);
+    threshold_tx[2] = (uint8_t)high_threshold;
+    threshold_tx[3] = (uint8_t)(low_threshold >> 8U);
+    threshold_tx[4] = (uint8_t)low_threshold;
+    result = rtd_acquire_max31865_spi_transfer(
+        spi,
+        threshold_tx,
+        threshold_rx,
+        sizeof(threshold_tx)
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        return result;
+    }
+
+    result = rtd_acquire_max31865_write_config(
+        spi,
+        (uint8_t)(base_config | RTD_ACQUIRE_MAX31865_CONFIG_BIAS
+            | RTD_ACQUIRE_MAX31865_CONFIG_CLEAR_FAULTS)
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+        return result;
+    }
+
+    result = rtd_acquire_max31865_delay(delay, bias_settle_us);
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+        return result;
+    }
+    result = rtd_acquire_max31865_write_config(
+        spi,
+        (uint8_t)(base_config | RTD_ACQUIRE_MAX31865_CONFIG_BIAS
+            | RTD_ACQUIRE_MAX31865_CONFIG_AUTO_FAULT_CYCLE)
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+        return result;
+    }
+    result = rtd_acquire_max31865_delay(
+        delay,
+        RTD_ACQUIRE_MAX31865_FAULT_CYCLE_MAX_US
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+        return result;
+    }
+    result = rtd_acquire_max31865_delay(delay, post_fault_settle_us);
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+        return result;
+    }
+    result = rtd_acquire_max31865_write_config(
+        spi,
+        (uint8_t)(base_config | RTD_ACQUIRE_MAX31865_CONFIG_BIAS
+            | RTD_ACQUIRE_MAX31865_CONFIG_ONE_SHOT)
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+        return result;
+    }
+    result = rtd_acquire_max31865_delay(delay, conversion_us);
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+        return result;
+    }
+    result = rtd_acquire_max31865_spi_transfer(
+        spi,
+        rtd_tx,
+        rtd_rx,
+        sizeof(rtd_tx)
+    );
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+        return result;
+    }
+
+    rtd_register = (uint16_t)((uint16_t)rtd_rx[1] << 8U) | rtd_rx[2];
+    if ((rtd_register & 0x0001U) != 0U) {
+        result = rtd_acquire_max31865_spi_transfer(
+            spi,
+            fault_tx,
+            fault_rx,
+            sizeof(fault_tx)
+        );
+        if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+            rtd_acquire_max31865_best_effort_bias_off(spi, base_config);
+            return result;
+        }
+        fault_status_register = fault_rx[1];
+    }
+
+    result = rtd_acquire_max31865_write_config(spi, base_config);
+    if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        return result;
+    }
+
+    return rtd_acquire_max31865_measurement_from_registers(
+        config,
+        rtd_register,
+        fault_status_register,
+        measurement
+    );
 }

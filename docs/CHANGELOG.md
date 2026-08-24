@@ -8,6 +8,9 @@ The first public alpha release is `0.1.0a1`.
 
 ### Added
 
+- Complete the portable C MAX31865 driver with a fault-checked one-shot
+  SPI/delay acquisition sequence, integer-microsecond timing policy, SPI-setting
+  validation, and best-effort VBIAS shutdown on execution failure.
 - Add portable C MAX31865 native RTD/fault-register decoding into the shared
   caller-owned result contract, and execute the existing measurement-decode
   conformance vectors against both Python and C.

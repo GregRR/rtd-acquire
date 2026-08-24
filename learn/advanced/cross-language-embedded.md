@@ -29,6 +29,11 @@ native-evidence arrays. Capacity is selected by the caller instead of being a
 single library-wide maximum, allowing constrained targets to reserve only the
 storage they need.
 
+The portable MAX31865 driver now composes those capabilities directly: SPI and
+blocking delay are injected by the platform adapter, while configuration, timing,
+register sequencing, VBIAS cleanup, and native decoding remain platform-neutral
+C11 code.
+
 ## Numeric differences
 
 Python normally evaluates these paths with binary64 floating point. Many MCU
