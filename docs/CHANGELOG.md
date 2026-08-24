@@ -23,6 +23,13 @@ The first public alpha release is `0.1.0a1`.
   contracts, and annotate documented features/APIs with their introduction
   versions.
 
+### Changed
+
+- Replace ambiguous Boolean returns from public C MAX31865 operations with a
+  discriminated result enum that separates invalid arguments, configuration,
+  caller-storage, SPI, delay, and internal failures; keep the pure
+  `config_is_valid` query Boolean.
+
 ## 0.1.0a1 - 2026-08-22
 
 ### Added

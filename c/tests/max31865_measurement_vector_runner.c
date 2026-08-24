@@ -123,12 +123,12 @@ int main(int argc, char **argv)
         evidence,
         RTD_ACQUIRE_MAX31865_MAX_NATIVE_EVIDENCE
     );
-    if (!rtd_acquire_max31865_measurement_from_registers(
-        &config,
-        rtd_register,
-        fault_status_register,
-        &measurement
-    )) {
+    if (rtd_acquire_max31865_measurement_from_registers(
+            &config,
+            rtd_register,
+            fault_status_register,
+            &measurement
+        ) != RTD_ACQUIRE_MAX31865_RESULT_OK) {
         puts("decode_error");
         return 0;
     }

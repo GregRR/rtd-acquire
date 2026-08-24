@@ -65,7 +65,10 @@ assembly storage, not a completed valid measurement.
 - `RTD_ACQUIRE_MEASUREMENT_STATUS_FAULT`
 
 `rtd_acquire_measurement_status()` derives status from the diagnostics. It is
-not independently stored in the result.
+not independently stored in the result. A null pointer is not a valid completed
+measurement; the function nevertheless returns `OK` for null as a defensive
+fallback so accidental null input does not cause undefined behavior. Callers
+must use valid initialized measurement objects for semantic status decisions.
 
 ### `rtd_acquire_measurement_is_valid()`
 

@@ -14,6 +14,7 @@ typedef enum {
     RTD_ACQUIRE_SPI_LSB_FIRST = 1
 } rtd_acquire_spi_bit_order_t;
 
+/* Effective settings for one caller-owned SPI capability. */
 typedef struct {
     uint8_t clock_polarity;
     uint8_t clock_phase;
@@ -28,6 +29,11 @@ typedef enum {
     RTD_ACQUIRE_SPI_IO_ERROR = 1
 } rtd_acquire_spi_result_t;
 
+/*
+ * Perform one complete full-duplex transaction. The adapter owns chip-select
+ * assertion/deassertion for the transaction and writes exactly length rx bytes
+ * when it returns RTD_ACQUIRE_SPI_OK.
+ */
 typedef rtd_acquire_spi_result_t (*rtd_acquire_spi_transfer_fn)(
     void *context,
     const uint8_t *tx,
@@ -35,6 +41,7 @@ typedef rtd_acquire_spi_result_t (*rtd_acquire_spi_transfer_fn)(
     size_t length
 );
 
+/* Caller-owned SPI capability and non-owning platform context. */
 typedef struct {
     void *context;
     rtd_acquire_spi_settings_t settings;

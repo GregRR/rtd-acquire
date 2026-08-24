@@ -201,6 +201,14 @@ static void test_reset_preserves_storage(void)
     assert(measurement.native_evidence_capacity == 3U);
 }
 
+static void test_null_status_is_defensive(void)
+{
+    assert(
+        rtd_acquire_measurement_status(NULL)
+        == RTD_ACQUIRE_MEASUREMENT_STATUS_OK
+    );
+}
+
 static void test_invalid_measurements_are_rejected(void)
 {
     rtd_acquire_diagnostic_t diagnostics[2];
@@ -347,6 +355,7 @@ int main(void)
     test_fault_status_wins_over_warning();
     test_composite_native_evidence();
     test_reset_preserves_storage();
+    test_null_status_is_defensive();
     test_invalid_measurements_are_rejected();
     test_fault_cannot_keep_resistance_or_uncertainty();
     test_duplicate_diagnostic_codes_are_rejected();

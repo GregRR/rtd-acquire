@@ -25,7 +25,9 @@ The portable MAX31865 C layer is implemented in
 `include/rtd_acquire/max31865.h` and `src/max31865.c`. It validates the public
 electrical configuration, encodes the static configuration byte and directional
 threshold registers, and decodes native RTD/fault registers into the shared
-caller-owned result contract. Both existing language-neutral MAX31865 vector
-families now execute against Python and C. The SPI/delay acquisition sequence,
-general binary64/binary32 acceptance profile, and HERO platform adapter remain
-0.2 work.
+caller-owned result contract. Public MAX31865 operations use a discriminated
+result enum so invalid arguments, configuration errors, insufficient storage,
+and later SPI/delay failures are not collapsed into one Boolean. Both existing
+language-neutral MAX31865 vector families execute against Python and C. The
+SPI/delay acquisition sequence, general binary64/binary32 acceptance profile,
+and HERO platform adapter remain 0.2 work.

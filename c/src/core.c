@@ -82,6 +82,10 @@ rtd_acquire_measurement_status_t rtd_acquire_measurement_status(
 {
     size_t index;
 
+    if (measurement == NULL) {
+        return RTD_ACQUIRE_MEASUREMENT_STATUS_OK;
+    }
+
     for (index = 0U; index < measurement->diagnostic_count; ++index) {
         if (measurement->diagnostics[index].severity
             == RTD_ACQUIRE_DIAGNOSTIC_SEVERITY_FAULT) {

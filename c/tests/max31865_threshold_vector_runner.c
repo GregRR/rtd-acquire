@@ -71,13 +71,21 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    if (!rtd_acquire_max31865_encode_threshold_registers(
-        &config,
-        &high,
-        &low
-    )) {
-        puts("configuration_error");
-        return 0;
+    {
+        const rtd_acquire_max31865_result_t result =
+            rtd_acquire_max31865_encode_threshold_registers(
+                &config,
+                &high,
+                &low
+            );
+        if (result == RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR) {
+            puts("configuration_error");
+            return 0;
+        }
+        if (result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+            puts("operation_error");
+            return 0;
+        }
     }
 
     printf("registers %u %u\n", (unsigned int)high, (unsigned int)low);

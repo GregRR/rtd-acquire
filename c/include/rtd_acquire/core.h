@@ -94,6 +94,7 @@ typedef struct {
     size_t native_evidence_capacity;
 } rtd_acquire_measurement_t;
 
+/* Bind caller-owned diagnostic/evidence storage and reset used fields. */
 void rtd_acquire_measurement_init(
     rtd_acquire_measurement_t *measurement,
     rtd_acquire_diagnostic_t *diagnostics,
@@ -102,12 +103,18 @@ void rtd_acquire_measurement_init(
     size_t native_evidence_capacity
 );
 
+/* Clear result fields and counts while preserving bound caller storage. */
 void rtd_acquire_measurement_reset(rtd_acquire_measurement_t *measurement);
 
+/* Return true only for a completed measurement satisfying the core contract. */
 bool rtd_acquire_measurement_is_valid(
     const rtd_acquire_measurement_t *measurement
 );
 
+/*
+ * Derive status from diagnostic severity. NULL returns OK only as a defensive
+ * fallback; NULL is never a valid completed measurement.
+ */
 rtd_acquire_measurement_status_t rtd_acquire_measurement_status(
     const rtd_acquire_measurement_t *measurement
 );

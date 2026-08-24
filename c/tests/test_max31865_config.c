@@ -23,17 +23,26 @@ static void test_valid_configuration_and_base_byte(void)
     uint8_t value = 0xFFU;
 
     assert(rtd_acquire_max31865_config_is_valid(&config));
-    assert(rtd_acquire_max31865_base_config_byte(&config, &value));
+    assert(
+        rtd_acquire_max31865_base_config_byte(&config, &value)
+        == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
     assert(value == 0x10U);
 
     config.wire_count = 4U;
     config.filter_frequency_hz = 50U;
-    assert(rtd_acquire_max31865_base_config_byte(&config, &value));
+    assert(
+        rtd_acquire_max31865_base_config_byte(&config, &value)
+        == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
     assert(value == 0x01U);
 
     config.wire_count = 2U;
     config.filter_frequency_hz = 60U;
-    assert(rtd_acquire_max31865_base_config_byte(&config, &value));
+    assert(
+        rtd_acquire_max31865_base_config_byte(&config, &value)
+        == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
     assert(value == 0x00U);
 }
 
@@ -99,11 +108,13 @@ static void test_threshold_encoding(void)
     uint16_t high = 0U;
     uint16_t low = UINT16_MAX;
 
-    assert(rtd_acquire_max31865_encode_threshold_registers(
-        &config,
-        &high,
-        &low
-    ));
+    assert(
+        rtd_acquire_max31865_encode_threshold_registers(
+            &config,
+            &high,
+            &low
+        ) == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
     assert(high == UINT16_MAX);
     assert(low == 0U);
 
@@ -112,21 +123,25 @@ static void test_threshold_encoding(void)
     config.low_fault_threshold_ohms = 50.001F;
     config.has_high_fault_threshold = true;
     config.high_fault_threshold_ohms = 100.001F;
-    assert(rtd_acquire_max31865_encode_threshold_registers(
-        &config,
-        &high,
-        &low
-    ));
+    assert(
+        rtd_acquire_max31865_encode_threshold_registers(
+            &config,
+            &high,
+            &low
+        ) == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
     assert(high == 16386U);
     assert(low == 8192U);
 
     config.low_fault_threshold_ohms = 0.0F;
     config.high_fault_threshold_ohms = 100.0F;
-    assert(rtd_acquire_max31865_encode_threshold_registers(
-        &config,
-        &high,
-        &low
-    ));
+    assert(
+        rtd_acquire_max31865_encode_threshold_registers(
+            &config,
+            &high,
+            &low
+        ) == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
     assert(high == 16384U);
     assert(low == 0U);
 }
@@ -139,20 +154,24 @@ static void test_high_threshold_top_band(void)
 
     config.has_high_fault_threshold = true;
     config.high_fault_threshold_ohms = 429.98687744140625F;
-    assert(rtd_acquire_max31865_encode_threshold_registers(
-        &config,
-        &high,
-        &low
-    ));
+    assert(
+        rtd_acquire_max31865_encode_threshold_registers(
+            &config,
+            &high,
+            &low
+        ) == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
     assert(high == 65534U);
 
     config.high_fault_threshold_ohms = 429.99F;
     assert(!rtd_acquire_max31865_config_is_valid(&config));
-    assert(!rtd_acquire_max31865_encode_threshold_registers(
-        &config,
-        &high,
-        &low
-    ));
+    assert(
+        rtd_acquire_max31865_encode_threshold_registers(
+            &config,
+            &high,
+            &low
+        ) == RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR
+    );
 }
 
 static void test_null_arguments_are_rejected(void)
@@ -163,23 +182,32 @@ static void test_null_arguments_are_rejected(void)
     uint16_t low = 0U;
 
     assert(!rtd_acquire_max31865_config_is_valid(NULL));
-    assert(!rtd_acquire_max31865_base_config_byte(NULL, &byte));
-    assert(!rtd_acquire_max31865_base_config_byte(&config, NULL));
-    assert(!rtd_acquire_max31865_encode_threshold_registers(
-        NULL,
-        &high,
-        &low
-    ));
-    assert(!rtd_acquire_max31865_encode_threshold_registers(
-        &config,
-        NULL,
-        &low
-    ));
-    assert(!rtd_acquire_max31865_encode_threshold_registers(
-        &config,
-        &high,
-        NULL
-    ));
+    assert(
+        rtd_acquire_max31865_base_config_byte(NULL, &byte)
+        == RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT
+    );
+    assert(
+        rtd_acquire_max31865_base_config_byte(&config, NULL)
+        == RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT
+    );
+    assert(
+        rtd_acquire_max31865_encode_threshold_registers(NULL, &high, &low)
+        == RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT
+    );
+    assert(
+        rtd_acquire_max31865_encode_threshold_registers(&config, NULL, &low)
+        == RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT
+    );
+    assert(
+        rtd_acquire_max31865_encode_threshold_registers(&config, &high, NULL)
+        == RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT
+    );
+
+    config.reference_resistance_ohms = 349.0F;
+    assert(
+        rtd_acquire_max31865_base_config_byte(&config, &byte)
+        == RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR
+    );
 }
 
 int main(void)

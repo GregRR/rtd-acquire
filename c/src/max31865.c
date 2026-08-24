@@ -80,26 +80,30 @@ _Static_assert(
     "MAX31865 native evidence capacity must match diagnostic capacity"
 );
 
-static bool rtd_acquire_max31865_measurement_storage_is_usable(
+static rtd_acquire_max31865_result_t
+rtd_acquire_max31865_measurement_storage_result(
     const rtd_acquire_measurement_t *measurement,
     size_t required_diagnostics,
     size_t required_native_evidence
 )
 {
     if (measurement == NULL) {
-        return false;
+        return RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT;
     }
     if (measurement->diagnostic_capacity > 0U
         && measurement->diagnostics == NULL) {
-        return false;
+        return RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT;
     }
     if (measurement->native_evidence_capacity > 0U
         && measurement->native_evidence == NULL) {
-        return false;
+        return RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT;
+    }
+    if (measurement->diagnostic_capacity < required_diagnostics
+        || measurement->native_evidence_capacity < required_native_evidence) {
+        return RTD_ACQUIRE_MAX31865_RESULT_INSUFFICIENT_STORAGE;
     }
 
-    return measurement->diagnostic_capacity >= required_diagnostics
-        && measurement->native_evidence_capacity >= required_native_evidence;
+    return RTD_ACQUIRE_MAX31865_RESULT_OK;
 }
 
 static bool rtd_acquire_max31865_threshold_is_valid(
@@ -224,15 +228,18 @@ bool rtd_acquire_max31865_config_is_valid(
     );
 }
 
-bool rtd_acquire_max31865_base_config_byte(
+rtd_acquire_max31865_result_t rtd_acquire_max31865_base_config_byte(
     const rtd_acquire_max31865_config_t *config,
     uint8_t *value
 )
 {
     uint8_t result = 0U;
 
-    if (value == NULL || !rtd_acquire_max31865_config_is_valid(config)) {
-        return false;
+    if (config == NULL || value == NULL) {
+        return RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT;
+    }
+    if (!rtd_acquire_max31865_config_is_valid(config)) {
+        return RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR;
     }
 
     if (config->wire_count == 3U) {
@@ -243,10 +250,10 @@ bool rtd_acquire_max31865_base_config_byte(
     }
 
     *value = result;
-    return true;
+    return RTD_ACQUIRE_MAX31865_RESULT_OK;
 }
 
-bool rtd_acquire_max31865_encode_threshold_registers(
+rtd_acquire_max31865_result_t rtd_acquire_max31865_encode_threshold_registers(
     const rtd_acquire_max31865_config_t *config,
     uint16_t *high_threshold_register,
     uint16_t *low_threshold_register
@@ -255,23 +262,24 @@ bool rtd_acquire_max31865_encode_threshold_registers(
     uint16_t high;
     uint16_t low;
 
-    if (high_threshold_register == NULL || low_threshold_register == NULL) {
-        return false;
+    if (config == NULL || high_threshold_register == NULL
+        || low_threshold_register == NULL) {
+        return RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT;
     }
     if (!rtd_acquire_max31865_config_is_valid(config)) {
-        return false;
+        return RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR;
     }
     if (!rtd_acquire_max31865_encode_high_threshold(config, &high)) {
-        return false;
+        return RTD_ACQUIRE_MAX31865_RESULT_INTERNAL_ERROR;
     }
     rtd_acquire_max31865_encode_low_threshold(config, &low);
 
     *high_threshold_register = high;
     *low_threshold_register = low;
-    return true;
+    return RTD_ACQUIRE_MAX31865_RESULT_OK;
 }
 
-bool rtd_acquire_max31865_measurement_from_registers(
+rtd_acquire_max31865_result_t rtd_acquire_max31865_measurement_from_registers(
     const rtd_acquire_max31865_config_t *config,
     uint16_t rtd_register,
     uint8_t fault_status_register,
@@ -281,9 +289,13 @@ bool rtd_acquire_max31865_measurement_from_registers(
     size_t mapping_index;
     size_t diagnostic_count = 0U;
     bool has_fault = false;
+    rtd_acquire_max31865_result_t storage_result;
 
+    if (config == NULL || measurement == NULL) {
+        return RTD_ACQUIRE_MAX31865_RESULT_INVALID_ARGUMENT;
+    }
     if (!rtd_acquire_max31865_config_is_valid(config)) {
-        return false;
+        return RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR;
     }
 
     for (mapping_index = 0U;
@@ -297,12 +309,13 @@ bool rtd_acquire_max31865_measurement_from_registers(
         }
     }
 
-    if (!rtd_acquire_max31865_measurement_storage_is_usable(
+    storage_result = rtd_acquire_max31865_measurement_storage_result(
         measurement,
         diagnostic_count,
         diagnostic_count
-    )) {
-        return false;
+    );
+    if (storage_result != RTD_ACQUIRE_MAX31865_RESULT_OK) {
+        return storage_result;
     }
 
     rtd_acquire_measurement_reset(measurement);
@@ -350,5 +363,8 @@ bool rtd_acquire_max31865_measurement_from_registers(
             * config->reference_resistance_ohms;
     }
 
-    return rtd_acquire_measurement_is_valid(measurement);
+    if (!rtd_acquire_measurement_is_valid(measurement)) {
+        return RTD_ACQUIRE_MAX31865_RESULT_INTERNAL_ERROR;
+    }
+    return RTD_ACQUIRE_MAX31865_RESULT_OK;
 }

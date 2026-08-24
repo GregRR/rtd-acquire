@@ -115,6 +115,17 @@ RtdAcquireError
 This distinction prevents software-operation failures from being disguised as
 device-reported diagnostic evidence.
 
+The portable C API preserves the same distinction without requiring C to mimic
+Python exceptions. Device-specific operation result enums may expose more
+specific causes when that improves embedded error handling. For MAX31865,
+`rtd_acquire_max31865_result_t` separates invalid programmer arguments,
+caller/configuration errors, insufficient caller-owned result storage, SPI I/O
+failure, delay failure, and defensive internal-invariant failure. SPI and delay
+failures are both C forms of Python's acquisition-operation failure; invalid
+static device configuration or incompatible SPI settings are configuration
+failures. `rtd_acquire_max31865_config_is_valid()` remains a Boolean predicate
+because its only question is whether one static configuration is valid.
+
 ## 4. Measurement contract
 
 The locked Python contract is:
@@ -698,6 +709,17 @@ The layer also derives the static MAX31865 configuration bits for three-wire
 compensation and 50 Hz filtering. Operational bits such as BIAS, one-shot,
 fault-cycle control, and fault clearing remain the responsibility of the later
 acquisition-sequencing slice rather than being stored as static configuration.
+Their register addresses and operational masks remain private implementation
+constants rather than becoming public configuration/API surface.
+
+Public MAX31865 operations return `rtd_acquire_max31865_result_t` rather than a
+bare success Boolean. This result vocabulary is frozen before acquisition
+sequencing so the sequence can report configuration, SPI, delay, and
+caller-storage failures without retrofitting the public signatures later. The
+future acquisition entry point will validate `rtd_acquire_spi_t.settings`
+before its first transfer; settings incompatible with MAX31865 requirements are
+reported as `RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR` rather than being
+folded into SPI I/O failure.
 
 Threshold encoding preserves the shared directional rule: low thresholds round
 downward and high thresholds round upward so quantization cannot move a native

@@ -21,6 +21,7 @@ typedef rtd_acquire_delay_result_t (*rtd_acquire_delay_us_fn)(
     uint32_t duration_us
 );
 
+/* Caller-owned blocking-delay capability and non-owning platform context. */
 typedef struct {
     void *context;
     rtd_acquire_delay_us_fn delay_us;

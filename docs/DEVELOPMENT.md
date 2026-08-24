@@ -68,6 +68,11 @@ The C gate will expand as the portable implementation grows. It must remain
 usable with ordinary C11 toolchains and must not require Arduino-specific
 headers for core tests.
 
+Public C headers should carry concise comments for ownership, preconditions,
+and failure/result semantics so the contract remains discoverable from an
+editor. The `learn/api/c/` pages remain the fuller API reference and should be
+updated in the same feature slice.
+
 ## Cross-language conformance
 
 Shared vectors under `conformance/` are the language-neutral behavioral
