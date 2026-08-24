@@ -24,6 +24,11 @@ SPI chip-select handling stays inside the SPI adapter, and the delay capability
 is only a blocking microsecond delay. The core does not require a generic GPIO
 HAL, clock service, scheduler, or heap allocator merely to support MAX31865.
 
+The 0.2 C result contract likewise uses caller-owned diagnostic and
+native-evidence arrays. Capacity is selected by the caller instead of being a
+single library-wide maximum, allowing constrained targets to reserve only the
+storage they need.
+
 ## Numeric differences
 
 Python normally evaluates these paths with binary64 floating point. Many MCU

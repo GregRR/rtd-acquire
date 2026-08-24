@@ -8,6 +8,9 @@ The first public alpha release is `0.1.0a1`.
 
 ### Added
 
+- Add caller-owned portable C `Measurement`/`Diagnostic` result storage,
+  derived status and invariant validation without a project-wide fixed
+  diagnostic-capacity limit.
 - Add a portable C11 blocking-delay HAL with caller-owned context and integral
   microsecond durations, plus a host-side contract test and CI/release gates.
 - Add a dedicated GitHub Pages Portable C API area for the SPI and delay HAL

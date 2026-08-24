@@ -90,6 +90,12 @@ jobs:
             -o /tmp/rtd-acquire-c-delay-contract-test
           /tmp/rtd-acquire-c-delay-contract-test
 
+          cc -std=c11 -Wall -Wextra -Werror -pedantic \
+            -I c/include \
+            c/src/core.c c/tests/test_core_contract.c \
+            -o /tmp/rtd-acquire-c-core-contract-test
+          /tmp/rtd-acquire-c-core-contract-test
+
       - name: Check tracked files for whitespace errors
         run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD
 

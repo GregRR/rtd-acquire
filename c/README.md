@@ -15,5 +15,10 @@ microsecond durations; successful adapters must not return before the requested
 interval has elapsed. Host contract tests exercise both HALs without platform
 headers or dynamic allocation.
 
-The MAX31865 C driver, caller-owned measurement/diagnostic structures, and HERO
-platform adapter remain 0.2 work.
+The portable result contract in `include/rtd_acquire/core.h` adds caller-owned
+measurement, diagnostic, and native-evidence storage. Callers choose the array
+capacities they can afford; the core does not impose one global diagnostic
+maximum. `src/core.c` derives measurement status and validates the shared
+Python/C result invariants.
+
+The MAX31865 C driver and HERO platform adapter remain 0.2 work.

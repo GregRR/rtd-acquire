@@ -239,6 +239,18 @@ universal-input modes and for BACnet reliability/status exposure. The current
 research establishes a software-visible validity path but does not yet establish
 which sensor-specific reliability states are exposed for each resistance mode.
 
+## Language and portability standards
+
+International Organization for Standardization & International Electrotechnical
+Commission. (2011). *ISO/IEC 9899:2011 Information technology — Programming
+languages — C* (3rd ed.). https://www.iso.org/standard/57853.html
+
+**Project use:** Normative language/standard-library basis for the portable C11
+core and contract tests, including the portable type, storage, Boolean, size,
+and floating-point facilities used by the HAL and measurement/diagnostic
+contracts. The project intentionally targets this C11 edition even though newer
+C editions now exist.
+
 ## Packaging and release automation
 
 Astral Software. (n.d.). *Building and publishing a Python package with uv*

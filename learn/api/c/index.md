@@ -17,11 +17,14 @@ The C core is designed around:
 - platform adapters that keep Arduino/HERO and other platform assumptions out
   of the core.
 
-The first frozen public C contracts are the SPI and blocking-delay HALs. Future
-0.2 work will extend this area with caller-owned measurement/diagnostic result
-storage and the portable MAX31865 driver.
+The current frozen public C contracts include the SPI and blocking-delay HALs
+plus caller-owned core measurement/diagnostic result storage. The portable
+MAX31865 driver is the next 0.2 implementation layer.
 
-Continue with [HAL interfaces](hal.md).
+Continue with:
+
+- [Core result contracts](core.md)
+- [HAL interfaces](hal.md)
 
 !!! note "Development API"
     The portable C API targets `rtd-acquire 0.2.0`, which is currently under

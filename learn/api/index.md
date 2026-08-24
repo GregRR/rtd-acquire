@@ -26,6 +26,8 @@ The independent portable C11 implementation is being developed for
 interfaces are not mixed into the Python module reference.
 
 - [Portable C API overview](c/index.md) — portability and ownership rules.
+- [Core result contracts](c/core.md) — caller-owned measurement, diagnostic,
+  and native-evidence storage.
 - [HAL interfaces](c/hal.md) — capability-specific SPI and blocking-delay
   contracts.
 

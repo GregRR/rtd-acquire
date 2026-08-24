@@ -642,6 +642,49 @@ HERO adapter may implement it with Arduino-compatible timing facilities, while
 desktop tests can inject a fake callback that records requested durations
 without sleeping.
 
+### 6.3 Portable C measurement and diagnostic storage
+
+The C result contract preserves the Python `Measurement`, `Diagnostic`,
+`DiagnosticSeverity`, `DiagnosticCode`, `NativeEvidence`, and derived-status
+semantics without requiring heap allocation or a project-wide fixed diagnostic
+maximum.
+
+`rtd_acquire_measurement_t` binds caller-supplied arrays for normalized
+diagnostics and native-evidence records. Each caller chooses capacities suitable
+for its platform and use case. The completed result records the used counts, and
+each diagnostic refers to a contiguous range within the measurement's shared
+native-evidence array. This avoids nested allocation while preserving composite
+native evidence.
+
+Optional numeric values use explicit presence flags rather than `NaN`, infinity,
+or another sentinel. The C scalar type is `rtd_acquire_real_t`, currently an
+alias for C `float`; the exact floating representation remains platform-defined,
+and the later conformance-profile work will define numeric acceptance for the
+supported binary64/binary32 cases.
+
+Status remains derived rather than stored independently:
+
+```text
+no diagnostics                -> OK
+WARNING diagnostics only      -> WARNING
+one or more FAULT diagnostics -> FAULT
+```
+
+The C validation helper enforces the same core invariants as Python: finite
+non-negative resistance and uncertainty when present, no duplicate normalized
+diagnostic codes, valid native-evidence ranges, non-empty native evidence, no
+resistance or uncertainty on a fault result, and at least one fault diagnostic
+when no trustworthy resistance is available.
+
+Native-evidence identifier/message pointers are non-owning references. The
+caller, driver, or platform adapter that supplies the referenced text must keep
+it alive for as long as the completed measurement is consumed. Device drivers
+with fixed native terms can satisfy this naturally with static string literals.
+
+The mutable initialized/reset state is assembly storage, not itself a completed
+valid `Measurement`; a driver fills it and returns only a semantically valid
+result or a separate execution/storage error.
+
 ## 7. Python and C relationship
 
 Python and C are independent implementations of a shared behavioral
@@ -835,8 +878,8 @@ implementation work requires it rather than pre-created speculatively.
 The following should remain explicit design work rather than hidden assumptions:
 
 - exact constructor/configuration shapes for hardware families after MAX31865;
-- fixed C diagnostic capacity and exact HAL signatures for capabilities beyond
-  the frozen SPI and delay interfaces;
+- exact HAL signatures for capabilities beyond the frozen SPI and delay
+  interfaces;
 - exact binary64/binary32 conformance tolerances;
 - initial Python version floor before the first public release (the starter
   scaffold provisionally aligns with `rtd-sensor` at Python >=3.11);

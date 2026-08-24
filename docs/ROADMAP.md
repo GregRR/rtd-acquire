@@ -93,7 +93,7 @@ validate them independently against Python.
   - [x] Use the frozen SPI transaction/settings HAL for converter I/O.
   - [x] Add a caller-owned blocking microsecond delay HAL for required settling,
         fault-cycle, and conversion waits.
-- [ ] Define caller-owned C measurement/diagnostic storage.
+- [x] Define caller-owned C measurement/diagnostic storage.
 - [ ] Implement the MAX31865 driver in portable C without mandatory heap use.
 - [ ] Add an Arduino-compatible HERO platform adapter.
 - [ ] Run shared conformance vectors against Python and C implementations.

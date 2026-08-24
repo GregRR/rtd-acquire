@@ -47,3 +47,15 @@ layer did not quantify one; it does **not** mean zero uncertainty.
 
 Fault measurements cannot carry resistance uncertainty because they do not
 carry a trustworthy resistance value.
+
+## Portable C representation
+
+**Introduced in:** `rtd-acquire 0.2.0`
+
+The portable C implementation preserves the same result semantics with
+caller-owned storage. Optional resistance and
+uncertainty use explicit presence flags, status remains derived from diagnostic
+severity, and diagnostic/native-evidence arrays are supplied by the caller
+rather than allocated by the core.
+
+See the [Portable C core API](../../api/c/core.md) for the C representation.
