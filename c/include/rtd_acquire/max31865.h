@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define RTD_ACQUIRE_MAX31865_MAX_DIAGNOSTICS 6U
+#define RTD_ACQUIRE_MAX31865_MAX_NATIVE_EVIDENCE 6U
+
 #include "rtd_acquire/core.h"
 
 #ifdef __cplusplus
@@ -33,6 +36,13 @@ bool rtd_acquire_max31865_encode_threshold_registers(
     const rtd_acquire_max31865_config_t *config,
     uint16_t *high_threshold_register,
     uint16_t *low_threshold_register
+);
+
+bool rtd_acquire_max31865_measurement_from_registers(
+    const rtd_acquire_max31865_config_t *config,
+    uint16_t rtd_register,
+    uint8_t fault_status_register,
+    rtd_acquire_measurement_t *measurement
 );
 
 #ifdef __cplusplus

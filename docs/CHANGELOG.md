@@ -8,6 +8,9 @@ The first public alpha release is `0.1.0a1`.
 
 ### Added
 
+- Add portable C MAX31865 native RTD/fault-register decoding into the shared
+  caller-owned result contract, and execute the existing measurement-decode
+  conformance vectors against both Python and C.
 - Add the first portable C MAX31865 layer with configuration validation,
   static configuration-byte encoding, directional threshold-register encoding,
   and shared threshold-vector execution against both Python and C.

@@ -712,6 +712,39 @@ C without waiting for a floating-point resistance tolerance profile. Numeric
 tolerances remain required for later measurement-decoding comparisons where
 Python binary64 and embedded-oriented C `float` values may differ.
 
+### 6.5 Portable C MAX31865 native decoding
+
+The second MAX31865 C slice decodes one native RTD register plus one fault-status
+register into the caller-owned `rtd_acquire_measurement_t` contract. The mapping
+uses the same six documented MAX31865 fault bits as Python, in D7-through-D2
+order. Each normalized diagnostic retains one non-owning native-evidence record
+with the documented bit identifier and device message. Reserved D1/D0 bits do
+not create inferred diagnostics.
+
+The native high- and low-resistance threshold bits are warnings, so a trustworthy
+resistance remains present when they are the only diagnostics. Any D5-through-D2
+FAULT diagnostic removes resistance and uncertainty from the completed result,
+matching the shared trust invariant rather than returning a magic value. The RTD
+resistance is computed from the 15-bit ADC code and configured reference
+resistance; the RTD-register fault-indicator bit is excluded by shifting the
+register right by one bit.
+
+The decoder performs no allocation. A MAX31865 native register state can produce
+at most six normalized diagnostics and six native-evidence records, but those are
+device-specific worst-case requirements rather than a project-wide fixed result
+capacity. The public `RTD_ACQUIRE_MAX31865_MAX_DIAGNOSTICS` and
+`RTD_ACQUIRE_MAX31865_MAX_NATIVE_EVIDENCE` constants let callers reserve enough
+fixed storage when they want to guarantee that any native MAX31865 fault state
+can be represented. If supplied result storage is insufficient, decoding fails as
+an operation/storage error instead of silently dropping evidence.
+
+The existing version-1 measurement-decode vectors now execute against both
+Python and C. Their current resistance reference values are exactly representable
+in both Python binary64 and the C binary32-oriented `float` path, so this initial
+cross-language gate does not define the general numeric acceptance profile. That
+profile remains a separate 0.2 requirement before broader non-exact numeric
+conformance cases are accepted.
+
 ## 7. Python and C relationship
 
 Python and C are independent implementations of a shared behavioral

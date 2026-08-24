@@ -37,7 +37,8 @@ numeric acceptance as an explicit conformance topic rather than assuming
 bit-for-bit equality across every target.
 
 Cross-language claims are made feature-by-feature as the C implementation
-actually consumes the corresponding shared vectors. MAX31865 threshold-register
-encoding is the first vector family executed against both Python and C and has
-exact integer register outputs. Measurement decoding remains pending and will use
-explicit numeric tolerances for resistance values.
+actually consumes the corresponding shared vectors. Both current MAX31865
+vector families now execute against Python and C. Threshold encoding has exact
+integer register outputs, while the current measurement-decode seed values are
+also exactly representable in binary32. The general acceptance profile for
+non-exact binary64/binary32 resistance comparisons remains separate 0.2 work.

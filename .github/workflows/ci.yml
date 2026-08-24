@@ -69,9 +69,15 @@ jobs:
 
           cc -std=c11 -Wall -Wextra -Werror -pedantic \
             -I c/include \
-            c/src/max31865.c c/tests/test_max31865_config.c \
+            c/src/core.c c/src/max31865.c c/tests/test_max31865_config.c \
             -o /tmp/rtd-acquire-c-max31865-config-test
           /tmp/rtd-acquire-c-max31865-config-test
+
+          cc -std=c11 -Wall -Wextra -Werror -pedantic \
+            -I c/include \
+            c/src/core.c c/src/max31865.c c/tests/test_max31865_decode.c \
+            -o /tmp/rtd-acquire-c-max31865-decode-test
+          /tmp/rtd-acquire-c-max31865-decode-test
 
       - name: Check tracked files for whitespace errors
         if: matrix.python-version == '3.14'

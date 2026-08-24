@@ -53,9 +53,15 @@ cc -std=c11 -Wall -Wextra -Werror -pedantic \
 
 cc -std=c11 -Wall -Wextra -Werror -pedantic \
   -I c/include \
-  c/src/max31865.c c/tests/test_max31865_config.c \
+  c/src/core.c c/src/max31865.c c/tests/test_max31865_config.c \
   -o /tmp/rtd-acquire-c-max31865-config-test
 /tmp/rtd-acquire-c-max31865-config-test
+
+cc -std=c11 -Wall -Wextra -Werror -pedantic \
+  -I c/include \
+  c/src/core.c c/src/max31865.c c/tests/test_max31865_decode.c \
+  -o /tmp/rtd-acquire-c-max31865-decode-test
+/tmp/rtd-acquire-c-max31865-decode-test
 ```
 
 The C gate will expand as the portable implementation grows. It must remain
@@ -69,9 +75,11 @@ contract. Python vectors are required now. Once the C implementation can
 consume a vector family, passing the same vectors in both languages becomes a
 required gate for that shared feature. Cross-language conformance is therefore
 activated feature-by-feature rather than blocked on C code that does not yet
-exist. The MAX31865 threshold-encoding vectors now execute against both Python
-and C; the C runner is compiled by pytest when a host `cc` compiler is
-available, while the strict standalone C contract gate remains mandatory.
+exist. Both current MAX31865 vector families now execute against Python and C;
+the C runners are compiled by pytest when a host `cc` compiler is available,
+while the strict standalone C contract gates remain mandatory. The current
+measurement seed values are exactly representable in the C `float` path; the
+general binary64/binary32 acceptance profile remains separate 0.2 work.
 
 Hardware-in-the-loop validation is a release/milestone gate, not a requirement
 for every source commit.

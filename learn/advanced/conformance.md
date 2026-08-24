@@ -14,9 +14,8 @@ For the current MAX31865 work, vectors can describe operations such as:
 - native measurement/register decoding; and
 - resistance-threshold encoding.
 
-Python and C consume the same threshold-encoding cases and are compared against
-the same exact register outputs. Measurement-decode vectors still execute only
-against Python until the C native decoder is implemented.
+Python and C now consume both current MAX31865 vector families and are compared
+against the same expected observable results.
 
 ## Portable C threshold conformance
 
@@ -27,6 +26,18 @@ gate. It covers directional rounding, zero-ohm low thresholds, the highest
 representable high threshold, and rejection of the unrepresentable top band.
 Because the observable outputs are exact 16-bit register values, this family
 does not need the later binary64/binary32 resistance tolerance profile.
+
+## Portable C measurement-decode conformance
+
+**Introduced in:** `rtd-acquire 0.2.0`
+
+The MAX31865 measurement-decode vectors also execute against the independent C
+decoder. They compare derived status, resistance presence/value, normalized
+diagnostic code and severity, and preserved native evidence. The current seed
+resistance values (107.5 ohms, 53.75 ohms, and 0 ohms) are exactly representable
+in binary32, so this gate can be exact without defining the broader floating-
+point tolerance policy. Non-exact binary64/binary32 cases remain blocked on the
+separate 0.2 numeric acceptance profile.
 
 ## What conformance does not prove
 

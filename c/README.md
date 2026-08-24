@@ -21,9 +21,11 @@ capacities they can afford; the core does not impose one global diagnostic
 maximum. `src/core.c` derives measurement status and validates the shared
 Python/C result invariants.
 
-The first MAX31865 C layer is implemented in `include/rtd_acquire/max31865.h`
-and `src/max31865.c`. It validates the public electrical configuration and
-encodes the static configuration byte and directional threshold registers.
-The existing language-neutral threshold vectors execute against both Python
-and C. Native register decoding, the SPI/delay acquisition sequence, and the
-HERO platform adapter remain 0.2 work.
+The portable MAX31865 C layer is implemented in
+`include/rtd_acquire/max31865.h` and `src/max31865.c`. It validates the public
+electrical configuration, encodes the static configuration byte and directional
+threshold registers, and decodes native RTD/fault registers into the shared
+caller-owned result contract. Both existing language-neutral MAX31865 vector
+families now execute against Python and C. The SPI/delay acquisition sequence,
+general binary64/binary32 acceptance profile, and HERO platform adapter remain
+0.2 work.
