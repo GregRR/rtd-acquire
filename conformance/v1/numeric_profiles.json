@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "profile_id": "python-binary64-c-binary32",
+  "description": "Cross-language numeric acceptance for supported Python binary64 and portable C binary32 MAX31865 conformance.",
+  "requirements": {
+    "python_float_radix": 2,
+    "python_float_mantissa_bits": 53,
+    "python_float_max_exponent": 1024,
+    "c_float_radix": 2,
+    "c_float_mantissa_bits": 24,
+    "c_float_max_exponent": 128
+  },
+  "measurement_decode": {
+    "resistance_ohms": {
+      "relative_tolerance": 2.384185791015625e-07,
+      "absolute_tolerance_ohms": 0.0,
+      "expected_zero_requires_exact_zero": true
+    }
+  },
+  "configuration_validation": {
+    "cross_language_vectors_must_be_binary32_stable": true
+  }
+}

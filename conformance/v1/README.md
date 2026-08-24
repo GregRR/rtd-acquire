@@ -3,8 +3,9 @@
 Version 1 uses UTF-8 JSON and is intended to be readable by Python, C-side host
 test harnesses, and other future implementations.
 
-`manifest.json` lists the available vector sets. Each manifest entry identifies
-a device, an `operation`, and the vector-set path. Each vector-set file contains:
+`manifest.json` lists the available vector sets and named numeric profiles.
+Each vector-set entry identifies a device, an `operation`, and the vector-set
+path. Each vector-set file contains:
 
 - `schema_version` — integer format version; currently `1`;
 - `device` — stable device-family identifier;
@@ -39,11 +40,22 @@ combined vendor identifiers must not be invented.
 ## Numeric comparison
 
 Floating-point values in vectors are reference values, not universal bit-for-bit
-requirements. A conformance runner selects the numeric acceptance profile. The
-initial Python implementation uses binary64 arithmetic; the later embedded C
-implementation may use binary32. Acceptance profiles will be frozen before C
-cross-language conformance is declared complete. Integer register outcomes and
-configuration-error outcomes are exact semantic requirements.
+requirements. A conformance runner selects a named numeric acceptance profile.
+Version 1 freezes `python-binary64-c-binary32` in `numeric_profiles.json`.
+
+That profile requires Python radix-2 `float` with a 53-bit significand and C
+radix-2 `float` with a 24-bit significand and the binary32 exponent range. For
+MAX31865 `measurement_decode`, expected zero resistance remains exact. Nonzero
+resistance uses a relative tolerance of `2^-22`
+(`2.384185791015625e-7`) with zero absolute tolerance. Status,
+resistance presence/absence, diagnostics, native evidence, integer fields,
+threshold-register outcomes, and configuration-error outcomes remain exact.
+
+The tolerance is computational only; it is not a hardware-accuracy or
+measurement-uncertainty allowance. Cross-language vector configurations must
+also be validation-stable when their floating values are converted to binary32.
+A vector must not depend on a distinction that Python binary64 can represent but
+C binary32 cannot.
 
 ## MAX31865 measurement-decode vectors
 
@@ -63,6 +75,10 @@ R_RTD = (rtd_register >> 1) / 32768 * R_REF
 The low fault-summary bit is evidence that one or more native faults were
 latched; normalized diagnostics are derived from the specific Fault Status
 register bits rather than duplicating the summary bit as another diagnostic.
+
+The vector set includes a non-binary32-exact reference-resistance case so the
+numeric profile is exercised by the cross-language gate instead of being
+specified only in prose.
 
 ## MAX31865 threshold-encoding vectors
 

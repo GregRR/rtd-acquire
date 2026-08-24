@@ -729,10 +729,9 @@ than clamped downward. Disabled thresholds use the device defaults `0x0000`
 (low) and `0xFFFF` (high).
 
 This threshold behavior is exact at the 16-bit register-output boundary, so the
-existing language-neutral threshold vectors can execute against both Python and
-C without waiting for a floating-point resistance tolerance profile. Numeric
-tolerances remain required for later measurement-decoding comparisons where
-Python binary64 and embedded-oriented C `float` values may differ.
+language-neutral threshold vectors require exact register outcomes in both
+Python and C. The separate binary64/binary32 profile applies to floating-point
+measurement outputs; it does not relax integer threshold-register results.
 
 ### 6.5 Portable C MAX31865 native decoding
 
@@ -760,12 +759,10 @@ fixed storage when they want to guarantee that any native MAX31865 fault state
 can be represented. If supplied result storage is insufficient, decoding fails as
 an operation/storage error instead of silently dropping evidence.
 
-The existing version-1 measurement-decode vectors now execute against both
-Python and C. Their current resistance reference values are exactly representable
-in both Python binary64 and the C binary32-oriented `float` path, so this initial
-cross-language gate does not define the general numeric acceptance profile. That
-profile remains a separate 0.2 requirement before broader non-exact numeric
-conformance cases are accepted.
+The version-1 measurement-decode vectors execute against both Python and C
+under the frozen `python-binary64-c-binary32` numeric profile. The vector set
+includes a non-binary32-exact reference resistance so the tolerance path is
+exercised rather than relying only on specially exact seed values.
 
 ### 6.6 Portable C MAX31865 one-shot acquisition sequence
 
@@ -836,6 +833,36 @@ Numeric expected values in vectors are reference values. Acceptance tolerances
 belong to the conformance runner/profile so binary64 Python and embedded
 binary32 implementations can use appropriate numeric policies without
 forking the fixture data.
+
+The first frozen numeric profile is stored in
+`conformance/v1/numeric_profiles.json` as
+`python-binary64-c-binary32`. It applies when Python uses radix-2, 53-bit
+significand `float` and the C conformance target uses radix-2, 24-bit
+significand `float` with the binary32 exponent range. The host C conformance
+runners assert those C properties before executing the profile. A C target with
+a different floating representation can still implement the portable API, but
+it needs an explicitly defined target profile before claiming this particular
+cross-language numeric conformance.
+
+For MAX31865 `measurement_decode`, status, resistance presence/absence,
+diagnostics, native evidence, and all integer/native fields remain exact
+semantic requirements. Expected zero resistance must match zero exactly. A
+nonzero C resistance is accepted when its relative difference from the
+language-neutral reference value is no greater than `2^-22`
+(`2.384185791015625e-7`), with zero absolute tolerance. This is two binary32
+machine epsilons: a deliberately tight computational allowance for binary32
+input representation and arithmetic rounding, not a sensor-accuracy or
+hardware-uncertainty allowance. It remains far below one MAX31865 ADC count
+throughout the supported reference-resistance range.
+
+Configuration acceptance is not made fuzzy by this profile. Cross-language
+vectors that require exact acceptance/rejection must remain stable when their
+floating configuration values are represented as binary32. In ordinary public
+API use, Python can distinguish decimal threshold values that collapse to the
+same C `float`; the C implementation validates the values it can actually
+represent and may therefore reject such a configuration. Sub-binary32
+configuration distinctions are outside this shared profile rather than being
+hidden behind widened comparisons.
 
 Real-hardware Python-vs-C comparison supplements but does not replace
 deterministic conformance testing.
@@ -1005,7 +1032,6 @@ The following should remain explicit design work rather than hidden assumptions:
 - exact constructor/configuration shapes for hardware families after MAX31865;
 - exact HAL signatures for capabilities beyond the frozen SPI and delay
   interfaces;
-- exact binary64/binary32 conformance tolerances;
 - initial Python version floor before the first public release (the starter
   scaffold provisionally aligns with `rtd-sensor` at Python >=3.11);
 - exact industrial device/interface selected for the first industrial driver;

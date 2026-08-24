@@ -43,7 +43,13 @@ bit-for-bit equality across every target.
 
 Cross-language claims are made feature-by-feature as the C implementation
 actually consumes the corresponding shared vectors. Both current MAX31865
-vector families now execute against Python and C. Threshold encoding has exact
-integer register outputs, while the current measurement-decode seed values are
-also exactly representable in binary32. The general acceptance profile for
-non-exact binary64/binary32 resistance comparisons remains separate 0.2 work.
+vector families execute against Python and C.
+
+**Binary64/binary32 profile introduced in:** `rtd-acquire 0.2.0`
+
+Threshold encoding keeps exact integer register outputs. MAX31865 decoded
+resistance uses the frozen `python-binary64-c-binary32` profile: expected zero
+is exact and nonzero resistance allows at most `2^-22` relative difference.
+Everything else in the measurement contract remains exact. Cross-language
+configuration cases must also be stable after binary32 input conversion rather
+than relying on sub-binary32 distinctions.

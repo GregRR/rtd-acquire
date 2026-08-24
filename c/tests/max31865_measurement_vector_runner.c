@@ -1,9 +1,14 @@
+#include <float.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "rtd_acquire/max31865.h"
+
+_Static_assert(FLT_RADIX == 2, "binary32 profile requires radix-2 float");
+_Static_assert(FLT_MANT_DIG == 24, "binary32 profile requires 24-bit float precision");
+_Static_assert(FLT_MAX_EXP == 128, "binary32 profile requires binary32 exponent range");
 
 static const char *status_name(rtd_acquire_measurement_status_t status)
 {
@@ -135,7 +140,7 @@ int main(int argc, char **argv)
 
     printf("status %s\n", status_name(rtd_acquire_measurement_status(&measurement)));
     if (measurement.has_resistance) {
-        printf("resistance %.9g\n", (double)measurement.resistance_ohms);
+        printf("resistance %a\n", (double)measurement.resistance_ohms);
     } else {
         puts("resistance none");
     }

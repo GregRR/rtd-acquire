@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import struct
+import sys
 from pathlib import Path
 from typing import Literal, cast
 
@@ -32,6 +34,34 @@ def _list(value: object) -> list[object]:
 def _load_json(path: Path) -> dict[str, object]:
     value: object = json.loads(path.read_text(encoding="utf-8"))
     return _object(value)
+
+
+def _binary32(value: float) -> float:
+    return cast(float, struct.unpack("!f", struct.pack("!f", value))[0])
+
+
+def _binary32_configuration(
+    configuration: dict[str, object],
+) -> dict[str, object]:
+    result = dict(configuration)
+    for key in (
+        "reference_resistance_ohms",
+        "low_fault_threshold_ohms",
+        "high_fault_threshold_ohms",
+    ):
+        value = result[key]
+        if value is not None:
+            assert isinstance(value, (int, float))
+            result[key] = _binary32(float(value))
+    return result
+
+
+def _configuration_is_valid(configuration: dict[str, object]) -> bool:
+    try:
+        _max31865_config(configuration)
+    except ConfigurationError:
+        return False
+    return True
 
 
 def _max31865_config(configuration: dict[str, object]) -> MAX31865Config:
@@ -66,6 +96,81 @@ def test_manifest_lists_existing_version_one_vector_sets() -> None:
         path = entry["path"]
         assert isinstance(path, str)
         assert (_CONFORMANCE_ROOT / path).is_file()
+
+    numeric_profiles = _list(manifest["numeric_profiles"])
+    assert len(numeric_profiles) == 1
+    profile_entry = _object(numeric_profiles[0])
+    assert profile_entry["profile_id"] == "python-binary64-c-binary32"
+    profile_path = profile_entry["path"]
+    assert isinstance(profile_path, str)
+    assert (_CONFORMANCE_ROOT / profile_path).is_file()
+
+
+def test_binary64_binary32_numeric_profile_is_frozen() -> None:
+    profile = _load_json(_CONFORMANCE_ROOT / "numeric_profiles.json")
+
+    assert profile["schema_version"] == 1
+    assert profile["profile_id"] == "python-binary64-c-binary32"
+
+    requirements = _object(profile["requirements"])
+    assert requirements == {
+        "python_float_radix": 2,
+        "python_float_mantissa_bits": 53,
+        "python_float_max_exponent": 1024,
+        "c_float_radix": 2,
+        "c_float_mantissa_bits": 24,
+        "c_float_max_exponent": 128,
+    }
+    assert sys.float_info.radix == requirements["python_float_radix"]
+    assert sys.float_info.mant_dig == requirements["python_float_mantissa_bits"]
+    assert sys.float_info.max_exp == requirements["python_float_max_exponent"]
+
+    measurement_decode = _object(profile["measurement_decode"])
+    resistance = _object(measurement_decode["resistance_ohms"])
+    assert resistance == {
+        "relative_tolerance": 2.384185791015625e-7,
+        "absolute_tolerance_ohms": 0.0,
+        "expected_zero_requires_exact_zero": True,
+    }
+
+    validation = _object(profile["configuration_validation"])
+    assert validation == {
+        "cross_language_vectors_must_be_binary32_stable": True,
+    }
+
+
+def test_cross_language_vector_configurations_are_binary32_stable() -> None:
+    for file_name in ("max31865.json", "max31865_threshold_encoding.json"):
+        document = _load_json(_CONFORMANCE_ROOT / file_name)
+        for vector_value in _list(document["vectors"]):
+            vector = _object(vector_value)
+            configuration = _object(vector["configuration"])
+            original_valid = _configuration_is_valid(configuration)
+            binary32_valid = _configuration_is_valid(
+                _binary32_configuration(configuration)
+            )
+            assert binary32_valid is original_valid, vector["id"]
+
+
+def test_measurement_vectors_exercise_non_binary32_numeric_profile() -> None:
+    document = _load_json(_CONFORMANCE_ROOT / "max31865.json")
+    vectors = _list(document["vectors"])
+    vector = next(
+        _object(value)
+        for value in vectors
+        if _object(value)["id"] == "max31865-non-binary32-reference-ok"
+    )
+    expected = _object(vector["expected"])
+    resistance = expected["resistance_ohms"]
+    assert isinstance(resistance, float)
+    configuration = _object(vector["configuration"])
+    native_input = _object(vector["native_input"])
+    reference = configuration["reference_resistance_ohms"]
+    rtd_register = native_input["rtd_register"]
+    assert isinstance(reference, float)
+    assert isinstance(rtd_register, int)
+    assert (rtd_register >> 1) / 32768.0 * reference == resistance
+    assert _binary32(resistance) != resistance
 
 
 def test_max31865_vectors_have_unique_ids_and_valid_contract_values() -> None:

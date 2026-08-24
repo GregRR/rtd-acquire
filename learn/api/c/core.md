@@ -38,9 +38,10 @@ typedef float rtd_acquire_real_t;
 ```
 
 Resistance and standard uncertainty use this portable C scalar. C `float` is
-chosen for the embedded-oriented core; the exact floating representation is a
-platform property, and binary64/binary32 conformance tolerances are defined
-separately from the semantic result contract.
+chosen for the embedded-oriented core. The semantic result contract does not
+require one floating representation; the version-1 cross-language conformance
+suite separately freezes a Python-binary64/C-binary32 numeric profile for
+binary32 targets.
 
 ### `rtd_acquire_measurement_t`
 

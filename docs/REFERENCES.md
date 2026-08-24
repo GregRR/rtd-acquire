@@ -251,6 +251,16 @@ and floating-point facilities used by the HAL and measurement/diagnostic
 contracts. The project intentionally targets this C11 edition even though newer
 C editions now exist.
 
+Institute of Electrical and Electronics Engineers. (2019). *IEEE standard for
+floating-point arithmetic* (IEEE Std 754-2019).
+https://standards.ieee.org/ieee/754/6210/
+
+**Project use:** Terminology and format characteristics for the explicit
+Python-binary64/C-binary32 conformance profile. The project-defined acceptance
+tolerance is intentionally narrower in scope than the standard: it governs
+comparison of independent `rtd-acquire` implementations and is not presented as
+an IEEE-specified tolerance.
+
 ## Packaging and release automation
 
 Astral Software. (n.d.). *Building and publishing a Python package with uv*

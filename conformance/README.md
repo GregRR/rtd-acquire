@@ -9,8 +9,12 @@ including normalized measurement decoding and hardware-register encoding. They
 intentionally do not encode a language-specific API shape.
 
 Numeric expected values are reference values. Comparison tolerances belong to
-the conformance runner/profile, not to individual vectors, so Python binary64
-and embedded binary32 implementations can use appropriate acceptance policies
-without duplicating fixtures.
+named conformance profiles rather than individual vectors so implementations can
+share fixtures without pretending every floating-point representation is
+bit-for-bit identical.
+
+Version 1 currently freezes the `python-binary64-c-binary32` profile in
+`v1/numeric_profiles.json`. Exact semantic fields remain exact; the profile only
+relaxes explicitly identified floating-point outputs.
 
 See [`v1/README.md`](v1/README.md) for the version-1 contract.

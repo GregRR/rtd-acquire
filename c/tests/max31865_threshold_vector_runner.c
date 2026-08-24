@@ -1,3 +1,4 @@
+#include <float.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -5,6 +6,10 @@
 #include <string.h>
 
 #include "rtd_acquire/max31865.h"
+
+_Static_assert(FLT_RADIX == 2, "binary32 profile requires radix-2 float");
+_Static_assert(FLT_MANT_DIG == 24, "binary32 profile requires 24-bit float precision");
+_Static_assert(FLT_MAX_EXP == 128, "binary32 profile requires binary32 exponent range");
 
 static bool parse_real(const char *text, rtd_acquire_real_t *value)
 {

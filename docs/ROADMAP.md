@@ -106,7 +106,7 @@ validate them independently against Python.
 - [x] Run shared conformance vectors against Python and C implementations.
   - [x] Run MAX31865 threshold-encoding vectors against both implementations.
   - [x] Run MAX31865 measurement-decode vectors against both implementations.
-- [ ] Define binary64/binary32 numeric acceptance profiles.
+- [x] Define binary64/binary32 numeric acceptance profiles.
 - [ ] Perform real-hardware Python/Raspberry Pi vs C/HERO comparison.
 - [ ] Add an optional thin Arduino/C++ convenience wrapper only if it improves
       usability without duplicating the C driver.

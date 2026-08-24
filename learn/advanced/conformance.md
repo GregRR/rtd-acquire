@@ -25,7 +25,7 @@ The threshold vector family is the first active cross-language conformance
 gate. It covers directional rounding, zero-ohm low thresholds, the highest
 representable high threshold, and rejection of the unrepresentable top band.
 Because the observable outputs are exact 16-bit register values, this family
-does not need the later binary64/binary32 resistance tolerance profile.
+remains exact and does not use the floating-point resistance tolerance.
 
 ## Portable C measurement-decode conformance
 
@@ -33,11 +33,27 @@ does not need the later binary64/binary32 resistance tolerance profile.
 
 The MAX31865 measurement-decode vectors also execute against the independent C
 decoder. They compare derived status, resistance presence/value, normalized
-diagnostic code and severity, and preserved native evidence. The current seed
-resistance values (107.5 ohms, 53.75 ohms, and 0 ohms) are exactly representable
-in binary32, so this gate can be exact without defining the broader floating-
-point tolerance policy. Non-exact binary64/binary32 cases remain blocked on the
-separate 0.2 numeric acceptance profile.
+diagnostic code and severity, and preserved native evidence.
+
+### Binary64/binary32 numeric profile
+
+**Introduced in:** `rtd-acquire 0.2.0`
+
+The frozen `python-binary64-c-binary32` profile applies a relative tolerance of
+`2^-22` (`2.384185791015625e-7`) to nonzero resistance values and requires
+expected zero to remain exactly zero. Status, resistance presence/absence,
+diagnostics, native evidence, integer fields, and threshold-register outputs
+remain exact.
+
+The tolerance is deliberately computational rather than metrological: it
+accounts for binary32 representation/arithmetic differences and does not add
+sensor accuracy, reference-resistor tolerance, or measurement uncertainty. The
+vector set includes a non-binary32-exact reference resistance so this path is
+actually exercised.
+
+Cross-language vector configurations must also remain valid or invalid after
+conversion to binary32. The profile does not make configuration comparisons
+fuzzy merely to preserve distinctions that a binary32 C target cannot represent.
 
 ## What conformance does not prove
 

@@ -8,6 +8,9 @@ The first public alpha release is `0.1.0a1`.
 
 ### Added
 
+- Freeze the first Python-binary64/C-binary32 conformance profile, including a
+  tightly bounded MAX31865 resistance tolerance, binary32-stable configuration
+  requirements, and a non-exact vector that exercises the profile.
 - Complete the portable C MAX31865 driver with a fault-checked one-shot
   SPI/delay acquisition sequence, integer-microsecond timing policy, SPI-setting
   validation, and best-effort VBIAS shutdown on execution failure.

@@ -11,5 +11,11 @@
       "operation": "threshold_encoding",
       "path": "max31865_threshold_encoding.json"
     }
+  ],
+  "numeric_profiles": [
+    {
+      "profile_id": "python-binary64-c-binary32",
+      "path": "numeric_profiles.json"
+    }
   ]
 }

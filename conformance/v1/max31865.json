@@ -247,6 +247,27 @@
           }
         ]
       }
+    },
+    {
+      "id": "max31865-non-binary32-reference-ok",
+      "description": "A non-binary32-exact reference resistance exercises the frozen binary64/binary32 numeric acceptance profile.",
+      "configuration": {
+        "reference_resistance_ohms": 1000.333,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": null,
+        "high_fault_threshold_ohms": null
+      },
+      "native_input": {
+        "rtd_register": 24690,
+        "fault_status_register": 0
+      },
+      "expected": {
+        "resistance_ohms": 376.8649562072754,
+        "status": "ok",
+        "standard_uncertainty_ohms": null,
+        "diagnostics": []
+      }
     }
   ]
 }

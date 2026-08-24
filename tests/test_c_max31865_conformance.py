@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import shutil
 import subprocess
 from pathlib import Path
@@ -13,6 +14,7 @@ _MEASUREMENT_VECTORS = _ROOT / "conformance" / "v1" / "max31865.json"
 _THRESHOLD_VECTORS = (
     _ROOT / "conformance" / "v1" / "max31865_threshold_encoding.json"
 )
+_NUMERIC_PROFILE = _ROOT / "conformance" / "v1" / "numeric_profiles.json"
 
 
 def _object(value: object) -> dict[str, object]:
@@ -30,6 +32,20 @@ def _token(value: object) -> str:
         return "none"
     assert isinstance(value, (int, float))
     return repr(value)
+
+
+def _resistance_tolerances() -> tuple[float, float, bool]:
+    profile = _object(json.loads(_NUMERIC_PROFILE.read_text(encoding="utf-8")))
+    measurement_decode = _object(profile["measurement_decode"])
+    resistance = _object(measurement_decode["resistance_ohms"])
+
+    relative = resistance["relative_tolerance"]
+    absolute = resistance["absolute_tolerance_ohms"]
+    exact_zero = resistance["expected_zero_requires_exact_zero"]
+    assert isinstance(relative, (int, float))
+    assert isinstance(absolute, (int, float))
+    assert isinstance(exact_zero, bool)
+    return float(relative), float(absolute), exact_zero
 
 
 def _compile_runner(
@@ -128,6 +144,7 @@ def test_max31865_measurement_vectors_execute_against_c(
 ) -> None:
     document = _object(json.loads(_MEASUREMENT_VECTORS.read_text(encoding="utf-8")))
     vectors = _list(document["vectors"])
+    relative_tolerance, absolute_tolerance, exact_zero = _resistance_tolerances()
 
     for vector_value in vectors:
         vector = _object(vector_value)
@@ -155,9 +172,20 @@ def test_max31865_measurement_vectors_execute_against_c(
             assert lines[1] == "resistance none"
         else:
             assert isinstance(expected_resistance, (int, float))
-            assert float(lines[1].split(maxsplit=1)[1]) == float(
-                expected_resistance
-            )
+            actual_resistance = float.fromhex(lines[1].split(maxsplit=1)[1])
+            expected_value = float(expected_resistance)
+            if expected_value == 0.0 and exact_zero:
+                assert actual_resistance == 0.0
+            else:
+                assert math.isclose(
+                    actual_resistance,
+                    expected_value,
+                    rel_tol=relative_tolerance,
+                    abs_tol=absolute_tolerance,
+                ), (
+                    f"{vector['id']}: C resistance {actual_resistance!r} "
+                    f"outside profile around {expected_value!r}"
+                )
 
         assert expected["standard_uncertainty_ohms"] is None
         assert lines[2] == "uncertainty none"

@@ -31,5 +31,6 @@ microseconds, validates SPI compatibility before I/O, and attempts to turn VBIAS
 off when an execution failure interrupts an active sequence. Public MAX31865
 operations use a discriminated result enum so configuration, storage, SPI, and
 delay failures remain distinct. Both existing language-neutral MAX31865 vector
-families execute against Python and C. The general binary64/binary32 acceptance
-profile and HERO platform adapter remain 0.2 work.
+families execute against Python and C. The first Python-binary64/C-binary32
+numeric acceptance profile is frozen for binary32 C conformance; the HERO
+platform adapter remains 0.2 work.
