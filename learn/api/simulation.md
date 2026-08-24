@@ -2,6 +2,8 @@
 
 ## `SimulatedAcquisitionFailure`
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 ```text
 SimulatedAcquisitionFailure(
     message: str = "simulated acquisition failure",
@@ -12,6 +14,8 @@ Represents one scripted failure of the acquisition operation. When consumed by
 the simulated device, it raises `AcquisitionError`.
 
 ## `SimulatedAcquisitionDevice`
+
+**Introduced in:** `rtd-acquire 0.1.0a1`
 
 ```text
 SimulatedAcquisitionDevice(

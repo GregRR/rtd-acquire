@@ -2,10 +2,14 @@
 
 ## `SpiBitOrder`
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 - `SpiBitOrder.MSB_FIRST` (`"msb_first"`)
 - `SpiBitOrder.LSB_FIRST` (`"lsb_first"`)
 
 ## `SpiSettings`
+
+**Introduced in:** `rtd-acquire 0.1.0a1`
 
 ```text
 SpiSettings(
@@ -22,6 +26,8 @@ Represents the observable settings of one configured SPI connection.
 
 ## `SpiDevice`
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 A structural protocol with:
 
 ```python
@@ -35,6 +41,8 @@ One `transfer` call represents one contiguous full-duplex transaction. The
 transport owns chip-select assertion/deassertion for that transaction.
 
 ## `LinuxSpidevDevice`
+
+**Introduced in:** `rtd-acquire 0.1.0a1`
 
 ```text
 LinuxSpidevDevice(

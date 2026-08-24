@@ -1,5 +1,7 @@
 # Errors and status
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 `rtd-acquire` separates invalid configuration, acquisition-operation failures,
 and hardware-reported measurement diagnostics.
 

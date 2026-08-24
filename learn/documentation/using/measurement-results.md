@@ -1,5 +1,7 @@
 # Measurement results
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 Every successful device read returns a `Measurement`.
 
 ```python

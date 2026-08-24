@@ -56,10 +56,16 @@ nav = [
   ] },
   { "API Reference" = [
     { "API home" = "api/index.md" },
-    { "Core contracts" = "api/core.md" },
-    { "max31865" = "api/max31865.md" },
-    { "simulation" = "api/simulation.md" },
-    { "transports" = "api/transports.md" },
+    { "Python API" = [
+      { "Core contracts" = "api/core.md" },
+      { "max31865" = "api/max31865.md" },
+      { "simulation" = "api/simulation.md" },
+      { "transports" = "api/transports.md" },
+    ] },
+    { "Portable C API" = [
+      { "Overview" = "api/c/index.md" },
+      { "HAL interfaces" = "api/c/hal.md" },
+    ] },
   ] },
   { "Project" = "project/index.md" },
 ]

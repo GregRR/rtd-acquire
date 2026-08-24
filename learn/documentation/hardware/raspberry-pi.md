@@ -1,5 +1,7 @@
 # Raspberry Pi / Linux SPI
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 The first Python host adapter uses Linux `spidev` rather than direct Raspberry
 Pi peripheral-register access.
 

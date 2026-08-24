@@ -1,5 +1,7 @@
 # Simulated acquisition
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 Use `SimulatedAcquisitionDevice` when you want deterministic behavior through
 the same `AcquisitionDevice` contract your application uses for real hardware.
 

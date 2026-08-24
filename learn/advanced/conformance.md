@@ -1,5 +1,7 @@
 # Understanding conformance
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 `rtd-acquire` is intended to have independent Python and portable C
 implementations of shared behavior. Conformance data provides a language-neutral
 contract between them.

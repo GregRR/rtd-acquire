@@ -1,5 +1,7 @@
 # Reading devices
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 The common application boundary is intentionally small:
 
 ```python

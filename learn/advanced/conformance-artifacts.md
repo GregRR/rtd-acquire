@@ -1,5 +1,7 @@
 # Conformance artifacts
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 Versioned, language-neutral conformance data lives under `conformance/` in the
 repository.
 

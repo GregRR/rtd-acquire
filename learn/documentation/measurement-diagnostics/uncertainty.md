@@ -1,5 +1,7 @@
 # Resistance uncertainty
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 `Measurement.standard_uncertainty_ohms` is the acquisition layer's optional
 place to report a **standard uncertainty in the resistance result**.
 

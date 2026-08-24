@@ -10,6 +10,9 @@ The first public alpha release is `0.1.0a1`.
 
 - Add a portable C11 blocking-delay HAL with caller-owned context and integral
   microsecond durations, plus a host-side contract test and CI/release gates.
+- Add a dedicated GitHub Pages Portable C API area for the SPI and delay HAL
+  contracts, and annotate documented features/APIs with their introduction
+  versions.
 
 ## 0.1.0a1 - 2026-08-22
 

@@ -4,11 +4,13 @@ title: API Reference
 
 # API Reference
 
-This section is a fast lookup for the public Python interfaces in the first
-`rtd-acquire` alpha. For concepts and task-oriented explanations, use the main
+This section is a fast lookup for the public interfaces provided by
+`rtd-acquire`. For concepts and task-oriented explanations, use the main
 [Documentation](../documentation/index.md).
 
-## Public API groups
+## Python API
+
+The released Python API currently reflects `rtd-acquire 0.1.0a1`:
 
 - [Core contracts](core.md) — `AcquisitionDevice`, `Measurement`, diagnostics,
   and exceptions.
@@ -17,8 +19,20 @@ This section is a fast lookup for the public Python interfaces in the first
 - [`simulation`](simulation.md) — deterministic generic acquisition simulation.
 - [`transports`](transports.md) — SPI contracts and Linux `spidev` adapter.
 
-!!! note "Alpha API"
-    `0.1.0a1` is a prerelease. Public interfaces may change before `0.1.0`.
+## Portable C API
+
+The independent portable C11 implementation is being developed for
+`rtd-acquire 0.2.0`. Its public contracts live in a separate API area so the C
+interfaces are not mixed into the Python module reference.
+
+- [Portable C API overview](c/index.md) — portability and ownership rules.
+- [HAL interfaces](c/hal.md) — capability-specific SPI and blocking-delay
+  contracts.
+
+!!! note "Development API"
+    `0.2.0` is under development. The portable C interfaces documented here are
+    present on the development branch but are not part of the released
+    `0.1.0a1` package.
 
 ## From resistance to temperature
 

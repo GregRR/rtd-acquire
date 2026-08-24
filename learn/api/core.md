@@ -4,6 +4,8 @@ The root `rtd_acquire` package re-exports the core application-facing API.
 
 ## `AcquisitionDevice`
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 ```python
 class AcquisitionDevice(Protocol):
     def read(self) -> Measurement: ...
@@ -13,6 +15,8 @@ A structural protocol for anything capable of producing RTD resistance
 measurements.
 
 ## `Measurement`
+
+**Introduced in:** `rtd-acquire 0.1.0a1`
 
 ```text
 Measurement(
@@ -26,11 +30,15 @@ Measurement(
 
 ### `MeasurementStatus`
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 - `MeasurementStatus.OK` (`"ok"`)
 - `MeasurementStatus.WARNING` (`"warning"`)
 - `MeasurementStatus.FAULT` (`"fault"`)
 
 ## Diagnostics
+
+**Introduced in:** `rtd-acquire 0.1.0a1`
 
 ```text
 Diagnostic(
@@ -44,10 +52,14 @@ Diagnostic(
 
 ### `DiagnosticSeverity`
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 - `WARNING` (`"warning"`)
 - `FAULT` (`"fault"`)
 
 ### `NativeEvidence`
+
+**Introduced in:** `rtd-acquire 0.1.0a1`
 
 ```text
 NativeEvidence(
@@ -60,11 +72,15 @@ At least one non-empty field is required.
 
 ### `DiagnosticCode`
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 `DiagnosticCode` is a string enum containing the project's stable normalized
 acquisition diagnostic identities. Use `diagnostic_message(code)` to obtain the
 canonical human-readable message.
 
 ## Exceptions
+
+**Introduced in:** `rtd-acquire 0.1.0a1`
 
 ```text
 RtdAcquireError

@@ -1,5 +1,7 @@
 # Native evidence
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 A normalized diagnostic answers **what common condition can the application
 rely on?** Native evidence answers **what did this device or protocol actually
 report?**

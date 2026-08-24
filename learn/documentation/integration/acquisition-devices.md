@@ -1,5 +1,7 @@
 # Implementing acquisition devices
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 Application-facing acquisition objects can satisfy the small
 `AcquisitionDevice` protocol:
 

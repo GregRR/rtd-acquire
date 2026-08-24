@@ -1,5 +1,7 @@
 # MAX31865 SPI emulator
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 `MAX31865SpiEmulator` exercises the real MAX31865 driver's SPI/register path
 without physical hardware.
 

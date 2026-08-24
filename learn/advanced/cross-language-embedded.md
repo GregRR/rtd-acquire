@@ -13,10 +13,16 @@ where the project declares shared observable semantics.
 
 ## Embedded priorities
 
+The portable C foundation is being introduced in `rtd-acquire 0.2.0`.
+
 The portable core is intended to remain usable on constrained systems and
-across MCU families. Platform adapters can supply capabilities such as SPI while
-the device driver remains independent of Arduino-specific or vendor-specific
-headers.
+across MCU families. Platform adapters supply small capabilities such as SPI and
+blocking relative delay while device drivers remain independent of
+Arduino-specific or vendor-specific headers.
+
+SPI chip-select handling stays inside the SPI adapter, and the delay capability
+is only a blocking microsecond delay. The core does not require a generic GPIO
+HAL, clock service, scheduler, or heap allocator merely to support MAX31865.
 
 ## Numeric differences
 

@@ -1,5 +1,7 @@
 # Diagnostics
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 Different acquisition devices use different terminology for similar conditions.
 `rtd-acquire` maps supported observations to stable `DiagnosticCode` values so
 application logic does not have to key off vendor-specific strings.

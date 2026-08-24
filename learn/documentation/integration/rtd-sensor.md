@@ -1,5 +1,7 @@
 # Integration with rtd-sensor
 
+**Introduced in:** `rtd-acquire 0.1.0a1`
+
 `rtd-acquire` and `rtd-sensor` are companion packages with an explicit boundary:
 
 ```text
