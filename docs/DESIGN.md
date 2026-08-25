@@ -855,6 +855,14 @@ and compiles the example sketch for `arduino:avr:uno` using Arduino AVR Boards
 physical HERO/MAX31865 validation; the real-hardware comparison remains a
 separate unchecked roadmap item.
 
+The optional Arduino/C++ convenience wrapper was evaluated at the 0.2 software
+scope-freeze checkpoint and deliberately deferred. The current adapter already
+lets Arduino sketches consume the portable C MAX31865 driver directly, and no
+real-hardware or user-feedback evidence yet demonstrates that a second object
+model would improve usability enough to justify another public API. A future
+wrapper may be added if that evidence emerges, but it must delegate to the C
+driver rather than duplicate acquisition, diagnostic, or timing semantics.
+
 ## 7. Python and C relationship
 
 Python and C are independent implementations of a shared behavioral

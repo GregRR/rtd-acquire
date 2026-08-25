@@ -109,3 +109,11 @@ The adapter has two software validation layers:
 Those checks validate API/toolchain integration. They do **not** mark the
 separate physical HERO + MAX31865 + RTD/reference-resistor validation item as
 complete.
+
+## C++ convenience layer
+
+The 0.2 API intentionally stops at the Arduino AVR HAL adapter plus the portable
+C MAX31865 interface. A separate C++ object wrapper was evaluated and deferred
+until physical-hardware or user feedback demonstrates a concrete usability
+benefit. If added later, it should remain a thin delegate to the portable C
+driver rather than becoming a second acquisition implementation.

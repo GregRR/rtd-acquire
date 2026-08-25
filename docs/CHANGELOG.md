@@ -35,6 +35,10 @@ The first public alpha release is `0.1.0a1`.
 
 ### Changed
 
+- Defer the optional Arduino/C++ convenience wrapper after the 0.2 software
+  scope review; the Arduino AVR adapter continues to expose the portable C
+  MAX31865 API directly until hardware or user feedback demonstrates a need for
+  another public layer.
 - Harden release source-distribution validation so all portable-C test sources
   and version-1 JSON conformance artifacts in the checkout are required to ship
   in the sdist.

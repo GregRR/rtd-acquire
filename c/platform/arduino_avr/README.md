@@ -20,6 +20,11 @@ The adapter currently targets the Arduino AVR / UNO-class core rather than all
 Arduino architectures. Physical HERO + MAX31865 validation remains a separate
 roadmap item.
 
+The 0.2 software scope intentionally does not add a separate C++ convenience
+wrapper. Arduino sketches use the portable C MAX31865 API through this adapter;
+a wrapper can be reconsidered later if hardware or user feedback identifies a
+concrete usability problem that cannot be solved without another public layer.
+
 See `examples/max31865_read/max31865_read.ino` for the minimal acquisition
 wiring at the software API level. The repository CI stages the portable C core
 and this adapter as a temporary Arduino library and compiles that sketch for
