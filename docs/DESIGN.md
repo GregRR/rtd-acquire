@@ -807,6 +807,54 @@ completed I/O operation can still return `INSUFFICIENT_STORAGE`; the decoder
 leaves the previous measurement contents untouched rather than truncating
 evidence.
 
+### 6.7 Arduino AVR / HERO platform adapter
+
+The first concrete embedded platform adapter targets the Arduino AVR core used
+by UNO R3-class boards, including the inventr.io HERO board. HERO is published
+as a derivative of the Arduino UNO R3 reference design, so `arduino:avr:uno` is
+the build target used for compile validation. The adapter is intentionally
+platform-specific C++ around the portable C11 core; Arduino headers do not enter
+`c/include/rtd_acquire/` or `c/src/`.
+
+`rtd_acquire_arduino_avr_spi_init()` binds an Arduino `SPIClass` instance and a
+caller-selected chip-select GPIO to `rtd_acquire_spi_t`. It maps CPOL/CPHA to
+Arduino SPI modes, maps bit order, supports 8-bit words, owns chip-select
+assertion/deassertion around each `beginTransaction()`/`endTransaction()` pair,
+and calls `SPI.begin()` during adapter initialization. The caller may release
+that initialization reference with `rtd_acquire_arduino_avr_spi_end()`.
+
+The portable SPI contract records **effective** settings. ArduinoCore-avr's
+`SPISettings` selects the fastest discrete AVR SPI divider that is no faster
+than the requested rate, or the slowest available divider when the request is
+below the hardware minimum. The adapter mirrors that divider selection when it
+populates `rtd_acquire_spi_t.settings.clock_frequency_hz`. The requested rate is
+still passed to `SPISettings` for each transaction, letting Arduino configure
+the same divider. This matters for device validation: a 5 MHz MAX31865 request
+on a 16 MHz HERO/UNO becomes an effective 4 MHz SPI clock rather than being
+reported inaccurately as 5 MHz.
+
+Arduino's byte `SPI.transfer()` API does not expose a transport-status result.
+After adapter argument validation, a completed Arduino transaction therefore
+maps to `RTD_ACQUIRE_SPI_OK`; the adapter cannot manufacture a host I/O error
+that the platform API does not report. Device-reported MAX31865 faults remain in
+`Measurement` diagnostics as usual.
+
+`rtd_acquire_arduino_avr_delay_init()` binds the blocking delay HAL to Arduino's
+`delay()` and `delayMicroseconds()` facilities. Because AVR `unsigned int` is
+narrower than the HAL's `uint32_t` microsecond duration, the adapter sends whole
+milliseconds through `delay()` and only the sub-millisecond remainder through
+`delayMicroseconds()`. This preserves the HAL's full duration range without
+truncating MAX31865 conversion or settling waits.
+
+A strict host C++11 adapter test uses minimal Arduino/SPI stubs to verify
+settings mapping, effective-clock reporting, transaction/chip-select ordering,
+and long-delay splitting without requiring Arduino headers. CI additionally
+stages the same portable C sources and adapter as a temporary Arduino library
+and compiles the example sketch for `arduino:avr:uno` using Arduino AVR Boards
+1.8.8. That compile gate validates toolchain/API compatibility but is not
+physical HERO/MAX31865 validation; the real-hardware comparison remains a
+separate unchecked roadmap item.
+
 ## 7. Python and C relationship
 
 Python and C are independent implementations of a shared behavioral

@@ -68,6 +68,18 @@ cc -std=c11 -Wall -Wextra -Werror -pedantic \
   c/src/core.c c/src/max31865.c c/tests/test_max31865_sequence.c \
   -o /tmp/rtd-acquire-c-max31865-sequence-test
 /tmp/rtd-acquire-c-max31865-sequence-test
+
+
+c++ -std=c++11 -Wall -Wextra -Werror -pedantic \
+  -DF_CPU=16000000UL \
+  -I c/tests/arduino_stubs \
+  -I c/include \
+  -I c/platform/arduino_avr/include \
+  c/platform/arduino_avr/src/arduino_avr.cpp \
+  c/tests/arduino_stubs/arduino_stubs.cpp \
+  c/tests/test_arduino_avr_adapter.cpp \
+  -o /tmp/rtd-acquire-arduino-avr-adapter-test
+/tmp/rtd-acquire-arduino-avr-adapter-test
 ```
 
 The C gate will expand as the portable implementation grows. It must remain
@@ -88,9 +100,10 @@ required gate for that shared feature. Cross-language conformance is therefore
 activated feature-by-feature rather than blocked on C code that does not yet
 exist. Both current MAX31865 vector families now execute against Python and C;
 the C runners are compiled by pytest when a host `cc` compiler is available,
-while the strict standalone C contract gates remain mandatory. The current
-measurement seed values are exactly representable in the C `float` path; the
-general binary64/binary32 acceptance profile remains separate 0.2 work.
+while the strict standalone C contract gates remain mandatory. Measurement
+decode comparisons use the frozen `python-binary64-c-binary32` profile,
+including a deliberately non-binary32-exact vector that exercises its numeric
+tolerance.
 
 Hardware-in-the-loop validation is a release/milestone gate, not a requirement
 for every source commit.
@@ -102,6 +115,13 @@ minor version, currently 3.11 through 3.14. The Python 3.14 job also runs Ruff,
 mypy strict, the portable C11 contract tests, tracked-file whitespace
 validation, and a clean-tree check.
 
+The Arduino AVR / HERO adapter also has a dedicated CI job. It installs Arduino
+CLI 1.5.0 and Arduino AVR Boards 1.8.8, stages the canonical portable C and
+adapter sources as a temporary Arduino library, and compiles the adapter example
+for `arduino:avr:uno`. The host C++11 adapter test remains the fast local gate;
+the Arduino compile job independently checks compatibility with the real AVR
+core API.
+
 The release candidate should pass the same local gates before a tag is created;
 CI is an independent confirmation, not a substitute for local artifact testing.
 
@@ -110,10 +130,12 @@ CI is an independent confirmation, not a substitute for local artifact testing.
 `.github/workflows/release.yml` validates a release tag, rebuilds the wheel and
 source distribution with `uv build --no-sources`, inspects their contents, and
 installs both artifacts into clean Python 3.11 and 3.14 environments for smoke
-testing. Source-distribution inspection requires the public portable-C headers
-and sources, every `c/tests/*.c` contract/conformance test source, and every
-`conformance/v1/*.json` artifact present in the checkout. It also verifies that
-the Raspberry Pi optional extra resolves and can import its `spidev` dependency.
+testing. Source-distribution inspection requires the public portable-C headers and
+sources, C/C++ contract and adapter-test support, the Arduino AVR / HERO adapter
+source/example tree, and every `conformance/v1/*.json` artifact present in the
+checkout. Release validation also compiles the staged adapter example with the
+Arduino Uno AVR core and verifies that the Raspberry Pi optional extra resolves
+and can import its `spidev` dependency.
 
 A manual `workflow_dispatch` run against a commit SHA, branch, or tag is
 deliberately build-only. It can be used as a safe pre-tag release-workflow dry

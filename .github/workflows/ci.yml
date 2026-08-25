@@ -85,6 +85,17 @@ jobs:
             -o /tmp/rtd-acquire-c-max31865-sequence-test
           /tmp/rtd-acquire-c-max31865-sequence-test
 
+          c++ -std=c++11 -Wall -Wextra -Werror -pedantic \
+            -DF_CPU=16000000UL \
+            -I c/tests/arduino_stubs \
+            -I c/include \
+            -I c/platform/arduino_avr/include \
+            c/platform/arduino_avr/src/arduino_avr.cpp \
+            c/tests/arduino_stubs/arduino_stubs.cpp \
+            c/tests/test_arduino_avr_adapter.cpp \
+            -o /tmp/rtd-acquire-arduino-avr-adapter-test
+          /tmp/rtd-acquire-arduino-avr-adapter-test
+
       - name: Check tracked files for whitespace errors
         if: matrix.python-version == '3.14'
         run: git diff --check "$(git hash-object -t tree /dev/null)" HEAD
@@ -92,3 +103,50 @@ jobs:
       - name: Confirm checks did not modify the tree
         if: matrix.python-version == '3.14'
         run: test -z "$(git status --short)"
+
+  arduino-avr:
+    name: Arduino AVR / HERO adapter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+        with:
+          version: "1.5.0"
+
+      - name: Install Arduino AVR Boards
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr@1.8.8
+
+      - name: Stage rtd-acquire as an Arduino library
+        run: |
+          library_dir="${RUNNER_TEMP}/arduino-libraries/RtdAcquire"
+          mkdir -p "${library_dir}/src/rtd_acquire"
+          cp c/include/rtd_acquire/*.h "${library_dir}/src/rtd_acquire/"
+          cp c/src/*.c "${library_dir}/src/"
+          cp c/platform/arduino_avr/include/RtdAcquire.h "${library_dir}/src/"
+          cp c/platform/arduino_avr/include/rtd_acquire/arduino_avr.hpp \
+            "${library_dir}/src/rtd_acquire/"
+          cp c/platform/arduino_avr/src/arduino_avr.cpp "${library_dir}/src/"
+          cat > "${library_dir}/library.properties" <<'EOF'
+          name=RtdAcquire
+          version=0.2.0
+          author=rtd-acquire contributors
+          maintainer=rtd-acquire contributors
+          sentence=Portable RTD acquisition contracts and Arduino AVR adapter.
+          paragraph=CI staging package for the portable C core and HERO/UNO adapter.
+          category=Sensors
+          architectures=avr
+          includes=RtdAcquire.h
+          EOF
+
+      - name: Compile HERO-compatible Arduino Uno example
+        run: |
+          arduino-cli compile \
+            --fqbn arduino:avr:uno \
+            --libraries "${RUNNER_TEMP}/arduino-libraries" \
+            c/platform/arduino_avr/examples/max31865_read

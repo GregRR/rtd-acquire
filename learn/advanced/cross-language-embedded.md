@@ -34,6 +34,15 @@ blocking delay are injected by the platform adapter, while configuration, timing
 register sequencing, VBIAS cleanup, and native decoding remain platform-neutral
 C11 code.
 
+**Arduino AVR / HERO adapter introduced in:** `rtd-acquire 0.2.0`
+
+The first concrete adapter targets the Arduino AVR / UNO-class core used by
+HERO. It supplies SPI and delay capabilities without changing the portable
+MAX31865 implementation. CI compiles the same adapter/example with the real
+Arduino Uno core while host tests use minimal stubs, demonstrating that the
+platform boundary can be tested independently from both hardware and the C11
+device logic.
+
 ## Numeric differences
 
 Python normally evaluates these paths with binary64 floating point. Many MCU

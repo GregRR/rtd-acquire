@@ -32,5 +32,12 @@ off when an execution failure interrupts an active sequence. Public MAX31865
 operations use a discriminated result enum so configuration, storage, SPI, and
 delay failures remain distinct. Both existing language-neutral MAX31865 vector
 families execute against Python and C. The first Python-binary64/C-binary32
-numeric acceptance profile is frozen for binary32 C conformance; the HERO
-platform adapter remains 0.2 work.
+numeric acceptance profile is frozen for binary32 C conformance.
+
+The first concrete platform adapter is under `platform/arduino_avr/`. It binds
+the portable SPI and blocking-delay HALs to the Arduino AVR core used by UNO
+R3-class boards, including the inventr.io HERO. The adapter is C++ only at the
+platform boundary; the device/result core remains portable C11. Host stubs test
+its transaction and timing semantics, and CI compiles the included MAX31865
+example against `arduino:avr:uno`. Physical HERO/MAX31865 validation remains a
+separate milestone item.

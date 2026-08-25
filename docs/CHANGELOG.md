@@ -8,6 +8,10 @@ The first public alpha release is `0.1.0a1`.
 
 ### Added
 
+- Add an Arduino AVR / inventr.io HERO platform adapter that binds the portable
+  SPI and delay HALs to `SPIClass`, caller-selected chip select, `delay()`, and
+  `delayMicroseconds()`, with host contract tests and an Arduino Uno compile
+  gate.
 - Freeze the first Python-binary64/C-binary32 conformance profile, including a
   tightly bounded MAX31865 resistance tolerance, binary32-stable configuration
   requirements, and a non-exact vector that exercises the profile.

@@ -90,6 +90,24 @@ that retain chip select for a transaction. Version 3.8 is the initial minimum
 because it introduced `open_path()` for caller-selected device paths and stable
 udev symlinks.
 
+Arduino. (2026). *Arduino AVR Boards 1.8.8* [Software]. GitHub.
+https://github.com/arduino/ArduinoCore-avr/tree/1.8.8
+
+**Project use:** Implementation basis for the Arduino AVR / HERO platform
+adapter. The adapter relies on the AVR core's `SPISettings`,
+`SPI.beginTransaction()`/`endTransaction()`, byte `SPI.transfer()`, discrete SPI
+clock-divider behavior, `delay()`, and `delayMicroseconds()` APIs. Version 1.8.8
+is pinned for the initial Arduino Uno compile gate.
+
+InventrKits LLC. (n.d.). *HERO PCB* [Open-source hardware design]. GitHub.
+https://github.com/inventrkits/HERO
+
+**Project use:** Implementation/platform provenance for the initial HERO target.
+InventrKits publishes HERO as a derivative of the Arduino UNO R3 reference
+design, supporting use of the Arduino AVR `arduino:avr:uno` core as the first
+HERO-compatible compile target. This reference does not substitute for the
+separate physical HERO/MAX31865 validation required by the roadmap.
+
 ## Companion software interface
 
 Roe, G. (2026). *rtd-sensor* [Python software]. GitHub.
@@ -262,6 +280,13 @@ comparison of independent `rtd-acquire` implementations and is not presented as
 an IEEE-specified tolerance.
 
 ## Packaging and release automation
+
+Arduino. (2026). *Arduino CLI 1.5.0* [Software]. GitHub.
+https://github.com/arduino/arduino-cli/releases/tag/v1.5.0
+
+**Project use:** Implementation basis for the Arduino AVR / HERO CI and release
+compile gates, including installing the pinned `arduino:avr` platform and
+compiling the staged adapter example for the `arduino:avr:uno` FQBN.
 
 Astral Software. (n.d.). *Building and publishing a Python package with uv*
 [Documentation].

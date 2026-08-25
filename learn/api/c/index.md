@@ -18,15 +18,15 @@ The C core is designed around:
   of the core.
 
 The current public C development contracts include the SPI and blocking-delay
-HALs, caller-owned core measurement/diagnostic result storage, and the portable
-MAX31865 driver: configuration, threshold encoding, native register decoding,
-and fault-checked one-shot acquisition.
+HALs, caller-owned core measurement/diagnostic result storage, the portable
+MAX31865 driver, and the first concrete Arduino AVR / HERO platform adapter.
 
 Continue with:
 
 - [Core result contracts](core.md)
 - [HAL interfaces](hal.md)
 - [MAX31865](max31865.md)
+- [Arduino AVR / HERO adapter](arduino-avr.md)
 
 !!! note "Development API"
     The portable C API targets `rtd-acquire 0.2.0`, which is currently under

@@ -67,6 +67,7 @@ nav = [
       { "Core result contracts" = "api/c/core.md" },
       { "HAL interfaces" = "api/c/hal.md" },
       { "MAX31865" = "api/c/max31865.md" },
+      { "Arduino AVR / HERO" = "api/c/arduino-avr.md" },
     ] },
   ] },
   { "Project" = "project/index.md" },

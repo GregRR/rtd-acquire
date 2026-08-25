@@ -31,7 +31,9 @@ interfaces are not mixed into the Python module reference.
 - [HAL interfaces](c/hal.md) — capability-specific SPI and blocking-delay
   contracts.
 - [MAX31865](c/max31865.md) — portable C configuration, threshold encoding,
-  and native measurement decoding.
+  native decoding, and fault-checked one-shot acquisition.
+- [Arduino AVR / HERO](c/arduino-avr.md) — UNO-class SPI and blocking-delay
+  bindings for the portable C driver.
 
 !!! note "Development API"
     `0.2.0` is under development. The portable C interfaces documented here are

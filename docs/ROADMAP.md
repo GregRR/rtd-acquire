@@ -102,7 +102,9 @@ validate them independently against Python.
         sequencing instead of collapsing configuration/storage/execution
         failures into one Boolean.
   - [x] Implement the SPI/delay-driven fault-checked one-shot acquisition sequence.
-- [ ] Add an Arduino-compatible HERO platform adapter.
+- [x] Add an Arduino-compatible HERO platform adapter for the Arduino AVR /
+      UNO-class core, with SPI and blocking-delay HAL bindings plus an
+      Arduino Uno compile gate.
 - [x] Run shared conformance vectors against Python and C implementations.
   - [x] Run MAX31865 threshold-encoding vectors against both implementations.
   - [x] Run MAX31865 measurement-decode vectors against both implementations.

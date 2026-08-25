@@ -18,15 +18,30 @@ interfaces rather than Python protocols.
 **Portable C HAL boundary introduced in:** `rtd-acquire 0.2.0`
 
 ```text
-HERO/Arduino adapter ─┐
-other C platform ─────┼─> SPI + delay HALs ─> portable C device driver
-host test fakes ──────┘
+Arduino AVR / HERO adapter ─┐
+other C platform ────────────┼─> SPI + delay HALs ─> portable C device driver
+host test fakes ─────────────┘
 ```
 
 The SPI HAL owns complete transactions, including chip-select handling. The
 blocking-delay HAL supplies only the relative timing capability the device
 needs. This keeps GPIO, clocks, schedulers, and Arduino-specific APIs out of the
 portable core unless a future device actually requires them.
+
+### Arduino AVR / HERO adapter
+
+**Introduced in:** `rtd-acquire 0.2.0`
+
+The first concrete embedded adapter now targets the Arduino AVR / UNO-class
+core used by the inventr.io HERO. It maps Arduino `SPIClass` transactions and a
+caller-selected chip-select GPIO into `rtd_acquire_spi_t`, and maps Arduino
+blocking delay functions into `rtd_acquire_delay_t`. Arduino headers remain
+confined to the platform adapter.
+
+The adapter reports the effective discrete AVR SPI clock and splits long
+microsecond waits across `delay()` and `delayMicroseconds()`. CI compiles its
+MAX31865 example for `arduino:avr:uno`; physical HERO/MAX31865 validation is
+still tracked separately. See the [Arduino AVR / HERO C API](../../api/c/arduino-avr.md).
 
 This structure separates three concerns:
 
