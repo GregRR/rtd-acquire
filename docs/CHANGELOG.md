@@ -31,6 +31,9 @@ The first public alpha release is `0.1.0a1`.
 
 ### Changed
 
+- Harden release source-distribution validation so all portable-C test sources
+  and version-1 JSON conformance artifacts in the checkout are required to ship
+  in the sdist.
 - Replace ambiguous Boolean returns from public C MAX31865 operations with a
   discriminated result enum that separates invalid arguments, configuration,
   caller-storage, SPI, delay, and internal failures; keep the pure

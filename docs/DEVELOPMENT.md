@@ -110,8 +110,10 @@ CI is an independent confirmation, not a substitute for local artifact testing.
 `.github/workflows/release.yml` validates a release tag, rebuilds the wheel and
 source distribution with `uv build --no-sources`, inspects their contents, and
 installs both artifacts into clean Python 3.11 and 3.14 environments for smoke
-testing. It also verifies that the Raspberry Pi optional extra resolves and can
-import its `spidev` dependency.
+testing. Source-distribution inspection requires the public portable-C headers
+and sources, every `c/tests/*.c` contract/conformance test source, and every
+`conformance/v1/*.json` artifact present in the checkout. It also verifies that
+the Raspberry Pi optional extra resolves and can import its `spidev` dependency.
 
 A manual `workflow_dispatch` run against a commit SHA, branch, or tag is
 deliberately build-only. It can be used as a safe pre-tag release-workflow dry

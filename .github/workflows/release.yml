@@ -157,7 +157,6 @@ jobs:
               "README.md",
               "pyproject.toml",
               "src/rtd_acquire/py.typed",
-              "conformance/v1/manifest.json",
               "c/include/rtd_acquire/core.h",
               "c/include/rtd_acquire/delay.h",
               "c/include/rtd_acquire/max31865.h",
@@ -165,6 +164,12 @@ jobs:
               "c/src/core.c",
               "c/src/max31865.c",
           }
+          required.update(
+              path.as_posix() for path in Path("c/tests").glob("*.c")
+          )
+          required.update(
+              path.as_posix() for path in Path("conformance/v1").glob("*.json")
+          )
           missing = sorted(required - names)
           if missing:
               raise SystemExit(f"sdist is missing required files: {missing!r}")
