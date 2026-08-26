@@ -111,7 +111,8 @@ validate them independently against Python.
 - [x] Define binary64/binary32 numeric acceptance profiles.
 - [x] Harden source-distribution release validation for portable-C test sources
       and version-1 JSON conformance artifacts.
-- [ ] Perform real-hardware Python/Raspberry Pi vs C/HERO comparison.
+- [ ] Perform real-hardware Python/Raspberry Pi vs C/HERO comparison
+      using the procedure in `HARDWARE_VALIDATION.md`.
 - [x] Evaluate an optional thin Arduino/C++ convenience wrapper for 0.2; defer
       adding one until hardware/usability feedback demonstrates a concrete need,
       so 0.2 does not duplicate the portable C driver behind a second public API.

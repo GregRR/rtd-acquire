@@ -35,6 +35,9 @@ The first public alpha release is `0.1.0a1`.
 
 ### Changed
 
+- Expand the canonical MAX31865 hardware-validation procedure with the
+  physical Arduino AVR/HERO leg and the Python/Raspberry Pi vs C/HERO
+  comparison gate, while keeping those hardware-validation items pending.
 - Defer the optional Arduino/C++ convenience wrapper after the 0.2 software
   scope review; the Arduino AVR adapter continues to expose the portable C
   MAX31865 API directly until hardware or user feedback demonstrates a need for
