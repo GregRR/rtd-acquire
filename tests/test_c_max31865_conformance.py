@@ -11,9 +11,7 @@ import pytest
 
 _ROOT = Path(__file__).resolve().parents[1]
 _MEASUREMENT_VECTORS = _ROOT / "conformance" / "v1" / "max31865.json"
-_THRESHOLD_VECTORS = (
-    _ROOT / "conformance" / "v1" / "max31865_threshold_encoding.json"
-)
+_THRESHOLD_VECTORS = _ROOT / "conformance" / "v1" / "max31865_threshold_encoding.json"
 _NUMERIC_PROFILE = _ROOT / "conformance" / "v1" / "numeric_profiles.json"
 
 

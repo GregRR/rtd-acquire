@@ -83,6 +83,9 @@ jobs:
       - name: Run Ruff lint
         run: uv run --locked ruff check src tests
 
+      - name: Check Ruff formatting
+        run: uv run --locked ruff format --check src tests
+
       - name: Run mypy
         run: uv run --locked mypy --strict src tests
 

@@ -41,18 +41,10 @@ class DiagnosticCode(StrEnum):
     INPUT_VOLTAGE_FAULT = "input_voltage_fault"
 
     # PGA / ADC electrical conditions
-    PGA_POSITIVE_OUTPUT_NEAR_POSITIVE_RAIL = (
-        "pga_positive_output_near_positive_rail"
-    )
-    PGA_POSITIVE_OUTPUT_NEAR_NEGATIVE_RAIL = (
-        "pga_positive_output_near_negative_rail"
-    )
-    PGA_NEGATIVE_OUTPUT_NEAR_POSITIVE_RAIL = (
-        "pga_negative_output_near_positive_rail"
-    )
-    PGA_NEGATIVE_OUTPUT_NEAR_NEGATIVE_RAIL = (
-        "pga_negative_output_near_negative_rail"
-    )
+    PGA_POSITIVE_OUTPUT_NEAR_POSITIVE_RAIL = "pga_positive_output_near_positive_rail"
+    PGA_POSITIVE_OUTPUT_NEAR_NEGATIVE_RAIL = "pga_positive_output_near_negative_rail"
+    PGA_NEGATIVE_OUTPUT_NEAR_POSITIVE_RAIL = "pga_negative_output_near_positive_rail"
+    PGA_NEGATIVE_OUTPUT_NEAR_NEGATIVE_RAIL = "pga_negative_output_near_negative_rail"
     POSITIVE_INPUT_OVERVOLTAGE = "positive_input_overvoltage"
     POSITIVE_INPUT_UNDERVOLTAGE = "positive_input_undervoltage"
     NEGATIVE_INPUT_OVERVOLTAGE = "negative_input_overvoltage"
@@ -92,9 +84,7 @@ _DIAGNOSTIC_MESSAGES: Final[dict[DiagnosticCode, str]] = {
     DiagnosticCode.SENSOR_NOT_DETECTED: (
         "The acquisition device reports that no sensor is detected."
     ),
-    DiagnosticCode.SENSOR_BURNOUT: (
-        "The acquisition device reports sensor burnout."
-    ),
+    DiagnosticCode.SENSOR_BURNOUT: ("The acquisition device reports sensor burnout."),
     DiagnosticCode.SENSOR_DRIFT: (
         "The acquisition device reports excessive sensor drift or disagreement."
     ),
@@ -130,8 +120,7 @@ _DIAGNOSTIC_MESSAGES: Final[dict[DiagnosticCode, str]] = {
         "The RTD input is below the device's monitored threshold."
     ),
     DiagnosticCode.INPUT_VOLTAGE_FAULT: (
-        "The acquisition device reports an input overvoltage or undervoltage "
-        "condition."
+        "The acquisition device reports an input overvoltage or undervoltage condition."
     ),
     DiagnosticCode.PGA_POSITIVE_OUTPUT_NEAR_POSITIVE_RAIL: (
         "The positive PGA output is near the positive supply rail."
@@ -157,9 +146,7 @@ _DIAGNOSTIC_MESSAGES: Final[dict[DiagnosticCode, str]] = {
     DiagnosticCode.NEGATIVE_INPUT_UNDERVOLTAGE: (
         "The negative ADC input is below its allowed voltage range."
     ),
-    DiagnosticCode.ADC_SATURATION: (
-        "The acquisition device reports ADC saturation."
-    ),
+    DiagnosticCode.ADC_SATURATION: ("The acquisition device reports ADC saturation."),
     DiagnosticCode.CONVERSION_ERROR: (
         "The acquisition device reports an invalid ADC conversion."
     ),
@@ -175,12 +162,8 @@ _DIAGNOSTIC_MESSAGES: Final[dict[DiagnosticCode, str]] = {
     DiagnosticCode.LDO_DECOUPLING_FAULT: (
         "The acquisition device reports an LDO decoupling fault."
     ),
-    DiagnosticCode.DATA_CRC_ERROR: (
-        "Conversion data failed its CRC integrity check."
-    ),
-    DiagnosticCode.SPI_CRC_ERROR: (
-        "The acquisition device reports an SPI CRC error."
-    ),
+    DiagnosticCode.DATA_CRC_ERROR: ("Conversion data failed its CRC integrity check."),
+    DiagnosticCode.SPI_CRC_ERROR: ("The acquisition device reports an SPI CRC error."),
     DiagnosticCode.SPI_CLOCK_COUNT_ERROR: (
         "The acquisition device reports an invalid SPI clock count."
     ),

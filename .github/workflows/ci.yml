@@ -42,6 +42,10 @@ jobs:
         if: matrix.python-version == '3.14'
         run: uv run --locked ruff check src tests
 
+      - name: Check Ruff formatting
+        if: matrix.python-version == '3.14'
+        run: uv run --locked ruff format --check src tests
+
       - name: Run mypy
         if: matrix.python-version == '3.14'
         run: uv run --locked mypy --strict src tests

@@ -72,7 +72,6 @@ def test_fault_bits_are_reported_in_register_bit_order() -> None:
     assert measurement.resistance_ohms is None
 
 
-
 def test_reserved_fault_status_bits_do_not_create_diagnostics() -> None:
     measurement = measurement_from_registers(
         _config(),
@@ -95,6 +94,7 @@ def test_reserved_fault_status_bits_are_ignored_with_known_warning() -> None:
         DiagnosticCode.RESISTANCE_HIGH_THRESHOLD
     ]
     assert measurement.resistance_ohms == pytest.approx(107.5)
+
 
 def test_fault_flag_bit_is_not_part_of_resistance_code() -> None:
     without_flag = measurement_from_registers(

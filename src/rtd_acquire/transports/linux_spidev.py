@@ -82,9 +82,7 @@ class LinuxSpidevDevice:
 
         try:
             self._backend.open_path(path)
-            self._backend.mode = (
-                settings.clock_polarity << 1
-            ) | settings.clock_phase
+            self._backend.mode = (settings.clock_polarity << 1) | settings.clock_phase
             self._backend.max_speed_hz = settings.clock_frequency_hz
             self._backend.lsbfirst = settings.bit_order is SpiBitOrder.LSB_FIRST
             self._backend.bits_per_word = settings.bits_per_word

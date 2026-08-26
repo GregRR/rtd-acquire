@@ -103,15 +103,12 @@ def measurement_from_registers(
     )
 
     if any(
-        diagnostic.severity is DiagnosticSeverity.FAULT
-        for diagnostic in diagnostics
+        diagnostic.severity is DiagnosticSeverity.FAULT for diagnostic in diagnostics
     ):
         return Measurement(resistance_ohms=None, diagnostics=diagnostics)
 
     adc_code = rtd_register >> 1
-    resistance_ohms = (
-        adc_code / _RTD_CODE_SCALE * config.reference_resistance_ohms
-    )
+    resistance_ohms = adc_code / _RTD_CODE_SCALE * config.reference_resistance_ohms
     return Measurement(
         resistance_ohms=resistance_ohms,
         diagnostics=diagnostics,

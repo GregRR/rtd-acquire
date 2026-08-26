@@ -70,9 +70,7 @@ def _max31865_config(configuration: dict[str, object]) -> MAX31865Config:
             float, configuration["reference_resistance_ohms"]
         ),
         wire_count=cast(Literal[2, 3, 4], configuration["wire_count"]),
-        filter_frequency_hz=cast(
-            Literal[50, 60], configuration["filter_frequency_hz"]
-        ),
+        filter_frequency_hz=cast(Literal[50, 60], configuration["filter_frequency_hz"]),
         low_fault_threshold_ohms=cast(
             float | None, configuration["low_fault_threshold_ohms"]
         ),
@@ -265,8 +263,7 @@ def test_max31865_seed_vectors_cover_ok_warning_and_fault() -> None:
     vectors = _list(document["vectors"])
 
     statuses = {
-        cast(str, _object(_object(vector)["expected"])["status"])
-        for vector in vectors
+        cast(str, _object(_object(vector)["expected"])["status"]) for vector in vectors
     }
 
     assert statuses == {"ok", "warning", "fault"}
@@ -315,9 +312,7 @@ def test_max31865_vectors_execute_against_python_decoder() -> None:
         measurement = measurement_from_registers(
             config,
             rtd_register=cast(int, native_input["rtd_register"]),
-            fault_status_register=cast(
-                int, native_input["fault_status_register"]
-            ),
+            fault_status_register=cast(int, native_input["fault_status_register"]),
         )
 
         assert measurement.status.value == expected["status"]

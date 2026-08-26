@@ -39,7 +39,6 @@ _CONFIG_CLEAR_FAULTS = 0x02
 _CONFIG_FILTER_50HZ = 0x01
 
 
-
 @dataclass(frozen=True, slots=True)
 class MAX31865Timing:
     """Timing policy for the MAX31865 input network and one-shot reads.

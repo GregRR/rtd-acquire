@@ -66,8 +66,7 @@ class MAX31865Config:
             and self.low_fault_threshold_ohms >= self.high_fault_threshold_ohms
         ):
             raise ConfigurationError(
-                "low_fault_threshold_ohms must be less than "
-                "high_fault_threshold_ohms"
+                "low_fault_threshold_ohms must be less than high_fault_threshold_ohms"
             )
 
     def _validate_threshold(

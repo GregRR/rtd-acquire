@@ -7,6 +7,7 @@ Run the applicable quality gates before each commit.
 ```sh
 uv run pytest
 uv run ruff check src tests
+uv run ruff format --check src tests
 uv run mypy --strict src tests
 git diff --check
 ```
@@ -111,9 +112,9 @@ for every source commit.
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs the Python test suite on every supported Python
-minor version, currently 3.11 through 3.14. The Python 3.14 job also runs Ruff,
-mypy strict, the portable C11 contract tests, tracked-file whitespace
-validation, and a clean-tree check.
+minor version, currently 3.11 through 3.14. The Python 3.14 job also runs Ruff
+lint and formatting checks, mypy strict, the portable C11 contract tests,
+tracked-file whitespace validation, and a clean-tree check.
 
 The Arduino AVR / HERO adapter also has a dedicated CI job. It installs Arduino
 CLI 1.5.0 and Arduino AVR Boards 1.8.8, stages the canonical portable C and

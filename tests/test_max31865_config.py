@@ -118,9 +118,7 @@ def test_invalid_high_fault_threshold_is_rejected(threshold: float) -> None:
 
 
 def test_low_fault_threshold_must_be_below_reference_resistance() -> None:
-    with pytest.raises(
-        ConfigurationError, match="less than reference_resistance_ohms"
-    ):
+    with pytest.raises(ConfigurationError, match="less than reference_resistance_ohms"):
         MAX31865Config(
             reference_resistance_ohms=430.0,
             wire_count=3,
@@ -130,9 +128,7 @@ def test_low_fault_threshold_must_be_below_reference_resistance() -> None:
 
 
 def test_high_fault_threshold_must_be_below_reference_resistance() -> None:
-    with pytest.raises(
-        ConfigurationError, match="less than reference_resistance_ohms"
-    ):
+    with pytest.raises(ConfigurationError, match="less than reference_resistance_ohms"):
         MAX31865Config(
             reference_resistance_ohms=430.0,
             wire_count=3,

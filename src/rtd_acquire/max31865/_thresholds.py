@@ -30,9 +30,7 @@ def encode_high_threshold_register(
     if resistance_ohms is None:
         return 0xFFFF
 
-    raw_code = math.ceil(
-        resistance_ohms / reference_resistance_ohms * _ADC_SCALE
-    )
+    raw_code = math.ceil(resistance_ohms / reference_resistance_ohms * _ADC_SCALE)
     if raw_code > _MAX_ADC_CODE:
         raise ConfigurationError(
             "high_fault_threshold_ohms cannot be represented without "
@@ -50,7 +48,5 @@ def encode_low_threshold_register(
     if resistance_ohms is None:
         return 0x0000
 
-    raw_code = math.floor(
-        resistance_ohms / reference_resistance_ohms * _ADC_SCALE
-    )
+    raw_code = math.floor(resistance_ohms / reference_resistance_ohms * _ADC_SCALE)
     return raw_code << 1
