@@ -503,6 +503,282 @@ static void test_final_bias_off_failure_leaves_measurement_untouched(void)
     assert_fake_consumed(&spi_context, &delay_context);
 }
 
+
+static void test_fault_cycle_delay_failure_attempts_bias_off(void)
+{
+    const transfer_event_t transfers[] = {
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x82U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x84U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+    };
+    const delay_event_t delays[] = {
+        {11500U, RTD_ACQUIRE_DELAY_OK},
+        {600U, RTD_ACQUIRE_DELAY_ERROR},
+    };
+    fake_spi_context_t spi_context = {transfers, 4U, 0U};
+    fake_delay_context_t delay_context = {delays, 2U, 0U};
+    rtd_acquire_spi_t spi = make_spi(&spi_context);
+    rtd_acquire_delay_t delay = make_delay(&delay_context);
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_max31865_timing_t timing = make_timing();
+    rtd_acquire_measurement_t measurement = make_measurement(NULL, 0U, NULL, 0U);
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_DELAY_ERROR
+    );
+    assert_fake_consumed(&spi_context, &delay_context);
+}
+
+static void test_post_fault_delay_failure_attempts_bias_off(void)
+{
+    const transfer_event_t transfers[] = {
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x82U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x84U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+    };
+    const delay_event_t delays[] = {
+        {11500U, RTD_ACQUIRE_DELAY_OK},
+        {600U, RTD_ACQUIRE_DELAY_OK},
+        {6000U, RTD_ACQUIRE_DELAY_ERROR},
+    };
+    fake_spi_context_t spi_context = {transfers, 4U, 0U};
+    fake_delay_context_t delay_context = {delays, 3U, 0U};
+    rtd_acquire_spi_t spi = make_spi(&spi_context);
+    rtd_acquire_delay_t delay = make_delay(&delay_context);
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_max31865_timing_t timing = make_timing();
+    rtd_acquire_measurement_t measurement = make_measurement(NULL, 0U, NULL, 0U);
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_DELAY_ERROR
+    );
+    assert_fake_consumed(&spi_context, &delay_context);
+}
+
+static void test_conversion_delay_failure_attempts_bias_off(void)
+{
+    const transfer_event_t transfers[] = {
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x82U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x84U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0xA0U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+    };
+    const delay_event_t delays[] = {
+        {11500U, RTD_ACQUIRE_DELAY_OK},
+        {600U, RTD_ACQUIRE_DELAY_OK},
+        {6000U, RTD_ACQUIRE_DELAY_OK},
+        {55000U, RTD_ACQUIRE_DELAY_ERROR},
+    };
+    fake_spi_context_t spi_context = {transfers, 5U, 0U};
+    fake_delay_context_t delay_context = {delays, 4U, 0U};
+    rtd_acquire_spi_t spi = make_spi(&spi_context);
+    rtd_acquire_delay_t delay = make_delay(&delay_context);
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_max31865_timing_t timing = make_timing();
+    rtd_acquire_measurement_t measurement = make_measurement(NULL, 0U, NULL, 0U);
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_DELAY_ERROR
+    );
+    assert_fake_consumed(&spi_context, &delay_context);
+}
+
+static void test_threshold_write_failure_returns_without_bias_cleanup(void)
+{
+    const transfer_event_t transfers[] = {
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_IO_ERROR},
+    };
+    fake_spi_context_t spi_context = {transfers, 1U, 0U};
+    fake_delay_context_t delay_context = {NULL, 0U, 0U};
+    rtd_acquire_spi_t spi = make_spi(&spi_context);
+    rtd_acquire_delay_t delay = make_delay(&delay_context);
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_max31865_timing_t timing = make_timing();
+    rtd_acquire_measurement_t measurement = make_measurement(NULL, 0U, NULL, 0U);
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_SPI_IO_ERROR
+    );
+    assert_fake_consumed(&spi_context, &delay_context);
+}
+
+static void test_one_shot_write_failure_attempts_bias_off(void)
+{
+    const transfer_event_t transfers[] = {
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x82U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x84U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0xA0U}, {0}, RTD_ACQUIRE_SPI_IO_ERROR},
+        {2U, {0x80U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+    };
+    const delay_event_t delays[] = {
+        {11500U, RTD_ACQUIRE_DELAY_OK},
+        {600U, RTD_ACQUIRE_DELAY_OK},
+        {6000U, RTD_ACQUIRE_DELAY_OK},
+    };
+    fake_spi_context_t spi_context = {transfers, 5U, 0U};
+    fake_delay_context_t delay_context = {delays, 3U, 0U};
+    rtd_acquire_spi_t spi = make_spi(&spi_context);
+    rtd_acquire_delay_t delay = make_delay(&delay_context);
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_max31865_timing_t timing = make_timing();
+    rtd_acquire_measurement_t measurement = make_measurement(NULL, 0U, NULL, 0U);
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_SPI_IO_ERROR
+    );
+    assert_fake_consumed(&spi_context, &delay_context);
+}
+
+static void test_rtd_read_failure_attempts_bias_off(void)
+{
+    const transfer_event_t transfers[] = {
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x82U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x84U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0xA0U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {3U, {0x01U, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_IO_ERROR},
+        {2U, {0x80U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+    };
+    const delay_event_t delays[] = {
+        {11500U, RTD_ACQUIRE_DELAY_OK},
+        {600U, RTD_ACQUIRE_DELAY_OK},
+        {6000U, RTD_ACQUIRE_DELAY_OK},
+        {55000U, RTD_ACQUIRE_DELAY_OK},
+    };
+    fake_spi_context_t spi_context = {transfers, 6U, 0U};
+    fake_delay_context_t delay_context = {delays, 4U, 0U};
+    rtd_acquire_spi_t spi = make_spi(&spi_context);
+    rtd_acquire_delay_t delay = make_delay(&delay_context);
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_max31865_timing_t timing = make_timing();
+    rtd_acquire_measurement_t measurement = make_measurement(NULL, 0U, NULL, 0U);
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_SPI_IO_ERROR
+    );
+    assert_fake_consumed(&spi_context, &delay_context);
+}
+
+static void test_fault_status_read_failure_attempts_bias_off(void)
+{
+    const transfer_event_t transfers[] = {
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x82U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x84U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0xA0U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {3U, {0x01U, 0x00U, 0x00U}, {0x00U, 0x40U, 0x01U}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x07U, 0x00U}, {0}, RTD_ACQUIRE_SPI_IO_ERROR},
+        {2U, {0x80U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+    };
+    const delay_event_t delays[] = {
+        {11500U, RTD_ACQUIRE_DELAY_OK},
+        {600U, RTD_ACQUIRE_DELAY_OK},
+        {6000U, RTD_ACQUIRE_DELAY_OK},
+        {55000U, RTD_ACQUIRE_DELAY_OK},
+    };
+    fake_spi_context_t spi_context = {transfers, 7U, 0U};
+    fake_delay_context_t delay_context = {delays, 4U, 0U};
+    rtd_acquire_spi_t spi = make_spi(&spi_context);
+    rtd_acquire_delay_t delay = make_delay(&delay_context);
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_max31865_timing_t timing = make_timing();
+    rtd_acquire_measurement_t measurement = make_measurement(NULL, 0U, NULL, 0U);
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_SPI_IO_ERROR
+    );
+    assert_fake_consumed(&spi_context, &delay_context);
+}
+
+static void test_repeated_reads_replace_measurement_state(void)
+{
+    const transfer_event_t transfers[] = {
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x82U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x84U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0xA0U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {3U, {0x01U, 0x00U, 0x00U}, {0x00U, 0x40U, 0x01U}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x07U, 0x00U}, {0x00U, 0x20U}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {5U, {0x83U, 0xFFU, 0xFFU, 0x00U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x82U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x84U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0xA0U}, {0}, RTD_ACQUIRE_SPI_OK},
+        {3U, {0x01U, 0x00U, 0x00U}, {0x00U, 0x40U, 0x00U}, RTD_ACQUIRE_SPI_OK},
+        {2U, {0x80U, 0x00U}, {0}, RTD_ACQUIRE_SPI_OK},
+    };
+    const delay_event_t delays[] = {
+        {11500U, RTD_ACQUIRE_DELAY_OK},
+        {600U, RTD_ACQUIRE_DELAY_OK},
+        {6000U, RTD_ACQUIRE_DELAY_OK},
+        {55000U, RTD_ACQUIRE_DELAY_OK},
+        {11500U, RTD_ACQUIRE_DELAY_OK},
+        {600U, RTD_ACQUIRE_DELAY_OK},
+        {6000U, RTD_ACQUIRE_DELAY_OK},
+        {55000U, RTD_ACQUIRE_DELAY_OK},
+    };
+    fake_spi_context_t spi_context = {transfers, 13U, 0U};
+    fake_delay_context_t delay_context = {delays, 8U, 0U};
+    rtd_acquire_spi_t spi = make_spi(&spi_context);
+    rtd_acquire_delay_t delay = make_delay(&delay_context);
+    rtd_acquire_max31865_config_t config = make_config();
+    rtd_acquire_max31865_timing_t timing = make_timing();
+    rtd_acquire_diagnostic_t diagnostics[1];
+    rtd_acquire_native_evidence_t evidence[1];
+    rtd_acquire_measurement_t measurement = make_measurement(
+        diagnostics,
+        1U,
+        evidence,
+        1U
+    );
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
+    assert(!measurement.has_resistance);
+    assert(measurement.diagnostic_count == 1U);
+    assert(measurement.native_evidence_count == 1U);
+    assert(
+        rtd_acquire_measurement_status(&measurement)
+        == RTD_ACQUIRE_MEASUREMENT_STATUS_FAULT
+    );
+
+    assert(
+        rtd_acquire_max31865_read(
+            &spi, &delay, &config, &timing, &measurement
+        ) == RTD_ACQUIRE_MAX31865_RESULT_OK
+    );
+    assert(measurement.has_resistance);
+    assert(measurement.resistance_ohms == 107.5F);
+    assert(measurement.diagnostic_count == 0U);
+    assert(measurement.native_evidence_count == 0U);
+    assert(
+        rtd_acquire_measurement_status(&measurement)
+        == RTD_ACQUIRE_MEASUREMENT_STATUS_OK
+    );
+    assert_fake_consumed(&spi_context, &delay_context);
+}
+
 static void test_actual_fault_can_exceed_caller_storage_after_io(void)
 {
     const transfer_event_t transfers[] = {
@@ -615,9 +891,17 @@ int main(void)
     test_three_wire_50_hz_sequence_and_timing();
     test_spi_settings_are_validated_before_io();
     test_delay_failure_preserves_error_and_attempts_bias_off();
+    test_fault_cycle_delay_failure_attempts_bias_off();
+    test_post_fault_delay_failure_attempts_bias_off();
+    test_conversion_delay_failure_attempts_bias_off();
+    test_threshold_write_failure_returns_without_bias_cleanup();
     test_spi_failure_after_bias_attempts_bias_off();
     test_failed_initial_bias_write_still_attempts_bias_off();
+    test_one_shot_write_failure_attempts_bias_off();
+    test_rtd_read_failure_attempts_bias_off();
+    test_fault_status_read_failure_attempts_bias_off();
     test_final_bias_off_failure_leaves_measurement_untouched();
+    test_repeated_reads_replace_measurement_state();
     test_actual_fault_can_exceed_caller_storage_after_io();
     test_unrepresentable_timing_is_configuration_error_before_io();
     test_null_capabilities_are_invalid_arguments();

@@ -28,6 +28,12 @@ void digitalWrite(uint8_t pin, uint8_t value)
 {
     rtd_arduino_stub_state.last_pin = pin;
     rtd_arduino_stub_state.last_pin_value = value;
+    if (rtd_arduino_stub_state.pin_write_count < RTD_ARDUINO_STUB_MAX_EVENTS) {
+        size_t index = rtd_arduino_stub_state.pin_write_count;
+        rtd_arduino_stub_state.pin_write_pins[index] = pin;
+        rtd_arduino_stub_state.pin_write_values[index] = value;
+        rtd_arduino_stub_state.pin_write_count += 1U;
+    }
     rtd_arduino_stub_record_event(RTD_ARDUINO_STUB_EVENT_PIN_WRITE);
 }
 

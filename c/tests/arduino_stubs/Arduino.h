@@ -29,6 +29,9 @@ typedef struct {
     uint8_t last_pin;
     uint8_t last_pin_value;
     uint8_t last_pin_mode;
+    uint8_t pin_write_pins[RTD_ARDUINO_STUB_MAX_EVENTS];
+    uint8_t pin_write_values[RTD_ARDUINO_STUB_MAX_EVENTS];
+    size_t pin_write_count;
     unsigned long last_delay_ms;
     unsigned int last_delay_us;
 } rtd_arduino_stub_state_t;

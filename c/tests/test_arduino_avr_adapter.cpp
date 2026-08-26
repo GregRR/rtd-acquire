@@ -84,6 +84,11 @@ static void test_transaction_owns_chip_select_and_settings(void)
     assert(bus.last_data_mode == SPI_MODE1);
     assert(rtd_arduino_stub_state.last_pin == 7U);
     assert(rtd_arduino_stub_state.last_pin_value == HIGH);
+    assert(rtd_arduino_stub_state.pin_write_count == 2U);
+    assert(rtd_arduino_stub_state.pin_write_pins[0] == 7U);
+    assert(rtd_arduino_stub_state.pin_write_values[0] == LOW);
+    assert(rtd_arduino_stub_state.pin_write_pins[1] == 7U);
+    assert(rtd_arduino_stub_state.pin_write_values[1] == HIGH);
 
     assert(rtd_arduino_stub_state.event_count == 6U);
     assert(rtd_arduino_stub_state.events[0]
@@ -94,6 +99,37 @@ static void test_transaction_owns_chip_select_and_settings(void)
     assert(rtd_arduino_stub_state.events[4] == RTD_ARDUINO_STUB_EVENT_PIN_WRITE);
     assert(rtd_arduino_stub_state.events[5]
         == RTD_ARDUINO_STUB_EVENT_SPI_END_TRANSACTION);
+}
+
+
+static void test_active_high_chip_select_levels_are_inverted(void)
+{
+    SPIClass bus;
+    rtd_acquire_arduino_avr_spi_context_t context = {};
+    rtd_acquire_spi_t spi = {};
+    rtd_acquire_spi_settings_t settings = valid_settings();
+    const uint8_t tx[] = {0x5AU};
+    uint8_t rx[] = {0U};
+
+    settings.chip_select_active_low = false;
+    rtd_arduino_stub_reset();
+    assert(rtd_acquire_arduino_avr_spi_init(
+        &context,
+        &spi,
+        &bus,
+        6U,
+        &settings
+    ));
+    assert(rtd_arduino_stub_state.pin_write_count == 1U);
+    assert(rtd_arduino_stub_state.pin_write_values[0] == LOW);
+
+    rtd_arduino_stub_reset();
+    assert(spi.transfer(spi.context, tx, rx, sizeof(tx)) == RTD_ACQUIRE_SPI_OK);
+    assert(rtd_arduino_stub_state.pin_write_count == 2U);
+    assert(rtd_arduino_stub_state.pin_write_pins[0] == 6U);
+    assert(rtd_arduino_stub_state.pin_write_values[0] == HIGH);
+    assert(rtd_arduino_stub_state.pin_write_pins[1] == 6U);
+    assert(rtd_arduino_stub_state.pin_write_values[1] == LOW);
 }
 
 static void test_spi_adapter_rejects_unsupported_settings(void)
@@ -146,12 +182,33 @@ static void test_delay_adapter_splits_long_microsecond_waits(void)
     assert(rtd_arduino_stub_state.event_count == 1U);
     assert(rtd_arduino_stub_state.events[0] == RTD_ARDUINO_STUB_EVENT_DELAY_US);
     assert(rtd_arduino_stub_state.last_delay_us == 600U);
+
+    rtd_arduino_stub_reset();
+    assert(delay_hal.delay_us(delay_hal.context, 1000U) == RTD_ACQUIRE_DELAY_OK);
+    assert(rtd_arduino_stub_state.event_count == 1U);
+    assert(rtd_arduino_stub_state.events[0] == RTD_ARDUINO_STUB_EVENT_DELAY_MS);
+    assert(rtd_arduino_stub_state.last_delay_ms == 1UL);
+    assert(rtd_arduino_stub_state.last_delay_us == 0U);
+
+    rtd_arduino_stub_reset();
+    assert(delay_hal.delay_us(delay_hal.context, 999U) == RTD_ACQUIRE_DELAY_OK);
+    assert(rtd_arduino_stub_state.event_count == 1U);
+    assert(rtd_arduino_stub_state.events[0] == RTD_ARDUINO_STUB_EVENT_DELAY_US);
+    assert(rtd_arduino_stub_state.last_delay_ms == 0UL);
+    assert(rtd_arduino_stub_state.last_delay_us == 999U);
+
+    rtd_arduino_stub_reset();
+    assert(delay_hal.delay_us(delay_hal.context, 0U) == RTD_ACQUIRE_DELAY_OK);
+    assert(rtd_arduino_stub_state.event_count == 0U);
+    assert(rtd_arduino_stub_state.last_delay_ms == 0UL);
+    assert(rtd_arduino_stub_state.last_delay_us == 0U);
 }
 
 int main(void)
 {
     test_initialization_reports_effective_avr_clock();
     test_transaction_owns_chip_select_and_settings();
+    test_active_high_chip_select_levels_are_inverted();
     test_spi_adapter_rejects_unsupported_settings();
     test_delay_adapter_splits_long_microsecond_waits();
     return 0;
