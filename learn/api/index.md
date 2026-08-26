@@ -10,7 +10,7 @@ This section is a fast lookup for the public interfaces provided by
 
 ## Python API
 
-The released Python API currently reflects `rtd-acquire 0.1.0a1`:
+The Python API in the current `rtd-acquire 0.2.0` release includes:
 
 - [Core contracts](core.md) — `AcquisitionDevice`, `Measurement`, diagnostics,
   and exceptions.
@@ -21,9 +21,9 @@ The released Python API currently reflects `rtd-acquire 0.1.0a1`:
 
 ## Portable C API
 
-The independent portable C11 implementation is being developed for
-`rtd-acquire 0.2.0`. Its public contracts live in a separate API area so the C
-interfaces are not mixed into the Python module reference.
+The independent portable C11 implementation is included in `rtd-acquire 0.2.0`.
+Its public contracts live in a separate API area so the C interfaces are not
+mixed into the Python module reference.
 
 - [Portable C API overview](c/index.md) — portability and ownership rules.
 - [Core result contracts](c/core.md) — caller-owned measurement, diagnostic,
@@ -35,10 +35,10 @@ interfaces are not mixed into the Python module reference.
 - [Arduino AVR / HERO](c/arduino-avr.md) — UNO-class SPI and blocking-delay
   bindings for the portable C driver.
 
-!!! note "Development API"
-    `0.2.0` is under development. The portable C interfaces documented here are
-    present on the development branch but are not part of the released
-    `0.1.0a1` package.
+!!! note "Portable C distribution"
+    The portable C sources, tests, conformance artifacts, and Arduino AVR / HERO
+    adapter ship in the `0.2.0` source distribution and repository. The Python
+    wheel intentionally contains only the Python package.
 
 ## From resistance to temperature
 

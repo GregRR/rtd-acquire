@@ -131,6 +131,27 @@ Support and validation remain separate claims:
 The adapter accepts a device path rather than assuming `/dev/spidev0.0`, which
 also permits stable udev symlinks on systems where SPI bus numbering may vary.
 
+### Arduino AVR / HERO through the portable C HALs
+
+Introduced in `rtd-acquire 0.2.0`, the first embedded host adapter targets the
+Arduino AVR / UNO R3-class core used by the inventr.io HERO. The adapter binds
+Arduino `SPIClass`/`SPISettings`, caller-selected chip select, and blocking
+Arduino delay facilities to the portable C SPI and delay HAL contracts; the
+MAX31865 device logic itself remains platform-neutral C11.
+
+The repository validates this adapter in two software layers: strict host C++11
+tests using minimal Arduino/SPI stubs, and compilation of the real example for
+`arduino:avr:uno` with the pinned Arduino AVR core. These checks establish API
+and toolchain compatibility, not physical converter/RTD validation.
+
+Support and validation remain separate claims:
+
+- inventr.io HERO / Arduino AVR / UNO R3-class: adapter implemented and real
+  Uno-core compilation validated; physical HERO + MAX31865 validation pending;
+- non-AVR Arduino-compatible boards: not claimed as supported by this adapter;
+  a separate platform adapter should be added when a concrete target requires
+  one.
+
 ## Diagnostic capability survey
 
 ### Analog Devices MAX31865

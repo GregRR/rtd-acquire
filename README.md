@@ -43,11 +43,10 @@ industrial digital interfaces, and configurable custom acquisition circuits.
 ## Installation
 
 `rtd-acquire` requires Python 3.11 or later and is published on
-[PyPI](https://pypi.org/project/rtd-acquire/). While the project is in alpha,
-install the latest prerelease explicitly:
+[PyPI](https://pypi.org/project/rtd-acquire/):
 
 ```sh
-python -m pip install --pre rtd-acquire
+python -m pip install rtd-acquire
 ```
 
 A minimal hardware-free acquisition uses the deterministic simulator:
@@ -64,7 +63,7 @@ print(measurement.resistance_ohms)
 For Raspberry Pi/Linux SPI support, install the optional backend dependency:
 
 ```sh
-python -m pip install --pre "rtd-acquire[raspberry-pi]"
+python -m pip install "rtd-acquire[raspberry-pi]"
 ```
 
 Developers working from a source checkout can instead use `uv sync`; see
@@ -158,11 +157,14 @@ See:
 
 ## Status
 
-`0.1.0a1` is the first public alpha release. The core measurement/diagnostic
-contracts, the platform-independent MAX31865 driver, Linux `spidev` adapter,
-simulation/emulation support, and shared conformance vectors are implemented.
-Raspberry Pi/MAX31865 physical hardware validation is still pending, and public
-APIs may change before `0.1.0`.
+`0.2.0` adds the independent portable C11 implementation, fault-checked
+MAX31865 acquisition, shared Python/C conformance with an explicit binary32
+numeric profile, and an Arduino AVR / HERO platform adapter to the Python
+acquisition stack introduced in `0.1.0a1`. The portable C sources and adapter
+ship in the source distribution; the Python wheel remains Python-only.
+
+Physical Raspberry Pi/MAX31865 and HERO/MAX31865 validation is still pending.
+`rtd-acquire` remains pre-1.0, and public APIs may change before `1.0`.
 
 ## License
 

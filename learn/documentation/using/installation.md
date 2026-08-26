@@ -2,13 +2,12 @@
 
 ## Python requirements
 
-`rtd-acquire 0.1.0a1` requires Python 3.11 or newer.
+`rtd-acquire 0.2.0` requires Python 3.11 or newer.
 
-Because the first release is an alpha prerelease, include `--pre` when
-installing from PyPI:
+Install the current release from PyPI:
 
 ```sh
-python -m pip install --pre rtd-acquire
+python -m pip install rtd-acquire
 ```
 
 The base package has no required runtime dependencies.
@@ -18,7 +17,7 @@ The base package has no required runtime dependencies.
 The Linux SPI adapter uses the optional `spidev` package:
 
 ```sh
-python -m pip install --pre "rtd-acquire[raspberry-pi]"
+python -m pip install "rtd-acquire[raspberry-pi]"
 ```
 
 The extra installs the Python backend; it does not enable SPI in the operating

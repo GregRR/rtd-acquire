@@ -143,15 +143,22 @@ run and does not publish to PyPI or modify a GitHub release.
 
 Publishing occurs only for GitHub's `release: published` event. That event is
 used for stable releases and prereleases. After validation succeeds, the
-workflow attaches the wheel and source distribution to the existing GitHub
-release and publishes the same artifacts to PyPI through Trusted Publishing.
+workflow publishes the validated wheel and source distribution to PyPI through
+Trusted Publishing.
 
-Before the first PyPI release, configure the PyPI pending Trusted Publisher for:
+GitHub Release asset attachment is intentionally manual. The build job retains
+the exact validated wheel and source distribution as the
+`python-package-distributions` Actions artifact for seven days. After the
+release workflow succeeds, download that artifact and attach those same files to
+the matching GitHub Release; do not rebuild different local artifacts for the
+release page.
+
+PyPI publishing uses the configured Trusted Publisher for:
 
 - owner: `GregRR`;
 - repository: `rtd-acquire`;
 - workflow: `release.yml`;
 - environment: `pypi`.
 
-The `pypi` GitHub environment should use appropriate protection rules. No PyPI
-API token is required when Trusted Publishing is configured correctly.
+The `pypi` GitHub environment should retain appropriate protection rules. No
+PyPI API token is required when Trusted Publishing is configured correctly.

@@ -12,19 +12,19 @@ measurement. No hardware is required.
     [rtd-sensor RTD Playground](https://gregrr.github.io/rtd-sensor/playground/).
     `rtd-acquire` focuses on obtaining resistance; `rtd-sensor` interprets it.
 
-## 1. Install the alpha
+## 1. Install rtd-acquire
 
-`rtd-acquire` requires Python 3.11 or newer. While the project is in prerelease,
-install it with `--pre`:
+`rtd-acquire` requires Python 3.11 or newer. Install the current release from
+PyPI:
 
 ```sh
-python -m pip install --pre rtd-acquire
+python -m pip install rtd-acquire
 ```
 
 For Raspberry Pi / Linux `spidev` support:
 
 ```sh
-python -m pip install --pre "rtd-acquire[raspberry-pi]"
+python -m pip install "rtd-acquire[raspberry-pi]"
 ```
 
 See [Installation](documentation/using/installation.md) for development-checkout
@@ -98,9 +98,10 @@ Do not copy the `430.0` reference-resistor value blindly. Configure the actual
 reference resistance used by your board.
 
 !!! warning "Physical validation is still pending"
-    The Linux/MAX31865 implementation is present in `0.1.0a1`, but the project's
-    formal Raspberry Pi 4 + real MAX31865 validation gate has not yet been
-    completed. Treat this as alpha hardware support.
+    The Linux/MAX31865 implementation has been present since `0.1.0a1`, but the
+    project's formal Raspberry Pi 4 + real MAX31865 validation gate has not yet
+    been completed. `0.2.0` also adds the portable C/HERO path, whose physical
+    MAX31865 validation is likewise pending.
 
 ## Where to go next
 

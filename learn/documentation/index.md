@@ -26,6 +26,7 @@ converter path.
 - [Hardware & acquisition](hardware/index.md)
 - [MAX31865](hardware/max31865.md)
 - [Raspberry Pi / Linux SPI](hardware/raspberry-pi.md)
+- [Arduino AVR / HERO adapter](../api/c/arduino-avr.md)
 - [The acquisition boundary](hardware/acquisition-boundary.md)
 
 ## Measurement & diagnostics

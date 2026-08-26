@@ -13,7 +13,7 @@ where the project declares shared observable semantics.
 
 ## Embedded priorities
 
-The portable C foundation is being introduced in `rtd-acquire 0.2.0`.
+The portable C foundation is introduced in `rtd-acquire 0.2.0`.
 
 The portable core is intended to remain usable on constrained systems and
 across MCU families. Platform adapters supply small capabilities such as SPI and

@@ -4,7 +4,7 @@ title: Portable C API
 
 # Portable C API
 
-`rtd-acquire` is developing a portable C11 implementation alongside the Python
+`rtd-acquire 0.2.0` includes a portable C11 implementation alongside the Python
 implementation. The two implementations are independent and converge on shared
 observable behavior rather than one wrapping the other.
 
@@ -17,7 +17,7 @@ The C core is designed around:
 - platform adapters that keep Arduino/HERO and other platform assumptions out
   of the core.
 
-The current public C development contracts include the SPI and blocking-delay
+The public C contracts include the SPI and blocking-delay
 HALs, caller-owned core measurement/diagnostic result storage, the portable
 MAX31865 driver, and the first concrete Arduino AVR / HERO platform adapter.
 
@@ -28,6 +28,7 @@ Continue with:
 - [MAX31865](max31865.md)
 - [Arduino AVR / HERO adapter](arduino-avr.md)
 
-!!! note "Development API"
-    The portable C API targets `rtd-acquire 0.2.0`, which is currently under
-    development. It is not part of the released `0.1.0a1` package.
+!!! note "Distribution"
+    The portable C implementation ships in the `0.2.0` source distribution and
+    repository. The Python wheel remains Python-only; use the sdist or repository
+    when integrating the C sources into an embedded build.

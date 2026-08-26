@@ -33,14 +33,17 @@ future precision ADC backend, or an industrial resistance input can expose the
 same core idea: **what resistance did the acquisition system establish, and how
 trustworthy is that result?**
 
-The first public alpha includes:
+The current software includes:
 
 - the core `AcquisitionDevice` and `Measurement` contracts;
 - normalized acquisition diagnostics with preserved native evidence;
-- a platform-independent MAX31865 driver;
-- a Linux `spidev` adapter for Raspberry Pi and other compatible Linux hosts;
-- deterministic generic simulation and a MAX31865 SPI emulator; and
-- language-neutral conformance vectors for shared behavior.
+- a platform-independent Python MAX31865 driver and Linux `spidev` adapter;
+- deterministic generic simulation and a MAX31865 SPI emulator;
+- an independent portable C11 MAX31865 implementation with caller-owned
+  result storage;
+- an Arduino AVR / HERO platform adapter; and
+- language-neutral Python/C conformance vectors with an explicit binary32
+  numeric acceptance profile.
 
 ## What rtd-acquire is not
 
@@ -54,9 +57,10 @@ well. Hardware drivers can report resistance without embedding assumptions
 about sensor curves, while the same `rtd-sensor` model can consume resistance
 from many different acquisition systems.
 
-!!! note "Alpha status"
-    `0.1.0a1` is the first public alpha. Public APIs may change before `0.1.0`,
-    and physical Raspberry Pi/MAX31865 validation is still pending.
+!!! note "Pre-1.0 status"
+    `0.2.0` is a pre-1.0 release, so public APIs may still change before `1.0`.
+    Physical Raspberry Pi/MAX31865 and HERO/MAX31865 validation is still
+    pending and is documented separately from the software/toolchain gates.
 
 ## Let's go
 

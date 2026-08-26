@@ -51,9 +51,11 @@ agnostic architecture, not simply to accumulate driver names.
 Goal: deliver a useful Python acquisition library on real Raspberry Pi
 hardware while proving the core public contracts.
 
-Release checkpoint: `0.1.0a1` publishes the completed software implementation
-while Raspberry Pi/MAX31865 and real-RTD hardware validation remain explicit
-pre-`0.1.0` gates.
+Release checkpoint: `0.1.0a1` published the completed Python software
+implementation while Raspberry Pi/MAX31865 and real-RTD hardware validation
+remained open. Those physical validation items remain explicitly pending
+through `0.2.0` and are completed only by the procedure in
+`HARDWARE_VALIDATION.md`.
 
 - [x] Implement the locked Python `Measurement`, status, and diagnostic core
       contracts with invariant tests.

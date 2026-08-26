@@ -9,13 +9,13 @@ library licensed under MPL-2.0.
 
 ## Current release
 
-`0.1.0a1` is the first public alpha. It establishes the initial Python
-measurement and diagnostic contracts, MAX31865 acquisition path, Linux SPI
-adapter, simulation/emulation support, conformance foundation, and portable C
-SPI HAL foundation.
+`0.2.0` adds the independent portable C11 MAX31865 implementation,
+caller-owned C result contracts, Python/C conformance with an explicit binary32
+numeric profile, and the Arduino AVR / HERO adapter to the Python acquisition
+stack introduced in `0.1.0a1`.
 
-Physical MAX31865 validation is still pending, and public APIs may change before
-`0.1.0`.
+Physical Raspberry Pi/MAX31865 and HERO/MAX31865 validation remains pending.
+The project remains pre-1.0, and public APIs may change before `1.0`.
 
 ## Repository
 

@@ -626,8 +626,9 @@ does not need to know which mechanism is used.
 The HAL reports host/platform transfer success separately from device-reported
 acquisition diagnostics. It requires no dynamic allocation and no
 Arduino-specific headers. The first contract test compiles and executes with an
-ordinary C11 host compiler so future HERO, STM32, ESP32, RP2040, and Linux
-adapters can implement the same capability.
+ordinary C11 host compiler so the current Arduino AVR / HERO adapter and
+future STM32, ESP32, RP2040, and Linux adapters can implement the same
+capability.
 
 ### 6.2 Portable C delay HAL contract
 
@@ -642,16 +643,16 @@ platform-neutral unit and does not force an embedded adapter to provide
 floating-point timing support.
 
 A successful callback return means the requested interval has elapsed; an
-adapter may delay longer but must not return early. The future MAX31865 C driver
-will conservatively round any computed minimum delay upward to whole
-microseconds before calling the HAL. Platform inability to perform the delay is
-reported through the HAL result and remains an API/acquisition-operation error,
-not a device diagnostic.
+adapter may delay longer but must not return early. The MAX31865 C driver
+conservatively rounds computed minimum delays upward to whole microseconds before
+calling the HAL. Platform inability to perform the delay is reported through the
+HAL result and remains an API/acquisition-operation error, not a device
+diagnostic.
 
-The delay HAL requires no dynamic allocation or Arduino-specific headers. A
-HERO adapter may implement it with Arduino-compatible timing facilities, while
-desktop tests can inject a fake callback that records requested durations
-without sleeping.
+The delay HAL requires no dynamic allocation or Arduino-specific headers. The
+Arduino AVR / HERO adapter implements it with Arduino timing facilities, while
+desktop tests inject a fake callback that records requested durations without
+sleeping.
 
 ### 6.3 Portable C measurement and diagnostic storage
 
@@ -669,9 +670,10 @@ native evidence.
 
 Optional numeric values use explicit presence flags rather than `NaN`, infinity,
 or another sentinel. The C scalar type is `rtd_acquire_real_t`, currently an
-alias for C `float`; the exact floating representation remains platform-defined,
-and the later conformance-profile work will define numeric acceptance for the
-supported binary64/binary32 cases.
+alias for C `float`. Cross-language conformance for the supported
+Python-binary64/C-binary32 case is governed by the frozen
+`python-binary64-c-binary32` numeric profile; C conformance runners assert the
+required binary32-style `float` properties before applying that profile.
 
 Status remains derived rather than stored independently:
 
@@ -698,7 +700,7 @@ result or a separate execution/storage error.
 
 ### 6.4 Portable C MAX31865 configuration layer
 
-The first MAX31865 C implementation slice is pure device logic with no HAL side
+The MAX31865 C configuration layer is pure device logic with no HAL side
 effects. `rtd_acquire_max31865_config_t` mirrors the electrical facts in the
 Python `MAX31865Config` contract using explicit presence flags for optional
 thresholds. It validates the same reference-resistance range, 2-/3-/4-wire
@@ -707,19 +709,19 @@ representability rule.
 
 The layer also derives the static MAX31865 configuration bits for three-wire
 compensation and 50 Hz filtering. Operational bits such as BIAS, one-shot,
-fault-cycle control, and fault clearing remain the responsibility of the later
-acquisition-sequencing slice rather than being stored as static configuration.
-Their register addresses and operational masks remain private implementation
-constants rather than becoming public configuration/API surface.
+fault-cycle control, and fault clearing are acquisition-sequence concerns rather
+than static configuration. Their register addresses and operational masks remain
+private implementation constants rather than becoming public configuration/API
+surface.
 
 Public MAX31865 operations return `rtd_acquire_max31865_result_t` rather than a
-bare success Boolean. This result vocabulary is frozen before acquisition
+bare success Boolean. This result vocabulary was frozen before acquisition
 sequencing so the sequence can report configuration, SPI, delay, and
 caller-storage failures without retrofitting the public signatures later. The
-future acquisition entry point will validate `rtd_acquire_spi_t.settings`
-before its first transfer; settings incompatible with MAX31865 requirements are
-reported as `RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR` rather than being
-folded into SPI I/O failure.
+acquisition entry point validates `rtd_acquire_spi_t.settings` before its first
+transfer; settings incompatible with MAX31865 requirements are reported as
+`RTD_ACQUIRE_MAX31865_RESULT_CONFIGURATION_ERROR` rather than being folded into
+SPI I/O failure.
 
 Threshold encoding preserves the shared directional rule: low thresholds round
 downward and high thresholds round upward so quantization cannot move a native
@@ -1088,8 +1090,6 @@ The following should remain explicit design work rather than hidden assumptions:
 - exact constructor/configuration shapes for hardware families after MAX31865;
 - exact HAL signatures for capabilities beyond the frozen SPI and delay
   interfaces;
-- initial Python version floor before the first public release (the starter
-  scaffold provisionally aligns with `rtd-sensor` at Python >=3.11);
 - exact industrial device/interface selected for the first industrial driver;
 - exact development board/module selected for ADS124S08 hardware tests;
 - uncertainty models that can be defended for each acquisition family.

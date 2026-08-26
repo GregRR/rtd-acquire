@@ -2,12 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-The first public alpha release is `0.1.0a1`.
+The first public alpha release was `0.1.0a1`.
 
-## Unreleased
+## 0.2.0 - 2026-08-25
 
 ### Added
 
+- Add a complete GitHub Pages documentation and API site with Start Here,
+  task-oriented documentation, Python and Portable C API references, advanced
+  architecture/conformance material, and links to the `rtd-sensor` RTD
+  Playground.
 - Add an Arduino AVR / inventr.io HERO platform adapter that binds the portable
   SPI and delay HALs to `SPIClass`, caller-selected chip select, `delay()`, and
   `delayMicroseconds()`, with host contract tests and an Arduino Uno compile
@@ -50,6 +54,24 @@ The first public alpha release is `0.1.0a1`.
   caller-storage, SPI, delay, and internal failures; keep the pure
   `config_is_valid` query Boolean.
 
+### Fixed
+
+- Keep GitHub Release asset attachment manual after removing the unreliable
+  automatic upload path used immediately after `0.1.0a1`; the release workflow
+  retains the exact validated distributions as an Actions artifact and publishes
+  those distributions to PyPI.
+
+### Known limitations
+
+- Physical MAX31865 validation on Raspberry Pi 4/Python and HERO/portable C has
+  not yet been completed. The 0.2.0 hardware paths are covered by unit,
+  conformance, emulator/host-stub, and real Arduino AVR compile/toolchain gates,
+  but physical converter/RTD validation remains pending.
+- The Arduino adapter targets AVR / UNO R3-class boards, including the
+  inventr.io HERO; non-AVR Arduino architectures are not claimed as supported.
+- A higher-level Arduino C++ convenience wrapper was evaluated and intentionally
+  deferred until hardware or user feedback demonstrates a concrete need.
+
 ## 0.1.0a1 - 2026-08-22
 
 ### Added
@@ -66,7 +88,7 @@ The first public alpha release is `0.1.0a1`.
 - Add a simple `rtd-sensor` Pt100 integration example without creating a runtime
   dependency between the projects.
 - Add CI across Python 3.11–3.14 and release automation that validates,
-  smoke-tests, attaches, and publishes wheel/source distributions.
+  smoke-tests, and publishes wheel/source distributions.
 - Add public alpha installation and hardware-free quickstart instructions.
 
 ### Changed

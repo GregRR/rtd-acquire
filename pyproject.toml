@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rtd-acquire"
-version = "0.1.0a1"
+version = "0.2.0"
 description = "Hardware-agnostic RTD resistance acquisition for embedded, SBC, laboratory, and industrial systems."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -53,6 +53,8 @@ dev = [
 ]
 
 [project.urls]
+Homepage = "https://gregrr.github.io/rtd-acquire/"
+Documentation = "https://gregrr.github.io/rtd-acquire/"
 Repository = "https://github.com/GregRR/rtd-acquire"
 Issues = "https://github.com/GregRR/rtd-acquire/issues"
 

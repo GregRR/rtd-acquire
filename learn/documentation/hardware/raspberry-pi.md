@@ -12,7 +12,7 @@ same userspace `/dev/spidev*` contract.
 ## Install the optional backend
 
 ```sh
-python -m pip install --pre "rtd-acquire[raspberry-pi]"
+python -m pip install "rtd-acquire[raspberry-pi]"
 ```
 
 ## Configure the SPI connection
@@ -40,7 +40,7 @@ chip-select number.
 The Linux architecture is intended to work on compatible `spidev` hosts. That
 is not the same as claiming every host has been physically validated.
 
-For `0.1.0a1`:
+For `0.2.0`:
 
 - Raspberry Pi 4: implementation present; formal project hardware validation
   pending;
