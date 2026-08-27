@@ -69,6 +69,7 @@ Makefile
 
 # Local project research and experiments
 # Intentionally never committed.
+.claudeignore
 .rtd-acquire-local/
 
 # Temporary files
