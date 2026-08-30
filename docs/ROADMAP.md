@@ -2,7 +2,10 @@
 
 This roadmap is outcome-oriented. Device support should be added when it
 broadens validated acquisition capability or meaningfully tests the hardware-
-agnostic architecture, not simply to accumulate driver names.
+agnostic architecture, not simply to accumulate driver names. Hardware that
+already supplies trustworthy RTD-element resistance can interoperate with the
+broader ecosystem without receiving an `rtd-acquire` driver; device count is
+not a project success metric.
 
 ## Pre-0.1 — Foundation and evidence
 
@@ -142,6 +145,10 @@ acquisition front end rather than only dedicated RTD converters.
 
 - [ ] Select a suitable ADS124S08 development board/module with required pins,
       reference, and excitation capabilities exposed.
+- [ ] Preserve the documented multi-channel rule that one logical resistance
+      source maps to one `AcquisitionDevice` view over any shared physical
+      backend; add coordinated/batch sampling only if concrete device semantics
+      require it.
 - [ ] Model excitation currents, reference selection/resistance, PGA gain,
       channels, wiring topology, and relevant calibration.
 - [ ] Implement Python ADS124S08 acquisition.
@@ -182,9 +189,12 @@ Goal: acquire trustworthy resistance/electrical observations through common
 industrial protocols without making `rtd-acquire` a general automation stack.
 
 - [ ] Add a representative Modbus path where the device exposes appropriate raw
-      resistance/electrical data. Siemens Desigo Essentials EM1.8U is now the
+      resistance/electrical data. Siemens Desigo Essentials EM1.8U remains the
       leading HVAC/building candidate because it documents raw-ohms registers and
-      separate per-channel reliability registers.
+      separate per-channel reliability registers. A simpler well-documented
+      low-cost module may be used as an earlier prototyping target when it
+      exposes raw resistance with adequate validity/status semantics; the
+      PT-100-485/MB is a catalog lead, not yet the selected backend.
 - [ ] Add BACnet support where a chosen HVAC/building device exposes suitable
       acquisition data and diagnostic status.
 - [ ] Evaluate HART integration for transmitter diagnostics/data where useful.
@@ -192,6 +202,9 @@ industrial protocols without making `rtd-acquire` a general automation stack.
 
 ## Later — Broader front ends and custom acquisition
 
+- [ ] Add ADS1220 support if a lower-cost second configurable precision-ADC path
+      provides enough validation or user value; do not displace ADS124S08 solely
+      because ADS1220 is smaller or cheaper.
 - [ ] Add AD7124-4/AD7124-8 support if demand or validation value justifies it.
 - [ ] Add explicit generic electrical acquisition models: voltage, current,
       constant-current, divider, ratiometric, and amplified/offset inputs.

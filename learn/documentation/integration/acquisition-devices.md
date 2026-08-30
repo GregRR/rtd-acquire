@@ -33,3 +33,26 @@ An acquisition implementation should:
 
 The base protocol does not require `read()` to be thread-safe or reentrant.
 Document stronger guarantees explicitly if your implementation provides them.
+
+## Multi-channel physical hardware
+
+**Multi-channel semantics introduced in:** `rtd-acquire 0.3.0`
+
+One `AcquisitionDevice` represents one logical resistance source. A physical
+converter or module with several channels may keep shared transport, locking,
+and device-wide configuration below several channel-scoped views:
+
+```text
+physical backend / shared transport
+    ├── channel 0 view → AcquisitionDevice → Measurement
+    ├── channel 1 view → AcquisitionDevice → Measurement
+    └── channel N view → AcquisitionDevice → Measurement
+```
+
+Keep application identity outside the measurement contract. Physical location,
+equipment names, control-loop roles, and RTD-model selection do not belong in
+`Measurement` merely because multiple inputs share one device.
+
+A multi-channel backend also does not automatically require a generic batch or
+simultaneous-read API. Add coordinated sampling only when a concrete device has
+semantics that justify such a contract.

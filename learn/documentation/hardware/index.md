@@ -14,6 +14,14 @@ families can include precision ADC/front ends, industrial resistance inputs,
 transmitters, and digital industrial interfaces while preserving the same
 high-level measurement boundary.
 
+**Boundary clarification introduced in:** `rtd-acquire 0.3.0`
+
+`rtd-acquire` is one route to resistance, not a required hop for every physical
+RTD. If another instrument or interface already provides the desired
+RTD-element resistance in ohms, it can feed `rtd-sensor` directly. Devices that
+expose only internally calculated temperature are outside the core
+`rtd-acquire` resistance-backend contract.
+
 Continue with:
 
 - [MAX31865](max31865.md)

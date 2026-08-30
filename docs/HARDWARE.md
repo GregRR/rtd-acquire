@@ -68,10 +68,12 @@ public diagnostic vocabulary.
 | --- | --- | --- | --- | --- |
 | Analog Devices MAX31865 | Dedicated RTD resistance-to-digital converter | SPI | Pt100–Pt1000 documented; other resistance ranges require configuration/validation | First implementation |
 | TI ADS124S08 | Precision configurable 24-bit ADC/front end | SPI | Flexible ratiometric RTD acquisition; strong candidate for Pt and Ni families | Second implementation |
+| TI ADS1220 | Precision configurable 24-bit ADC/front end | SPI | PGA/reference/IDAC architecture supports flexible ratiometric RTD acquisition | Later precision-ADC candidate |
 | Analog Devices AD7124-4/-8 | Precision configurable 24-bit ADC/front end | SPI | Flexible RTD/resistive-sensor acquisition | High-priority catalog target |
 | Pepperl+Fuchs KFD0-TR-1 | Industrial Pt100 transmitter/converter | 4–20 mA | Pt100-specific; non-linearized mode is especially relevant to project boundary | Industrial analog target |
 | Siemens Desigo PXC4 family | HVAC/building universal input/controller | BACnet / controller I/O | LG-Ni1000, Pt1000 and resistance-input modes | HVAC catalog/validation target |
 | Siemens Desigo Essentials EM1.8U | HVAC/building universal I/O | Modbus RTU | Raw R1000/R10000 resistance plus Ni1000/Pt1000 modes | High-priority HVAC digital target |
+| Sumtech PT-100-485/MB | Low-cost PT100 acquisition module | Modbus RTU / RS-485 | Separate PT100 resistance register at 0.1 Ω scaling | Prototyping-oriented Modbus research candidate |
 | Honeywell Unitary family | HVAC/building universal-I/O controller | BACnet IP / MS/TP / T1L | Pt100/Pt1000/Ni1000 TK5000/Ni1000 DIN/custom resistive | HVAC parity/diagnostic target |
 | Rosemount 644 family | Industrial temperature transmitter | 4–20 mA / HART | RTD transmitter with explicit device diagnostics | Industrial diagnostic reference/target |
 | Endress+Hauser iTEMP TMT82 | Industrial temperature transmitter | 4–20 mA / HART | RTD transmitter with event-numbered sensor diagnostics | Industrial diagnostic reference/target |
@@ -101,6 +103,38 @@ or removes a supported family:
 A device need not support all models. Project-wide coverage is the goal. A new
 family first triggers a compatibility/validation review of existing acquisition
 paths; it does not automatically require a new device driver.
+
+## Direct-resistance sources
+
+Some instruments, RTD interfaces, DAQs, and industrial inputs already expose a
+defensible RTD-element resistance in ohms. Those systems can feed `rtd-sensor`
+directly without an `rtd-acquire` backend.
+
+Their existence still matters to this catalog because it defines the project
+boundary and may reveal useful future backend classes. A wrapper should be
+considered only when `rtd-acquire` adds independent value such as normalized
+diagnostics, acquisition calibration/configuration, or common multi-channel
+semantics. Direct interoperability by itself is not a driver requirement.
+
+## Evaluated but outside the core contract
+
+### Atlas Scientific EZO-RTD
+
+The documented EZO-RTD interface returns an internally calculated temperature
+in °C, K, or °F over UART or I²C. The current documented interface does not
+establish a raw-resistance output suitable for the `rtd-acquire` resistance
+contract.
+
+Accordingly, EZO-RTD is not a current core backend target. `rtd-acquire` should
+not reverse temperature back into resistance after the device has already
+performed RTD interpretation. Reassess this decision only if a documented
+resistance or sufficiently direct electrical-observation interface becomes
+available.
+
+Sources:
+
+- https://atlas-scientific.com/embedded-solutions/ezo-rtd-temperature-circuit/
+- https://files.atlas-scientific.com/EZO_RTD_Datasheet.pdf
 
 ## Host-platform adapters
 
@@ -248,6 +282,27 @@ Sources:
 
 - https://www.ti.com/product/ADS124S08
 - https://www.ti.com/lit/ds/symlink/ads124s08.pdf
+
+### TI ADS1220
+
+The ADS1220 is a later precision-ADC candidate that covers many of the same
+architectural concerns as the planned ADS124S08 while using a smaller four-input
+24-bit delta-sigma ADC. TI documents an SPI interface, programmable gain,
+internal and external references, two matched programmable excitation-current
+sources, and 50/60 Hz rejection. TI's RTD material uses the device for
+ratiometric 2-, 3-, and 4-wire RTD measurement configurations.
+
+That overlap makes ADS1220 useful as a lower-cost representative of the
+configurable precision-ADC family, but it does **not** displace ADS124S08 from
+the current roadmap. ADS124S08 already carries deliberate diagnostic research
+and remains the second planned implementation family. ADS1220 should be
+implemented later only when availability, cost, validation value, or user need
+justifies a second independent configurable-ADC path.
+
+Sources:
+
+- https://www.ti.com/product/ADS1220
+- https://www.ti.com/lit/ds/symlink/ads1220.pdf
 
 ### Analog Devices AD7124-8 / AD7124 family
 
@@ -417,6 +472,26 @@ Sources:
 - https://sid.siemens.com/r/A6V14300949/25901888779___en-US_26440986635
 - https://sid.siemens.com/r/A6V13841491/25014743435___en-US_25015603339
 - https://sid.siemens.com/r/A6V13841491/25014743435___en-US_25015601803
+
+### Sumtech PT-100-485/MB
+
+The PT-100-485/MB is a low-cost/prototyping-oriented Modbus RTU research
+candidate rather than a replacement for the better-documented professional
+industrial targets. Its protocol documentation exposes temperature and PT100
+resistance separately; the resistance register uses 0.1 Ω scaling, and a
+separate writable resistance-correction register is documented.
+
+This makes the module useful for evaluating a simple raw-resistance Modbus path
+without forcing the device's calculated temperature into `rtd-sensor`. The
+current research does **not** establish a sufficiently rich independent
+fault/status model, so it should remain a catalog candidate rather than the
+selected first Modbus backend until diagnostics, validity behavior,
+documentation provenance, and physical hardware can be evaluated more fully.
+
+Sources:
+
+- https://www.sumtech.co.th/manual/PT-100MB%20PT100%20RS485%20sensor%20Instructions.pdf
+- https://www.sumtech.co.th/manual/PT-100-485MB%20PT100%20RS485%20sensor%20protocol.pdf
 
 ### Phoenix Contact MINI MCR-2-RTD-UI
 

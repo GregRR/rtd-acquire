@@ -131,6 +131,16 @@ ADS124S08 acquisition family and for normalized diagnostic semantics involving
 PGA rail monitoring, reference-low flags, CRC-protected conversion data,
 burnout-test ambiguity, excitation sources, and system-monitor facilities.
 
+Texas Instruments. (2026). *ADS1220 4-channel, 2-kSPS, low-power, 24-bit ADC
+with integrated PGA and reference* (Rev. D) [Data sheet].
+https://www.ti.com/lit/ds/symlink/ads1220.pdf
+
+**Project use:** Research/future source for a lower-cost configurable precision
+ADC candidate. It supports the catalog claims for SPI, programmable gain,
+internal/external reference options, matched programmable excitation-current
+sources, 50/60 Hz rejection, and ratiometric RTD acquisition. It does not
+replace the existing ADS124S08 implementation priority.
+
 Analog Devices. (2023). *AD7124-8: 8-channel, low noise, low power, 24-bit,
 sigma-delta ADC with PGA and reference* (Rev. F) [Data sheet].
 https://www.analog.com/media/en/technical-documentation/data-sheets/ad7124-8.pdf
@@ -148,6 +158,20 @@ https://files.pepperl-fuchs.com/webcat/navi/productInfo/pds/038307_eng.pdf
 fault output.
 
 ## Industrial transmitters and universal I/O
+
+Summation Technology. (n.d.). *PT-100-485/MB PT100 RS485 sensor instructions*
+[Manual].
+https://www.sumtech.co.th/manual/PT-100MB%20PT100%20RS485%20sensor%20Instructions.pdf
+
+Summation Technology. (n.d.). *PT-100-485/MB PT100 RS485 sensor protocol*
+[Protocol manual].
+https://www.sumtech.co.th/manual/PT-100-485MB%20PT100%20RS485%20sensor%20protocol.pdf
+
+**Project use:** Research/future source for a low-cost Modbus RTU PT100 module
+that exposes a separate raw-resistance register at 0.1-ohm scaling and a
+resistance-correction register. Current documentation does not yet justify a
+rich normalized diagnostic mapping, so the device remains a prototyping/catalog
+candidate rather than a selected backend.
 
 Emerson. (2024). *Rosemount 644 temperature transmitter reference manual*
 (Rev. CB; document 00809-0400-4728).
@@ -256,6 +280,17 @@ https://sid.siemens.com/r/A6V12954388/20185284747_28090979851__en-US_19516361099
 universal-input modes and for BACnet reliability/status exposure. The current
 research establishes a software-visible validity path but does not yet establish
 which sensor-specific reliability states are exposed for each resistance mode.
+
+## Boundary examples
+
+Atlas Scientific. (2024). *EZO-RTD embedded temperature circuit* (Version 3.7)
+[Data sheet].
+https://files.atlas-scientific.com/EZO_RTD_Datasheet.pdf
+
+**Project use:** Corroborating/design source for the rule that a smart RTD
+interface exposing only internally calculated temperature is outside the core
+`rtd-acquire` resistance-backend contract. The documented interface returns
+temperature over UART/I2C; it is not used as evidence for a raw-resistance path.
 
 ## Language and portability standards
 

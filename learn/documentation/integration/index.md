@@ -6,6 +6,8 @@ hardware and higher-level software.
 Typical integration patterns include:
 
 - acquire resistance, then pass it to `rtd-sensor`;
+- recognize when another system already provides trustworthy RTD-element
+  resistance and `rtd-acquire` is therefore unnecessary for that path;
 - build application logic against the generic `AcquisitionDevice` protocol;
 - add another hardware driver while retaining the same `Measurement` contract;
   or

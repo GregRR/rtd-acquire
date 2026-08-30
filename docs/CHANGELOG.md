@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The first public alpha release was `0.1.0a1`.
 
+## 0.3.0 - Unreleased
+
+### Added
+
+- Record the TI ADS1220 as a later configurable precision-ADC candidate and the
+  PT-100-485/MB as a low-cost raw-resistance Modbus research candidate.
+- Record Atlas Scientific EZO-RTD as an evaluated temperature-output device
+  outside the current resistance-backend contract.
+
+### Changed
+
+- Clarify that `rtd-acquire` is optional when another system already supplies a
+  trustworthy RTD-element resistance in ohms, while temperature-only devices do
+  not become resistance backends by reverse-converting their output.
+- Define one `AcquisitionDevice` as one logical resistance source for future
+  multi-channel hardware, with shared physical state below channel-scoped views
+  and no generic batch API until concrete device semantics require one.
+
 ## 0.2.0 - 2026-08-25
 
 ### Added

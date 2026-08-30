@@ -43,6 +43,31 @@ The separation between `rtd-acquire` and `rtd-sensor` is intentional.
 `rtd-acquire` must not apply temperature offsets or otherwise reinterpret an RTD
 resistance as temperature.
 
+### 2.1 Resistance-output bypass
+
+`rtd-acquire` is not required merely because physical RTD hardware exists. If
+another system already provides the desired trustworthy estimate of RTD-element
+resistance in ohms, a consumer may pass that resistance directly to
+`rtd-sensor` or another model layer.
+
+A direct-resistance path does not become an `rtd-acquire` driver requirement
+just to make the hardware interoperable with the broader RTD ecosystem. A
+future wrapper or backend should have independent acquisition value, such as
+common configuration, diagnostics, calibration, or multi-channel behavior.
+
+### 2.2 Backend eligibility
+
+A device belongs in the core `rtd-acquire` backend model only when the chosen
+interface exposes resistance or sufficiently direct electrical observations
+from which RTD-element resistance can be defensibly estimated.
+
+A device that exposes only an internally calculated temperature is outside the
+core resistance-acquisition contract. `rtd-acquire` must not reconstruct a
+synthetic resistance from that temperature merely to force the device through
+the acquisition boundary; doing so would discard the original acquisition
+evidence and duplicate model interpretation after the device has already
+performed it.
+
 ## 3. Public terminology
 
 The primary public abstraction is `AcquisitionDevice`.
@@ -88,7 +113,33 @@ if multiple device instances share one stateful transport, serialization belongs
 to the caller, transport, or platform adapter rather than being silently added
 to every acquisition driver.
 
-### 3.1 Operation errors
+### 3.1 Multi-channel physical hardware
+
+`AcquisitionDevice` represents one **logical resistance source**, not
+necessarily one physical IC, module, transport, or enclosure.
+
+A multi-channel converter or controller may own shared communication state,
+locking, device-wide configuration, and channel switching while exposing one
+channel-scoped logical `AcquisitionDevice` per resistance source:
+
+```text
+physical backend / shared transport
+    ├── channel 0 view → AcquisitionDevice → Measurement
+    ├── channel 1 view → AcquisitionDevice → Measurement
+    └── channel N view → AcquisitionDevice → Measurement
+```
+
+A channel view may own channel-specific electrical configuration, but
+application metadata stays above the acquisition contract. Do not add physical
+location, application channel labels, equipment identity, RTD-model selection,
+or control-loop roles to `Measurement` merely because a physical device has
+multiple inputs.
+
+Multi-channel hardware also does not by itself justify a generic batch or
+simultaneous-read API. Coordinated sampling semantics differ by device and
+should be designed only when a concrete backend requires them.
+
+### 3.2 Operation errors
 
 Device-reported acquisition conditions are represented in a `Measurement`,
 including `FAULT` measurements. Exceptions are reserved for cases where the

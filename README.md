@@ -19,16 +19,37 @@ model-level uncertainty belong in
 ```text
 physical RTD
     ↓
-converter / ADC / transmitter / controller
-    ↓
-rtd-acquire
-    ↓
-resistance + acquisition diagnostics
-    ↓
-rtd-sensor
-    ↓
-temperature / RTD-model interpretation
+resistance-measurement path
+    ├── raw converter / ADC / electrical observations
+    │       ↓
+    │   rtd-acquire
+    │       ↓
+    │   resistance + acquisition diagnostics
+    │
+    └── instrument / RTD interface already reports resistance
+            ↓
+        resistance
+            ↓
+        rtd-sensor
+            ↓
+        temperature / RTD-model interpretation
 ```
+
+## When do I need rtd-acquire?
+
+Use `rtd-acquire` when hardware still needs acquisition work before it can
+produce a trustworthy estimate of RTD-element resistance. Examples include raw
+converter or ADC data, reference/excitation/scaling calculations, wiring or
+lead compensation, acquisition calibration, and device-native diagnostics.
+
+You may not need `rtd-acquire` when an instrument, RTD interface, DAQ, or other
+system already provides the desired RTD-element resistance in ohms. That
+resistance can be passed directly to `rtd-sensor` or another model layer.
+
+A device that exposes only internally calculated temperature is different. It
+has already crossed the RTD-model interpretation boundary and is not a normal
+`rtd-acquire` resistance backend unless a sufficiently direct resistance or
+electrical-observation interface is also available.
 
 ## Initial targets
 
@@ -37,8 +58,10 @@ hardware testing on a Raspberry Pi 4 Model B and portable C hardware testing on
 Arduino-compatible HERO boards.
 
 The second planned hardware family is the TI ADS124S08 precision ADC/front end.
-Later targets cover industrial resistance inputs, 4–20 mA transmitters,
-industrial digital interfaces, and configurable custom acquisition circuits.
+The TI ADS1220 is a later lower-cost precision-ADC candidate with overlapping
+RTD-acquisition concerns; it does not displace the ADS124S08 milestone. Later
+targets cover industrial resistance inputs, 4–20 mA transmitters, industrial
+digital interfaces, and configurable custom acquisition circuits.
 
 ## Installation
 

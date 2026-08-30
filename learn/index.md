@@ -14,16 +14,23 @@ It deliberately stops at resistance.
 ```text
 physical RTD
     ↓
-converter / ADC / transmitter / controller
-    ↓
-rtd-acquire
-    ↓
-resistance + acquisition diagnostics
-    ↓
-rtd-sensor
-    ↓
-temperature / RTD-model interpretation
+resistance-measurement path
+    ├── raw converter / ADC / electrical observations
+    │       ↓
+    │   rtd-acquire
+    │       ↓
+    │   resistance + acquisition diagnostics
+    │
+    └── instrument / RTD interface already reports resistance
+            ↓
+        resistance
+            ↓
+        rtd-sensor
+            ↓
+        temperature / RTD-model interpretation
 ```
+
+**Boundary clarification introduced in:** `rtd-acquire 0.3.0`
 
 ## What rtd-acquire is
 
@@ -56,6 +63,12 @@ Keeping acquisition separate from RTD interpretation lets each layer do one job
 well. Hardware drivers can report resistance without embedding assumptions
 about sensor curves, while the same `rtd-sensor` model can consume resistance
 from many different acquisition systems.
+
+`rtd-acquire` is not required when another instrument or interface already gives
+you the RTD-element resistance you intend to model. In that case, pass the
+resistance directly to `rtd-sensor`. Conversely, a smart device that exposes
+only internally calculated temperature has already performed RTD interpretation
+and is not a normal `rtd-acquire` resistance backend.
 
 !!! note "Pre-1.0 status"
     `0.2.0` is a pre-1.0 release, so public APIs may still change before `1.0`.

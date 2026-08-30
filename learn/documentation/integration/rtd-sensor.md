@@ -10,6 +10,19 @@ rtd-acquire → resistance → rtd-sensor
 
 They do not depend on one another at runtime.
 
+## rtd-acquire is not always required
+
+**Boundary clarification introduced in:** `rtd-acquire 0.3.0`
+
+When raw hardware still needs converter handling, electrical scaling,
+calibration, or acquisition diagnostics, `rtd-acquire` can produce the
+resistance that `rtd-sensor` consumes.
+
+If an instrument or RTD interface already provides the desired trustworthy
+RTD-element resistance in ohms, applications can pass that resistance directly
+to `rtd-sensor`; no `rtd-acquire` driver is required merely for
+interoperability.
+
 ## Pass resistance explicitly
 
 ```python
