@@ -8,6 +8,10 @@ The first public alpha release was `0.1.0a1`.
 
 ### Added
 
+- Define full-characteristic resistance envelopes for all six current
+  `rtd-sensor` built-in RTD families and the evidence needed to distinguish
+  manufacturer support, electrical compatibility, range validation, and real
+  family/hardware validation.
 - Record the TI ADS1220 as a later configurable precision-ADC candidate and the
   PT-100-485/MB as a low-cost raw-resistance Modbus research candidate.
 - Record Atlas Scientific EZO-RTD as an evaluated temperature-output device

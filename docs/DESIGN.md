@@ -1007,18 +1007,67 @@ repeated in every measurement.
 
 Three compatibility claims are distinct:
 
-1. **Manufacturer-supported** — the vendor explicitly documents support.
-2. **Electrically compatible** — the configured acquisition chain can measure
-   the required resistance range/topology even if not advertised for that RTD.
-3. **rtd-acquire validated** — the project has explicit test evidence for the
-   RTD/hardware/configuration combination.
+1. **Manufacturer-supported** — the vendor explicitly documents the relevant RTD
+   family/model or a resistance-input mode that covers the stated use, with the
+   required configuration/topology. The claim applies only to what the vendor
+   actually documents: support for a generic resistance-input mode does not
+   become a vendor claim for an RTD family that the documentation does not name.
+2. **Electrically compatible** — documented device limits plus engineering
+   analysis show that the configured acquisition chain can measure the complete
+   required resistance envelope and wiring/topology without violating relevant
+   reference, excitation, gain, input, or representability limits, even if the
+   vendor does not advertise that RTD family.
+3. **rtd-acquire validated** — the project has reproducible physical test
+   evidence for the hardware/configuration combination. Validation never upgrades
+   an electrically compatible combination into a manufacturer-supported claim.
 
 Compatibility is configuration-specific rather than a simple property of a
 converter chip. Reference resistance, excitation, gain, wiring, input limits,
-and other configuration may determine whether a combination is usable.
+and other configuration may determine whether a combination is usable. A nominal
+`R0` value alone is not enough: compatibility is checked against the complete
+ideal resistance envelope of the companion `rtd-sensor` characteristic.
 
-The project must not turn an electrical-compatibility analysis into a claim of
-manufacturer support.
+### 9.1 Evidence required for a compatibility record
+
+A compatibility record should identify enough evidence to reproduce the claim:
+
+- exact acquisition device/module and relevant hardware revision when known;
+- interface/backend used and software version or commit;
+- RTD family/characteristic being assessed;
+- required resistance envelope and its source/provenance;
+- reference resistor/reference network, excitation, gain, wiring mode, channel,
+  and other electrical settings that affect usable range;
+- vendor documentation supporting any manufacturer-support claim;
+- calculations and device limits supporting any electrical-compatibility claim;
+- physical test platform/date, reference equipment, tested resistance points,
+  acceptance limits, and result artifacts for project validation; and
+- explicit limitations, untested regions, and unresolved assumptions.
+
+Absence of one evidence class must remain visible. For example, successful bench
+tests can establish project validation for a configuration but cannot manufacture
+a vendor support statement that the vendor never made.
+
+### 9.2 Validation depth
+
+`rtd-acquire validated` can carry two useful evidence depths without creating
+additional compatibility categories:
+
+- **range-validated** — physical precision-resistance testing covers
+  representative low, middle, and high points spanning the required acquisition
+  envelope for a configuration. This validates resistance acquisition without
+  depending on RTD temperature-model interpretation.
+- **family/hardware validated** — the configured acquisition path is additionally
+  exercised with the intended RTD family on real hardware, with applicable
+  wiring behavior and any native-fault behavior required by the validation plan
+  recorded.
+
+A family/hardware validation does not imply that every resistance across the
+characteristic was physically tested. Conversely, range validation does not prove
+that a particular physical probe is suitable across its mathematical model's
+full temperature range. The validation record must say which evidence exists.
+
+The project must not turn electrical-compatibility analysis, range validation, or
+family testing into a stronger claim than the evidence supports.
 
 ### RTD-model parity goal
 

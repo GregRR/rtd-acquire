@@ -89,16 +89,36 @@ public diagnostic vocabulary.
 This table is the canonical `rtd-acquire` list of current `rtd-sensor` parity
 targets. The project should maintain at least one validated acquisition path for
 each listed built-in family and reconcile this table whenever `rtd-sensor` adds
-or removes a supported family:
+or removes a supported family.
 
-| RTD model | Nominal R0 | rtd-acquire obligation |
-| --- | ---: | --- |
-| Pt100 | 100 Ω | Required |
-| Pt500 | 500 Ω | Required |
-| Pt1000 | 1000 Ω | Required |
-| Ni120 6720 | 120 Ω | Required |
-| Ni1000 6180 | 1000 Ω | Required |
-| Ni1000 TK5000 | 1000 Ω | Required |
+The resistance envelope is the ideal-element resistance implied by the current
+`rtd-sensor` characteristic over that characteristic's complete supported
+temperature range. It is an **acquisition requirement**, not temperature-model
+logic for a driver. A candidate acquisition chain must be able to measure the
+required resistance interval with the intended wiring/configuration before it can
+be considered electrically compatible with the full characteristic.
+
+| RTD model | Nominal R0 | Characteristic span | Required ideal resistance envelope | rtd-acquire obligation |
+| --- | ---: | ---: | ---: | --- |
+| Pt100 | 100 Ω | -200 to 850 °C | 18.52008 to 390.481125 Ω | Required |
+| Pt500 | 500 Ω | -200 to 850 °C | 92.6004 to 1952.405625 Ω | Required |
+| Pt1000 | 1000 Ω | -200 to 850 °C | 185.2008 to 3904.81125 Ω | Required |
+| Ni120 6720 | 120 Ω | -80 to 260 °C | ~66.6000 to 380.3099 Ω | Required |
+| Ni1000 6180 | 1000 Ω | -60 to 250 °C | 695.202595 to 2891.5625 Ω | Required |
+| Ni1000 TK5000 | 1000 Ω | -60 to 250 °C | 751.79284 to 2517.265625 Ω | Required |
+
+The platinum values are derived from the IEC 60751 PT-385 characteristic used by
+`rtd-sensor`; Pt100, Pt500, and Pt1000 therefore share one normalized curve and
+differ only by scale. The nickel values come from the distinct 6720, 6180, and
+TK5000 characteristics used by `rtd-sensor`. Ni120 is shown rounded because its
+published piecewise coefficients require the small, explicitly bounded continuity
+adjustments documented by the companion project.
+
+These bounds describe the mathematical characteristic, not every physical RTD
+product sold under the same family name. A probe's packaging, construction,
+tolerance class, lead arrangement, or rated operating range may be narrower.
+Hardware validation must record the actual sensor and acquisition configuration
+rather than treating this table as a product-rating claim.
 
 A device need not support all models. Project-wide coverage is the goal. A new
 family first triggers a compatibility/validation review of existing acquisition

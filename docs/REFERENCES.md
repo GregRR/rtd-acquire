@@ -113,11 +113,42 @@ separate physical HERO/MAX31865 validation required by the roadmap.
 Roe, G. (2026). *rtd-sensor* [Python software]. GitHub.
 https://github.com/GregRR/rtd-sensor
 
-**Project use:** Integration-interface reference for the explicit package
-boundary demonstrated by `examples/rtd_sensor_pt100.py`. The example passes a
-trustworthy acquired resistance to `rtd_sensor.pt100.resistance_to_celsius()`;
-`rtd-sensor` remains a separate package rather than an `rtd-acquire` runtime
-dependency.
+**Project use:** Integration-interface and parity reference for the explicit
+package boundary demonstrated by `examples/rtd_sensor_pt100.py` and for the
+current built-in RTD families that `rtd-acquire 0.3` must cover. The companion
+project's source definitions and versioned conformance catalog identify the
+characteristic ranges and coefficients from which `rtd-acquire` derives required
+ideal resistance envelopes; `rtd-sensor` remains a separate package rather than
+an `rtd-acquire` runtime dependency.
+
+## RTD characteristic and resistance-envelope sources
+
+International Electrotechnical Commission. (2022). *IEC 60751:2022 industrial
+platinum resistance thermometers and platinum temperature sensors* (3rd ed.).
+https://webstore.iec.ch/en/publication/63753
+
+**Project use:** Normative scientific source inherited through the companion
+`rtd-sensor` PT-385 characteristic for the Pt100, Pt500, and Pt1000 full-model
+resistance envelopes used in 0.3 acquisition-compatibility planning.
+
+Innovative Sensor Technology AG. (n.d.). *RTD nickel sensors* [Application
+note].
+https://www.ist-ag.com/sites/default/files/downloads/ATN_E.pdf
+
+**Project use:** Scientific source inherited through `rtd-sensor` for the
+former-DIN Ni1000 6178/6180 ppm/K and Nickel NL / Ni1000 TK5000 5000 ppm/K
+characteristics. The resulting resistance envelopes are compatibility inputs,
+not runtime temperature-model logic in `rtd-acquire`.
+
+Minco Products, Inc. (n.d.). *Resistance thermometry: Principles and
+applications of resistance thermometers and thermistors*.
+https://www.minco.com/wp-content/uploads/Resistance-Thermometry.pdf
+
+**Project use:** Scientific source inherited through `rtd-sensor` for the North
+American Ni120 / 6720 ppm/K piecewise characteristic and its -80 °C through
+260 °C model span. The companion project owns the bounded continuity treatment
+of the published rounded segments; `rtd-acquire` consumes only the resulting
+resistance-envelope requirement.
 
 ## Precision ADC and converter research
 

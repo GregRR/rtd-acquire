@@ -127,16 +127,25 @@ validate them independently against Python.
 Goal: ensure the project as a whole provides practical acquisition paths for
 all current `rtd-sensor` built-in RTD families.
 
-- [ ] Document resistance requirements for Pt100, Pt500, Pt1000, Ni120,
+- [x] Document resistance requirements for Pt100, Pt500, Pt1000, Ni120,
       Ni1000 6180, and Ni1000 TK5000 without importing temperature-model logic
-      into acquisition drivers.
-- [ ] Classify tested combinations as manufacturer-supported, electrically
-      compatible, and/or `rtd-acquire` validated.
-- [ ] Validate appropriate MAX31865 configurations beyond Pt100 where the
-      electrical range and reference network support them.
-- [ ] Add precision reference-resistance validation across representative
-      low/mid/high operating points.
-- [ ] Document unsupported or unvalidated combinations explicitly.
+      into acquisition drivers; define the compatibility/evidence vocabulary used
+      by later validation records.
+- [ ] Add machine-readable 0.3 compatibility/evidence data after the textual
+      contract is stable enough to avoid freezing accidental schema choices.
+- [ ] Extend shared Python/C MAX31865 conformance and threshold coverage to a
+      representative ~4.3 kΩ reference network/high-scale configuration.
+- [ ] Classify MAX31865/family configurations as manufacturer-supported,
+      electrically compatible, and/or `rtd-acquire` validated, with unsupported
+      and unvalidated combinations explicit.
+- [ ] Publish the compatibility matrix and evidence distinctions in the GitHub
+      Pages documentation with navigation/cross-links and bibliography updates.
+- [ ] Extend the physical validation procedure across representative family
+      resistance envelopes and precision low/mid/high reference points.
+- [ ] Add a reproducible validation-results template and small capture helpers so
+      physical evidence can be recorded without copying ad hoc terminal output.
+- [ ] Record incremental real-hardware evidence as equipment becomes available,
+      while keeping untested combinations visibly unvalidated.
 
 ## 0.4 — Configurable precision ADC: ADS124S08
 
