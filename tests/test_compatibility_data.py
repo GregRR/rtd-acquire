@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import cast
 
@@ -244,3 +245,255 @@ def test_evidence_model_keeps_claim_dimensions_independent() -> None:
         depths.add(depth_id)
 
     assert depths == {"range_validated", "family_hardware_validated"}
+
+
+def test_max31865_record_set_covers_current_families_once() -> None:
+    family_document = _load_json(_COMPATIBILITY_ROOT / "rtd_families.json")
+    record_document = _load_json(_COMPATIBILITY_ROOT / "max31865.json")
+
+    assert record_document["schema_version"] == 1
+    assert set(record_document) == {
+        "schema_version",
+        "record_set_id",
+        "device",
+        "family_requirements_path",
+        "evidence_model_path",
+        "device_limits",
+        "sources",
+        "records",
+    }
+    assert record_document["record_set_id"] == "max31865"
+    assert record_document["family_requirements_path"] == "rtd_families.json"
+    assert record_document["evidence_model_path"] == "evidence_model.json"
+    assert _object(record_document["device"]) == {
+        "manufacturer": "Analog Devices",
+        "model": "MAX31865",
+        "interface": "SPI",
+    }
+
+    family_ids = {
+        cast(str, _object(value)["model_id"])
+        for value in _list(family_document["families"])
+    }
+    record_family_ids = [
+        cast(str, _object(_object(value)["rtd_family"])["model_id"])
+        for value in _list(record_document["records"])
+    ]
+
+    assert len(record_family_ids) == len(set(record_family_ids))
+    assert set(record_family_ids) == family_ids
+
+
+def test_compatibility_records_use_frozen_evidence_states() -> None:
+    evidence_document = _load_json(_COMPATIBILITY_ROOT / "evidence_model.json")
+    manifest = _load_json(_COMPATIBILITY_ROOT / "manifest.json")
+
+    allowed_states: dict[str, set[str]] = {}
+    for dimension_value in _list(evidence_document["claim_dimensions"]):
+        dimension = _object(dimension_value)
+        dimension_id = dimension["id"]
+        assert isinstance(dimension_id, str)
+        allowed_states[dimension_id] = {
+            cast(str, _object(state)["id"]) for state in _list(dimension["states"])
+        }
+
+    allowed_depths = {
+        cast(str, _object(depth)["id"])
+        for depth in _list(evidence_document["validation_depths"])
+    }
+
+    for record_set_value in _list(manifest["compatibility_record_sets"]):
+        record_set_path = _object(record_set_value)["path"]
+        assert isinstance(record_set_path, str)
+        record_document = _load_json(_COMPATIBILITY_ROOT / record_set_path)
+        assert set(record_document) == {
+            "schema_version",
+            "record_set_id",
+            "device",
+            "family_requirements_path",
+            "evidence_model_path",
+            "device_limits",
+            "sources",
+            "records",
+        }
+        assert record_document["schema_version"] == 1
+        assert record_document["family_requirements_path"] == "rtd_families.json"
+        assert record_document["evidence_model_path"] == "evidence_model.json"
+        source_ids = {
+            cast(str, _object(source)["id"])
+            for source in _list(record_document["sources"])
+        }
+
+        record_ids: set[str] = set()
+        for record_value in _list(record_document["records"]):
+            record = _object(record_value)
+            assert set(record) == {
+                "id",
+                "rtd_family",
+                "configuration",
+                "claims",
+                "validation_depths",
+                "limitations",
+            }
+            record_id = record["id"]
+            assert isinstance(record_id, str)
+            assert record_id not in record_ids
+            record_ids.add(record_id)
+            limitations = _list(record["limitations"])
+            assert limitations
+            assert all(isinstance(limitation, str) for limitation in limitations)
+
+            claims = _object(record["claims"])
+            assert set(claims) == set(allowed_states)
+
+            for dimension_id, states in allowed_states.items():
+                claim = _object(claims[dimension_id])
+                assert set(claim) == {"state", "evidence_source_ids", "rationale"}
+                state = claim["state"]
+                assert isinstance(state, str)
+                assert state in states
+                rationale = claim["rationale"]
+                assert isinstance(rationale, str)
+                assert rationale
+                for source_id in _list(claim["evidence_source_ids"]):
+                    assert isinstance(source_id, str)
+                    assert source_id in source_ids
+
+            validation_depths = _list(record["validation_depths"])
+            assert all(isinstance(depth, str) for depth in validation_depths)
+            assert set(cast(list[str], validation_depths)) <= allowed_depths
+
+            project_state = _object(claims["project_validation"])["state"]
+            if project_state == "not_validated":
+                assert validation_depths == []
+            else:
+                assert project_state == "validated"
+                assert validation_depths
+
+
+def test_max31865_electrical_compatibility_covers_full_envelopes() -> None:
+    family_document = _load_json(_COMPATIBILITY_ROOT / "rtd_families.json")
+    record_document = _load_json(_COMPATIBILITY_ROOT / "max31865.json")
+
+    families = {
+        cast(str, _object(value)["model_id"]): _object(value)
+        for value in _list(family_document["families"])
+    }
+    limits = _object(record_document["device_limits"])
+    reference_limits = _object(limits["reference_resistance_ohms"])
+    minimum_reference = reference_limits["minimum"]
+    maximum_reference = reference_limits["maximum"]
+    adc_scale = limits["adc_scale_codes"]
+    highest_threshold_code = limits["highest_threshold_code"]
+    assert isinstance(minimum_reference, (int, float))
+    assert isinstance(maximum_reference, (int, float))
+    assert isinstance(adc_scale, int)
+    assert isinstance(highest_threshold_code, int)
+    assert adc_scale == 1 << 15
+    assert highest_threshold_code == adc_scale - 1
+
+    bias_voltage = _object(limits["bias_voltage_v"])
+    bias_current = _object(limits["bias_output_current_ma"])
+    cable_resistance = _object(limits["cable_resistance_ohms_per_lead"])
+    minimum_bias_voltage = bias_voltage["minimum"]
+    maximum_bias_voltage = bias_voltage["maximum"]
+    minimum_bias_current = bias_current["minimum"]
+    maximum_bias_current = bias_current["maximum"]
+    maximum_cable_resistance = cable_resistance["maximum"]
+    assert isinstance(minimum_bias_voltage, (int, float))
+    assert isinstance(maximum_bias_voltage, (int, float))
+    assert isinstance(minimum_bias_current, (int, float))
+    assert isinstance(maximum_bias_current, (int, float))
+    assert isinstance(maximum_cable_resistance, (int, float))
+
+    expected_reference_resistances = {
+        "pt100": 430.0,
+        "pt500": 2000.0,
+        "pt1000": 4300.0,
+        "ni120": 430.0,
+        "ni1000": 4300.0,
+        "ni1000_tk5000": 4300.0,
+    }
+
+    for record_value in _list(record_document["records"]):
+        record = _object(record_value)
+        family_ref = _object(record["rtd_family"])
+        model_id = family_ref["model_id"]
+        characteristic_id = family_ref["characteristic_id"]
+        assert isinstance(model_id, str)
+        assert isinstance(characteristic_id, str)
+
+        family = families[model_id]
+        assert family["characteristic_id"] == characteristic_id
+        envelope = _object(family["required_resistance_envelope_ohms"])
+        minimum_resistance = envelope["minimum"]
+        maximum_resistance = envelope["maximum"]
+        assert isinstance(minimum_resistance, (int, float))
+        assert isinstance(maximum_resistance, (int, float))
+
+        configuration = _object(record["configuration"])
+        assert set(configuration) == {"reference_resistance_ohms", "wire_count"}
+        reference_resistance = configuration["reference_resistance_ohms"]
+        assert isinstance(reference_resistance, (int, float))
+        assert float(reference_resistance) == expected_reference_resistances[model_id]
+        assert configuration["wire_count"] == 4
+        assert minimum_reference <= reference_resistance <= maximum_reference
+        assert 0 < minimum_resistance < maximum_resistance < reference_resistance
+
+        high_threshold_code = math.ceil(
+            maximum_resistance / reference_resistance * adc_scale
+        )
+        assert high_threshold_code <= highest_threshold_code
+
+        maximum_current_ma = (
+            maximum_bias_voltage / (reference_resistance + minimum_resistance) * 1000.0
+        )
+        minimum_current_ma = (
+            minimum_bias_voltage
+            / (
+                reference_resistance
+                + maximum_resistance
+                + 2.0 * maximum_cable_resistance
+            )
+            * 1000.0
+        )
+        assert minimum_current_ma >= minimum_bias_current
+        assert maximum_current_ma <= maximum_bias_current
+
+        electrical_claim = _object(
+            _object(record["claims"])["electrical_compatibility"]
+        )
+        assert electrical_claim["state"] == "compatible"
+
+
+def test_max31865_manufacturer_support_is_scoped_to_documented_platinum() -> None:
+    record_document = _load_json(_COMPATIBILITY_ROOT / "max31865.json")
+
+    observed: dict[str, str] = {}
+    for record_value in _list(record_document["records"]):
+        record = _object(record_value)
+        model_id = _object(record["rtd_family"])["model_id"]
+        state = _object(_object(record["claims"])["manufacturer_support"])["state"]
+        assert isinstance(model_id, str)
+        assert isinstance(state, str)
+        observed[model_id] = state
+
+    assert observed == {
+        "pt100": "documented_supported",
+        "pt500": "documented_supported",
+        "pt1000": "documented_supported",
+        "ni120": "not_established",
+        "ni1000": "not_established",
+        "ni1000_tk5000": "not_established",
+    }
+
+
+def test_max31865_records_do_not_claim_physical_validation() -> None:
+    record_document = _load_json(_COMPATIBILITY_ROOT / "max31865.json")
+
+    for record_value in _list(record_document["records"]):
+        record = _object(record_value)
+        project_claim = _object(_object(record["claims"])["project_validation"])
+        assert project_claim["state"] == "not_validated"
+        assert _list(project_claim["evidence_source_ids"]) == []
+        assert _list(record["validation_depths"]) == []

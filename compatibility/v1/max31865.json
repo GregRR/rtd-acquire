@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "record_set_id": "max31865",
+  "device": {
+    "manufacturer": "Analog Devices",
+    "model": "MAX31865",
+    "interface": "SPI"
+  },
+  "family_requirements_path": "rtd_families.json",
+  "evidence_model_path": "evidence_model.json",
+  "device_limits": {
+    "reference_resistance_ohms": {
+      "minimum": 350.0,
+      "maximum": 10000.0
+    },
+    "adc_scale_codes": 32768,
+    "highest_threshold_code": 32767,
+    "bias_voltage_v": {
+      "minimum": 1.95,
+      "maximum": 2.06
+    },
+    "bias_output_current_ma": {
+      "minimum": 0.2,
+      "maximum": 5.75
+    },
+    "cable_resistance_ohms_per_lead": {
+      "minimum": 0.0,
+      "maximum": 50.0
+    }
+  },
+  "sources": [
+    {
+      "id": "max31865-datasheet-rev3-page1",
+      "title": "MAX31865 RTD-to-Digital Converter data sheet",
+      "revision": "3",
+      "date": "2015-07",
+      "url": "https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31865.pdf",
+      "locator": "page 1, Benefits and Features",
+      "supports": [
+        "platinum RTDs from 100 ohm to 1 kohm at 0 degC (PT100 to PT1000)",
+        "2-wire, 3-wire, and 4-wire sensor connections"
+      ]
+    },
+    {
+      "id": "max31865-datasheet-rev3-page2",
+      "title": "MAX31865 RTD-to-Digital Converter data sheet",
+      "revision": "3",
+      "date": "2015-07",
+      "url": "https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31865.pdf",
+      "locator": "page 2, Recommended DC Operating Conditions",
+      "supports": [
+        "reference resistor operating range of 350 ohm to 10 kohm",
+        "normal conversion analog voltages from 0 to VBIAS"
+      ]
+    },
+    {
+      "id": "max31865-datasheet-rev3-page3",
+      "title": "MAX31865 RTD-to-Digital Converter data sheet",
+      "revision": "3",
+      "date": "2015-07",
+      "url": "https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31865.pdf",
+      "locator": "page 3, Electrical Characteristics",
+      "supports": [
+        "bias voltage range of 1.95 V to 2.06 V",
+        "bias output current range of 0.2 mA to 5.75 mA"
+      ]
+    },
+    {
+      "id": "max31865-datasheet-rev3-page10",
+      "title": "MAX31865 RTD-to-Digital Converter data sheet",
+      "revision": "3",
+      "date": "2015-07",
+      "url": "https://www.analog.com/media/en/technical-documentation/data-sheets/MAX31865.pdf",
+      "locator": "page 10, Detailed Description / Application Circuits / Using Thermistors",
+      "supports": [
+        "signal conditioning optimized for PT100 through PT1000 RTDs",
+        "ADC output equals RTD resistance divided by reference resistance",
+        "four-times-R0 reference resistor guidance for platinum RTDs",
+        "PT100 uses 400 ohm and PT1000 uses 4 kohm as nominal optimum examples",
+        "other resistive sensors may be used when RREF is at least the sensor maximum resistance",
+        "4-wire connection eliminates cable-resistance error by separate force and sense leads"
+      ]
+    }
+  ],
+  "records": [
+    {
+      "id": "max31865-pt100-rref430-4wire",
+      "rtd_family": {
+        "model_id": "pt100",
+        "characteristic_id": "iec60751_pt385"
+      },
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 4
+      },
+      "claims": {
+        "manufacturer_support": {
+          "state": "documented_supported",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page1",
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "Analog Devices explicitly documents platinum RTDs from PT100 through PT1000 and 4-wire sensor connections; the assessed 430 ohm reference resistor is within the documented operating range."
+        },
+        "electrical_compatibility": {
+          "state": "compatible",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page3",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The assessed RREF is within the documented operating range, the complete required resistance envelope remains below RREF and the 15-bit full-scale ratio, the upper envelope threshold remains representable without downward rounding, and the resulting 4-wire bias-current bounds remain inside the documented output-current range."
+        },
+        "project_validation": {
+          "state": "not_validated",
+          "evidence_source_ids": [],
+          "rationale": "No qualifying physical MAX31865 plus RTD-family validation record is yet referenced for this configuration."
+        }
+      },
+      "validation_depths": [],
+      "limitations": [
+        "This record assesses a 4-wire topology only; 2-wire and 3-wire accuracy and lead-resistance effects are not classified by this record.",
+        "Electrical compatibility establishes acquisition-range feasibility, not RTD probe product ratings, temperature accuracy, or physical project validation."
+      ]
+    },
+    {
+      "id": "max31865-pt500-rref2000-4wire",
+      "rtd_family": {
+        "model_id": "pt500",
+        "characteristic_id": "iec60751_pt385"
+      },
+      "configuration": {
+        "reference_resistance_ohms": 2000.0,
+        "wire_count": 4
+      },
+      "claims": {
+        "manufacturer_support": {
+          "state": "documented_supported",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page1",
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "Analog Devices explicitly documents 100 ohm through 1 kohm platinum RTDs and 4-wire sensor connections; the four-times-R0 guidance yields the assessed 2 kohm reference resistor."
+        },
+        "electrical_compatibility": {
+          "state": "compatible",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page3",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The assessed RREF is within the documented operating range, the complete required resistance envelope remains below RREF and the 15-bit full-scale ratio, the upper envelope threshold remains representable without downward rounding, and the resulting 4-wire bias-current bounds remain inside the documented output-current range."
+        },
+        "project_validation": {
+          "state": "not_validated",
+          "evidence_source_ids": [],
+          "rationale": "No qualifying physical MAX31865 plus RTD-family validation record is yet referenced for this configuration."
+        }
+      },
+      "validation_depths": [],
+      "limitations": [
+        "This record assesses a 4-wire topology only; 2-wire and 3-wire accuracy and lead-resistance effects are not classified by this record.",
+        "Electrical compatibility establishes acquisition-range feasibility, not RTD probe product ratings, temperature accuracy, or physical project validation."
+      ]
+    },
+    {
+      "id": "max31865-pt1000-rref4300-4wire",
+      "rtd_family": {
+        "model_id": "pt1000",
+        "characteristic_id": "iec60751_pt385"
+      },
+      "configuration": {
+        "reference_resistance_ohms": 4300.0,
+        "wire_count": 4
+      },
+      "claims": {
+        "manufacturer_support": {
+          "state": "documented_supported",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page1",
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "Analog Devices explicitly documents PT1000 and 4-wire sensor connections; the assessed 4.3 kohm reference resistor is within the documented operating range, while the datasheet identifies 4 kohm as the nominal optimum for PT1000."
+        },
+        "electrical_compatibility": {
+          "state": "compatible",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page3",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The assessed RREF is within the documented operating range, the complete required resistance envelope remains below RREF and the 15-bit full-scale ratio, the upper envelope threshold remains representable without downward rounding, and the resulting 4-wire bias-current bounds remain inside the documented output-current range."
+        },
+        "project_validation": {
+          "state": "not_validated",
+          "evidence_source_ids": [],
+          "rationale": "No qualifying physical MAX31865 plus RTD-family validation record is yet referenced for this configuration."
+        }
+      },
+      "validation_depths": [],
+      "limitations": [
+        "This record assesses a 4-wire topology only; 2-wire and 3-wire accuracy and lead-resistance effects are not classified by this record.",
+        "Electrical compatibility establishes acquisition-range feasibility, not RTD probe product ratings, temperature accuracy, or physical project validation."
+      ]
+    },
+    {
+      "id": "max31865-ni120-rref430-4wire",
+      "rtd_family": {
+        "model_id": "ni120",
+        "characteristic_id": "ni6720_north_american"
+      },
+      "configuration": {
+        "reference_resistance_ohms": 430.0,
+        "wire_count": 4
+      },
+      "claims": {
+        "manufacturer_support": {
+          "state": "not_established",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The datasheet discusses nickel as an RTD material and permits other resistive sensors, but it does not explicitly name the Ni120 6720 family; generic resistance-input capability is not promoted to a manufacturer RTD-family support claim."
+        },
+        "electrical_compatibility": {
+          "state": "compatible",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page3",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The assessed RREF is within the documented operating range, the complete required resistance envelope remains below RREF and the 15-bit full-scale ratio, the upper envelope threshold remains representable without downward rounding, and the resulting 4-wire bias-current bounds remain inside the documented output-current range."
+        },
+        "project_validation": {
+          "state": "not_validated",
+          "evidence_source_ids": [],
+          "rationale": "No qualifying physical MAX31865 plus RTD-family validation record is yet referenced for this configuration."
+        }
+      },
+      "validation_depths": [],
+      "limitations": [
+        "This record assesses a 4-wire topology only; 2-wire and 3-wire accuracy and lead-resistance effects are not classified by this record.",
+        "Electrical compatibility establishes acquisition-range feasibility, not RTD probe product ratings, temperature accuracy, or physical project validation."
+      ]
+    },
+    {
+      "id": "max31865-ni1000-rref4300-4wire",
+      "rtd_family": {
+        "model_id": "ni1000",
+        "characteristic_id": "ni6180_din43760"
+      },
+      "configuration": {
+        "reference_resistance_ohms": 4300.0,
+        "wire_count": 4
+      },
+      "claims": {
+        "manufacturer_support": {
+          "state": "not_established",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The datasheet discusses nickel as an RTD material and permits other resistive sensors, but it does not explicitly name the Ni1000 6180 family; generic resistance-input capability is not promoted to a manufacturer RTD-family support claim."
+        },
+        "electrical_compatibility": {
+          "state": "compatible",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page3",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The assessed RREF is within the documented operating range, the complete required resistance envelope remains below RREF and the 15-bit full-scale ratio, the upper envelope threshold remains representable without downward rounding, and the resulting 4-wire bias-current bounds remain inside the documented output-current range."
+        },
+        "project_validation": {
+          "state": "not_validated",
+          "evidence_source_ids": [],
+          "rationale": "No qualifying physical MAX31865 plus RTD-family validation record is yet referenced for this configuration."
+        }
+      },
+      "validation_depths": [],
+      "limitations": [
+        "This record assesses a 4-wire topology only; 2-wire and 3-wire accuracy and lead-resistance effects are not classified by this record.",
+        "Electrical compatibility establishes acquisition-range feasibility, not RTD probe product ratings, temperature accuracy, or physical project validation."
+      ]
+    },
+    {
+      "id": "max31865-ni1000-tk5000-rref4300-4wire",
+      "rtd_family": {
+        "model_id": "ni1000_tk5000",
+        "characteristic_id": "ni5000_tk5000"
+      },
+      "configuration": {
+        "reference_resistance_ohms": 4300.0,
+        "wire_count": 4
+      },
+      "claims": {
+        "manufacturer_support": {
+          "state": "not_established",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The datasheet discusses nickel as an RTD material and permits other resistive sensors, but it does not explicitly name the Ni1000 TK5000 family; generic resistance-input capability is not promoted to a manufacturer RTD-family support claim."
+        },
+        "electrical_compatibility": {
+          "state": "compatible",
+          "evidence_source_ids": [
+            "max31865-datasheet-rev3-page2",
+            "max31865-datasheet-rev3-page3",
+            "max31865-datasheet-rev3-page10"
+          ],
+          "rationale": "The assessed RREF is within the documented operating range, the complete required resistance envelope remains below RREF and the 15-bit full-scale ratio, the upper envelope threshold remains representable without downward rounding, and the resulting 4-wire bias-current bounds remain inside the documented output-current range."
+        },
+        "project_validation": {
+          "state": "not_validated",
+          "evidence_source_ids": [],
+          "rationale": "No qualifying physical MAX31865 plus RTD-family validation record is yet referenced for this configuration."
+        }
+      },
+      "validation_depths": [],
+      "limitations": [
+        "This record assesses a 4-wire topology only; 2-wire and 3-wire accuracy and lead-resistance effects are not classified by this record.",
+        "Electrical compatibility establishes acquisition-range feasibility, not RTD probe product ratings, temperature accuracy, or physical project validation."
+      ]
+    }
+  ]
+}

@@ -61,7 +61,13 @@ registers, 2-/3-/4-wire behavior, SPI mode and clock limits, fault-status bits,
 automatic fault-detection cycle, input-settling guidance (including the
 five-time-constant plus 1 ms post-fault stabilization recommendation), and
 one-shot conversion timing. It is also the implementation basis for the
-MAX31865 conformance vectors and native diagnostic evidence.
+MAX31865 conformance vectors, native diagnostic evidence, and the 0.3
+compatibility classification: page 1 explicitly covers 100 Ω to 1 kΩ platinum
+RTDs (PT100 to PT1000), page 2 specifies the 350 Ω to 10 kΩ recommended `RREF`
+range, page 3 provides the 1.95–2.06 V bias and 0.2–5.75 mA output-current
+limits used in the electrical analysis, and page 10 documents the ratiometric
+acquisition model, platinum reference-resistor guidance, 4-wire behavior, and
+generic resistive-sensor use.
 
 Raspberry Pi Ltd. (n.d.). *Raspberry Pi computer hardware: Serial peripheral
 interface (SPI)* [Documentation].

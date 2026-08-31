@@ -66,7 +66,7 @@ public diagnostic vocabulary.
 
 | Device/family | Architecture | Typical interface | RTD relevance | Project priority |
 | --- | --- | --- | --- | --- |
-| Analog Devices MAX31865 | Dedicated RTD resistance-to-digital converter | SPI | Pt100–Pt1000 documented; other resistance ranges require configuration/validation | First implementation |
+| Analog Devices MAX31865 | Dedicated RTD resistance-to-digital converter | SPI | Vendor explicitly documents platinum RTDs from Pt100 through Pt1000; selected Ni-family paths are separately classified as electrical, not vendor-family, compatibility | First implementation |
 | TI ADS124S08 | Precision configurable 24-bit ADC/front end | SPI | Flexible ratiometric RTD acquisition; strong candidate for Pt and Ni families | Second implementation |
 | TI ADS1220 | Precision configurable 24-bit ADC/front end | SPI | PGA/reference/IDAC architecture supports flexible ratiometric RTD acquisition | Later precision-ADC candidate |
 | Analog Devices AD7124-4/-8 | Precision configurable 24-bit ADC/front end | SPI | Flexible RTD/resistive-sensor acquisition | High-priority catalog target |
@@ -128,6 +128,45 @@ support claims than this catalog.
 A device need not support all models. Project-wide coverage is the goal. A new
 family first triggers a compatibility/validation review of existing acquisition
 paths; it does not automatically require a new device driver.
+
+
+### MAX31865 compatibility classification
+
+The first v1 device record set classifies one conservative 4-wire MAX31865
+reference-network configuration for each current parity target. These are
+configuration-specific acquisition claims, not universal statements about every
+MAX31865 module or every probe sold under the family name.
+
+| RTD family | Assessed RREF | Manufacturer support | Electrical compatibility | rtd-acquire validation |
+| --- | ---: | --- | --- | --- |
+| Pt100 | 430 Ω | Documented supported | Compatible | Not validated |
+| Pt500 | 2 kΩ | Documented supported | Compatible | Not validated |
+| Pt1000 | 4.3 kΩ | Documented supported | Compatible | Not validated |
+| Ni120 6720 | 430 Ω | Not established | Compatible | Not validated |
+| Ni1000 6180 | 4.3 kΩ | Not established | Compatible | Not validated |
+| Ni1000 TK5000 | 4.3 kΩ | Not established | Compatible | Not validated |
+
+Analog Devices explicitly documents 100 Ω through 1 kΩ platinum RTDs (PT100 to
+PT1000), 2-/3-/4-wire connections, and a 350 Ω to 10 kΩ recommended `RREF`
+range. The datasheet also explains generic ratiometric resistance acquisition
+and notes nickel RTDs/other resistive sensors, but it does not explicitly name
+the three nickel families above. Under the project's evidence rule, generic
+resistance-input capability therefore does not become a nickel-family vendor
+support claim.
+
+For electrical compatibility, each selected `RREF` lies within the documented
+operating range, exceeds the complete family resistance envelope, and leaves the
+upper envelope representable in the MAX31865 15-bit threshold domain. The
+resulting 4-wire excitation-current bounds also remain inside the datasheet's
+0.2–5.75 mA bias-output range across each envelope, including the documented
+maximum per-lead cable resistance in the minimum-current check. Four-wire
+operation is intentionally assessed first because it removes lead-resistance
+error from the acquisition result; 2-wire and 3-wire family/configuration
+classifications are not implied by these records.
+
+All six records remain `not_validated`. Software conformance, including the
+4.3 kΩ high-scale vectors, is not physical converter/family evidence. The
+machine-readable source of truth is `compatibility/v1/max31865.json`.
 
 ## Direct-resistance sources
 

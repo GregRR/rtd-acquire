@@ -11,6 +11,8 @@ The data is separate from `conformance/`:
   evidence needed to make hardware/configuration compatibility claims.
 
 Neither dataset substitutes for physical validation. Real-hardware evidence is
-recorded separately and referenced by compatibility records when it exists.
+recorded separately and referenced by compatibility records when it exists. The
+first device record set classifies MAX31865 reference-network configurations
+without claiming physical validation.
 
 See [`v1/README.md`](v1/README.md) for the current format.

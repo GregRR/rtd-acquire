@@ -1077,14 +1077,19 @@ from deterministic implementation conformance under `conformance/`.
 
 The initial v1 data freezes the six current RTD-family resistance requirements
 and the three independent claim dimensions defined above. Device/configuration
-record sets are added only when their evidence has been explicitly classified; an
-empty record-set list must not be interpreted as implicit support or
+record sets are added only when their evidence has been explicitly classified.
+The first v1 record set classifies conservative MAX31865 4-wire reference-network
+configurations; absent records remain neither implicit support nor implicit
 incompatibility.
 
 Machine-readable records must retain explicit unknown/not-assessed states. They
 must not collapse manufacturer support, electrical compatibility, and project
 validation into one `supported` flag. Physical-validation depth also remains
-separate from those compatibility dimensions.
+separate from those compatibility dimensions. A record with
+`project_validation = not_validated` must have no validation depths; a record
+with `project_validation = validated` must declare at least one validation depth.
+This invariant is enforced by compatibility-data tests so a depth label cannot
+contradict the physical-validation claim.
 
 ### RTD-model parity goal
 

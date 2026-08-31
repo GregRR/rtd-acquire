@@ -136,7 +136,7 @@ all current `rtd-sensor` built-in RTD families.
       leaving device/configuration record sets empty until separately classified.
 - [x] Extend shared Python/C MAX31865 conformance and threshold coverage to a
       representative ~4.3 kΩ reference network/high-scale configuration.
-- [ ] Classify MAX31865/family configurations as manufacturer-supported,
+- [x] Classify MAX31865/family configurations as manufacturer-supported,
       electrically compatible, and/or `rtd-acquire` validated, with unsupported
       and unvalidated combinations explicit.
 - [ ] Publish the compatibility matrix and evidence distinctions in the GitHub
