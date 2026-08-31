@@ -58,6 +58,46 @@ The binary64/binary32 software conformance tolerance is not a substitute for a
 physical acceptance budget. Real hardware adds reference-resistor, converter,
 wiring, resistance-standard, and repeatability uncertainty.
 
+## RTD-family envelope validation
+
+**Family-envelope validation introduced in:** `rtd-acquire 0.3.0`
+
+The 0.3 procedure extends physical validation from the original Pt100-focused
+platform gates to every current RTD-family compatibility record. It keeps two
+validation depths distinct:
+
+- `range_validated` requires characterized resistance references near the low,
+  middle, and high parts of the complete family resistance envelope; and
+- `family_hardware_validated` additionally requires a real RTD from that family
+  on the assessed hardware/wiring path.
+
+For a family envelope `Rmin..Rmax`, define a test point's normalized position as
+`(Rtest - Rmin) / (Rmax - Rmin)`. The canonical procedure requires three
+distinct precision references in these bands:
+
+- low: 0–10% of the envelope span;
+- middle: 45–55%; and
+- high: 90–100%.
+
+The nominal 0 °C resistance is not automatically a middle-range test point.
+Actual characterized resistor values may differ from convenient planning
+values as long as they fall inside the required bands and their uncertainty is
+recorded.
+
+Each point uses at least 20 consecutive measurements and a predeclared physical
+acceptance budget appropriate to the actual `RREF`, resistance standard,
+wiring, and platform. All three points must pass before a record can claim
+`range_validated`.
+
+A real-family test then checks the intended sensor family and wiring on physical
+hardware, preferably against an independent resistance measurement. It does not
+need to reproduce the RTD's entire temperature range because the precision
+resistance points already establish full-envelope acquisition coverage.
+
+Validation remains platform- and configuration-scoped: a Pi/Python result does
+not silently validate HERO/C, another `RREF`, another wire count, or another RTD
+family.
+
 ## Do not substitute plausibility for accuracy
 
 A room-temperature Pt100 producing a plausible-looking value is useful as a
@@ -71,5 +111,7 @@ The canonical detailed procedure remains in
     `0.1.0a1` was released before the Raspberry Pi/MAX31865 physical validation
     gate was completed. The 0.2 software implementation and HERO/UNO toolchain
     compile gate are also complete, but the physical Pi-versus-HERO comparison
-    remains pending. Implemented/toolchain-verified support must therefore stay
-    distinct from physically validated hardware.
+    remains pending. The 0.3 MAX31865 family records likewise remain
+    `not_validated` until the applicable range/family procedure is completed.
+    Implemented/toolchain-verified support must therefore stay distinct from
+    physically validated hardware.

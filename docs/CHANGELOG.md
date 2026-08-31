@@ -32,6 +32,10 @@ The first public alpha release was `0.1.0a1`.
 
 ### Changed
 
+- Extend the physical MAX31865 validation procedure across all six current RTD
+  families with explicit low/middle/high precision-resistance bands,
+  per-configuration acceptance budgets, and separate range-versus-real-family
+  validation gates.
 - Record independent verification of the pinned `rtd-sensor v0.8.0` conformance
   catalog hashes and harden compatibility-manifest completeness checks for
   future device/configuration record sets.

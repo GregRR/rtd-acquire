@@ -141,7 +141,7 @@ all current `rtd-sensor` built-in RTD families.
       and unvalidated combinations explicit.
 - [x] Publish the compatibility matrix and evidence distinctions in the GitHub
       Pages documentation with navigation/cross-links and bibliography updates.
-- [ ] Extend the physical validation procedure across representative family
+- [x] Extend the physical validation procedure across representative family
       resistance envelopes and precision low/mid/high reference points.
 - [ ] Add a reproducible validation-results template and small capture helpers so
       physical evidence can be recorded without copying ad hoc terminal output.

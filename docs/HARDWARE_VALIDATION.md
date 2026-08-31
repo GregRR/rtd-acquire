@@ -320,3 +320,170 @@ Passing this procedure on Pi 4 and HERO does not make Pi 5 hardware-validated.
 Pi 5 may continue to be described as supported by the Linux `spidev`
 architecture but unvalidated on physical hardware until the Raspberry Pi
 procedure is repeated on a Pi 5.
+
+## Part D — 0.3 RTD-family envelope validation
+
+**Family-envelope procedure introduced in:** `rtd-acquire 0.3.0`
+
+This part extends the MAX31865 physical procedure from the original Pt100-focused
+platform gates to the six current RTD-family parity targets. It deliberately
+separates two physical-evidence depths already defined by the compatibility
+model:
+
+- `range_validated` uses characterized resistance sources to exercise the
+  assessed acquisition configuration near the low, middle, and high portions of
+  a family's complete required resistance envelope; and
+- `family_hardware_validated` additionally exercises a real RTD from the named
+  family with the applicable wiring and native-fault behavior recorded.
+
+Precision-resistance substitution is therefore sufficient for range evidence but
+cannot by itself establish family/hardware validation. Conversely, one
+plausible-looking real RTD reading does not establish range validation.
+
+Physical evidence is also platform-scoped. A successful Raspberry Pi/Python run
+must not be presented as HERO/C validation, or vice versa, unless the applicable
+platform leg was actually executed and recorded.
+
+### 14. Select low, middle, and high precision-resistance points
+
+For each family/configuration being range-validated, use the required resistance
+envelope in `compatibility/v1/rtd_families.json` and the exact assessed
+configuration in the applicable compatibility record set. Do not derive these
+points from nominal `R0` alone and do not reproduce RTD temperature-model
+coefficients in the validation harness.
+
+Define normalized position inside the required envelope as:
+
+```text
+position = (Rtest - Rmin) / (Rmax - Rmin)
+```
+
+Select three **distinct characterized resistance references** meeting all of the
+following:
+
+- **low:** `0.00 <= position <= 0.10`;
+- **middle:** `0.45 <= position <= 0.55`; and
+- **high:** `0.90 <= position <= 1.00`.
+
+The actual reference need not equal a mathematically convenient target. Record
+its characterized resistance and uncertainty and verify that its normalized
+position falls inside the required band. The nominal resistance at 0 °C may be
+an additional useful point, but it does not replace the middle point unless it
+actually lies in the middle band.
+
+The following 5%/50%/95% values are planning examples, not required resistor
+values. They are derived only from the tracked acquisition envelopes and are
+included to make test-equipment selection easier:
+
+| RTD family | Required envelope | Assessed `RREF` | Example low (5%) | Example middle (50%) | Example high (95%) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Pt100 | 18.52008–390.481125 Ω | 430 Ω | 37.118 Ω | 204.501 Ω | 371.883 Ω |
+| Pt500 | 92.6004–1952.405625 Ω | 2 kΩ | 185.591 Ω | 1022.503 Ω | 1859.415 Ω |
+| Pt1000 | 185.2008–3904.81125 Ω | 4.3 kΩ | 371.181 Ω | 2045.006 Ω | 3718.831 Ω |
+| Ni120 North American 6720 | 66.6–380.3099 Ω | 430 Ω | 82.285 Ω | 223.455 Ω | 364.624 Ω |
+| Ni1000 6180 | 695.202595–2891.5625 Ω | 4.3 kΩ | 805.021 Ω | 1793.383 Ω | 2781.745 Ω |
+| Ni1000 TK5000 | 751.79284–2517.265625 Ω | 4.3 kΩ | 840.066 Ω | 1634.529 Ω | 2428.992 Ω |
+
+If a precision source is reused across multiple family records, it counts for
+each record only when it independently satisfies that record's low/middle/high
+position rule and uses the exact assessed configuration. Reuse must be explicit
+in the validation evidence rather than inferred afterward.
+
+### 15. Characterize the resistance source and acceptance budget
+
+Prefer a calibrated decade box, resistance calibrator, or individually
+characterized precision resistors. Where practical, characterize the source
+with a four-terminal measurement so lead/contact resistance is not silently
+folded into the reference value. Record the instrument or calibration source,
+measurement date, characterized value, tolerance/uncertainty, and connection
+method.
+
+Predeclare an acceptance budget for **each family/configuration and platform**
+before examining the final results. In addition to the general budget terms
+above, account for the fact that different assessed `RREF` networks have
+different converter quantization steps (`RREF / 32768`) and may have different
+reference-resistor uncertainty.
+
+Do not use one absolute ohm tolerance across 430 Ω, 2 kΩ, and 4.3 kΩ reference
+networks merely for convenience. The declared budget must be defensible for the
+specific physical configuration and reference equipment being tested.
+
+### 16. Run precision range validation
+
+For each family/configuration and for each selected low/middle/high resistance
+reference:
+
+1. configure the exact assessed `RREF` and 4-wire topology from the compatibility
+   record;
+2. connect the characterized resistance source using the board manufacturer's
+   recommended four-wire/Kelvin arrangement where available;
+3. collect at least 20 consecutive measurements through the platform path being
+   validated;
+4. record every resistance result, acquisition/operation result, measurement
+   status, and diagnostic/native evidence;
+5. verify that no unexplained acquisition failures or fault diagnostics occur;
+6. compute the mean, standard deviation, minimum, maximum, and signed error from
+   the characterized reference; and
+7. verify the mean error and repeatability against the predeclared budget.
+
+A family/configuration may claim `range_validated` only when **all three**
+low/middle/high points pass. A missing or failed point leaves that record without
+range-validation depth even if the other points look excellent.
+
+The low/middle/high substitution tests validate the resistance-acquisition path
+across the required envelope. They do not demonstrate RTD temperature-model
+accuracy and do not require `rtd-sensor` at runtime.
+
+### 17. Run real-family hardware validation
+
+To add `family_hardware_validated` for a record, connect a real RTD matching the
+recorded family identity and the assessed 4-wire configuration. Record the RTD
+manufacturer/model, characteristic/family designation, wiring, and any relevant
+probe tolerance/class information available from the manufacturer.
+
+At a stable test condition:
+
+1. acquire at least 20 consecutive resistance measurements;
+2. compare the acquired resistance with an independent resistance reference
+   where practical, such as a calibrated four-wire ohmmeter measurement made
+   under sufficiently stable conditions;
+3. record repeatability, diagnostics, and any material environmental drift;
+4. exercise or reference at least one safe native-fault observation applicable
+   to the same converter/path/topology; and
+5. verify the result against a predeclared family-hardware acceptance budget.
+
+A calibrated temperature environment plus the external RTD model may be useful
+additional evidence, but it must remain clearly identified as an indirect
+resistance reference. `rtd-acquire` validation should not silently turn a
+resistance-to-temperature model into acquisition truth.
+
+Family/hardware validation does **not** require physically driving the RTD across
+its entire published temperature characteristic. The precision-resistance
+low/middle/high tests provide the full-envelope acquisition evidence; the real
+RTD test establishes that the intended sensor family, wiring, converter, and
+software path work together on physical hardware.
+
+A converter-level native-fault observation may be referenced by more than one
+family record only when it was produced with the same applicable converter,
+platform path, and wiring topology and the shared evidence is explicitly
+identified. Do not imply that an untested topology inherited the result.
+
+### 18. Promote compatibility evidence only after the gate passes
+
+After the physical evidence is finalized, update only the claim depth actually
+supported:
+
+- low/middle/high precision-reference success may add `range_validated`;
+- qualifying real-family RTD evidence may add `family_hardware_validated`; and
+- `project_validation` becomes `validated` only when at least one qualifying
+  validation depth and its reproducible evidence are attached.
+
+Do not change manufacturer-support or electrical-compatibility states merely
+because physical validation succeeded. Likewise, do not generalize a validation
+result to untested platforms, wire counts, reference-resistor values, board
+revisions, or RTD families.
+
+The tracked summary should identify the exact compatibility-record ID(s) covered,
+platform/runtime path, hardware revisions, resistance points, acceptance
+budgets, and evidence artifacts. Raw captures and calculations may remain under
+`.rtd-acquire-local/` until they are summarized in tracked project evidence.

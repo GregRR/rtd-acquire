@@ -549,3 +549,52 @@ def test_learn_compatibility_matrix_matches_max31865_records() -> None:
             f"`{validation_state}` |"
         )
         assert expected_row in matrix_text
+
+
+def test_hardware_validation_family_plan_matches_compatibility_records() -> None:
+    family_document = _load_json(_COMPATIBILITY_ROOT / "rtd_families.json")
+    record_document = _load_json(_COMPATIBILITY_ROOT / "max31865.json")
+    validation_text = (
+        Path(__file__).parents[1] / "docs" / "HARDWARE_VALIDATION.md"
+    ).read_text(encoding="utf-8")
+
+    families = {
+        cast(str, _object(value)["model_id"]): _object(value)
+        for value in _list(family_document["families"])
+    }
+
+    for record_value in _list(record_document["records"]):
+        record = _object(record_value)
+        model_id = _object(record["rtd_family"])["model_id"]
+        assert isinstance(model_id, str)
+        family = families[model_id]
+
+        display_name = family["display_name"]
+        assert isinstance(display_name, str)
+        envelope = _object(family["required_resistance_envelope_ohms"])
+        minimum_resistance = envelope["minimum"]
+        maximum_resistance = envelope["maximum"]
+        assert isinstance(minimum_resistance, (int, float))
+        assert isinstance(maximum_resistance, (int, float))
+
+        configuration = _object(record["configuration"])
+        reference_resistance = configuration["reference_resistance_ohms"]
+        assert isinstance(reference_resistance, (int, float))
+        assert configuration["wire_count"] == 4
+
+        span = maximum_resistance - minimum_resistance
+        low_target = minimum_resistance + 0.05 * span
+        middle_target = minimum_resistance + 0.50 * span
+        high_target = minimum_resistance + 0.95 * span
+
+        reference_label = (
+            f"{reference_resistance / 1000:g} kΩ"
+            if reference_resistance >= 1000
+            else f"{reference_resistance:g} Ω"
+        )
+        expected_row = (
+            f"| {display_name} | {minimum_resistance}–{maximum_resistance} Ω | "
+            f"{reference_label} | {low_target:.3f} Ω | {middle_target:.3f} Ω | "
+            f"{high_target:.3f} Ω |"
+        )
+        assert expected_row in validation_text
