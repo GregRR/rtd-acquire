@@ -18,6 +18,7 @@ from rtd_acquire.max31865._thresholds import (
 )
 
 _CONFORMANCE_ROOT = Path(__file__).parents[1] / "conformance" / "v1"
+_COMPATIBILITY_ROOT = Path(__file__).parents[1] / "compatibility" / "v1"
 
 
 def _object(value: object) -> dict[str, object]:
@@ -282,6 +283,59 @@ def test_max31865_quarter_scale_reference_value_is_exact() -> None:
     resistance = (rtd_register >> 1) / 32768.0 * reference
 
     assert resistance == expected["resistance_ohms"] == 107.5
+
+
+def test_max31865_high_scale_vectors_cover_pt1000_envelope() -> None:
+    families_document = _load_json(_COMPATIBILITY_ROOT / "rtd_families.json")
+    pt1000 = next(
+        _object(value)
+        for value in _list(families_document["families"])
+        if _object(value)["model_id"] == "pt1000"
+    )
+    envelope = _object(pt1000["required_resistance_envelope_ohms"])
+    minimum = envelope["minimum"]
+    maximum = envelope["maximum"]
+    assert isinstance(minimum, float)
+    assert isinstance(maximum, float)
+
+    measurement_document = _load_json(_CONFORMANCE_ROOT / "max31865.json")
+    measurement = next(
+        _object(value)
+        for value in _list(measurement_document["vectors"])
+        if _object(value)["id"] == "max31865-high-scale-pt1000-envelope-ok"
+    )
+    measurement_config = _object(measurement["configuration"])
+    native_input = _object(measurement["native_input"])
+    measurement_expected = _object(measurement["expected"])
+    reference = measurement_config["reference_resistance_ohms"]
+    rtd_register = native_input["rtd_register"]
+    expected_resistance = measurement_expected["resistance_ohms"]
+    assert isinstance(reference, float)
+    assert isinstance(rtd_register, int)
+    assert isinstance(expected_resistance, float)
+
+    adc_code = rtd_register >> 1
+    assert reference == 4300.0
+    assert expected_resistance == adc_code / 32768.0 * reference
+    assert expected_resistance <= maximum
+    assert (adc_code + 1) / 32768.0 * reference > maximum
+
+    threshold_document = _load_json(
+        _CONFORMANCE_ROOT / "max31865_threshold_encoding.json"
+    )
+    threshold = next(
+        _object(value)
+        for value in _list(threshold_document["vectors"])
+        if _object(value)["id"] == "max31865-high-scale-pt1000-envelope-thresholds"
+    )
+    threshold_config = _object(threshold["configuration"])
+    threshold_expected = _object(threshold["expected"])
+
+    assert threshold_config["reference_resistance_ohms"] == 4300.0
+    assert threshold_config["low_fault_threshold_ohms"] == minimum
+    assert threshold_config["high_fault_threshold_ohms"] == maximum
+    assert threshold_expected["high_threshold_register"] == 59514
+    assert threshold_expected["low_threshold_register"] == 2822
 
 
 def test_max31865_vectors_execute_against_python_decoder() -> None:

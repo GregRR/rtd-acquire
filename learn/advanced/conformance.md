@@ -55,6 +55,20 @@ Cross-language vector configurations must also remain valid or invalid after
 conversion to binary32. The profile does not make configuration comparisons
 fuzzy merely to preserve distinctions that a binary32 C target cannot represent.
 
+## High-scale MAX31865 coverage
+
+**Introduced in:** `rtd-acquire 0.3.0`
+
+The shared MAX31865 vectors also exercise a 4.3 kΩ reference network. One
+measurement-decode case sits at the nearest representable resistance below the
+Pt1000 full-characteristic upper envelope, while one threshold case encodes the
+Pt1000 low/high envelope endpoints using the existing directional-rounding
+contract. Both cases execute against Python and portable C.
+
+This is software conformance evidence for the high-scale configuration. It does
+not by itself establish electrical compatibility or physical validation; those
+claims are tracked separately.
+
 ## What conformance does not prove
 
 Passing deterministic vectors does not by itself prove that physical hardware

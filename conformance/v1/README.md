@@ -80,6 +80,13 @@ The vector set includes a non-binary32-exact reference-resistance case so the
 numeric profile is exercised by the cross-language gate instead of being
 specified only in prose.
 
+**High-scale coverage added in:** `rtd-acquire 0.3.0`
+
+The measurement-decode set also includes a 4.3 kΩ reference-network case near
+the upper Pt1000 full-characteristic resistance envelope. This exercises the
+same ratiometric decode path at a materially larger resistance scale without
+turning the conformance fixture into an RTD temperature-model test.
+
 ## MAX31865 threshold-encoding vectors
 
 The MAX31865 `threshold_encoding` vectors pin the language-neutral conversion
@@ -96,3 +103,10 @@ above 32767. Such a configuration has the expected outcome
 Register outcomes use the complete 16-bit register value, including the unused
 least-significant bit position, so implementations do not need to infer whether
 the fixture contains an ADC code or a wire/register value.
+
+**High-scale coverage added in:** `rtd-acquire 0.3.0`
+
+The threshold set includes a 4.3 kΩ reference-network case using the Pt1000
+full-characteristic resistance-envelope endpoints. The expected register words
+pin the same directional rounding rules at the higher scale and are executed by
+both the Python and portable C conformance runners.

@@ -64,6 +64,22 @@
       "expected": {
         "outcome": "configuration_error"
       }
+    },
+    {
+      "id": "max31865-high-scale-pt1000-envelope-thresholds",
+      "description": "A 4.3 k\u03a9 reference network directionally encodes the Pt1000 full-characteristic resistance-envelope endpoints.",
+      "configuration": {
+        "reference_resistance_ohms": 4300.0,
+        "wire_count": 3,
+        "filter_frequency_hz": 60,
+        "low_fault_threshold_ohms": 185.2008,
+        "high_fault_threshold_ohms": 3904.81125
+      },
+      "expected": {
+        "outcome": "registers",
+        "high_threshold_register": 59514,
+        "low_threshold_register": 2822
+      }
     }
   ]
 }

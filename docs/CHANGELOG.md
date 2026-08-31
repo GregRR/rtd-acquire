@@ -8,6 +8,9 @@ The first public alpha release was `0.1.0a1`.
 
 ### Added
 
+- Extend shared Python/C MAX31865 conformance with a 4.3 kΩ reference-network
+  measurement near the Pt1000 upper resistance envelope and directional
+  threshold encoding across the Pt1000 full-characteristic envelope.
 - Add versioned machine-readable compatibility data for the six current
   `rtd-sensor` parity targets and the independent manufacturer-support,
   electrical-compatibility, and project-validation claim dimensions.
