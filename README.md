@@ -172,6 +172,8 @@ See:
 - [DESIGN.md](docs/DESIGN.md) — architecture and project contracts
 - [ROADMAP.md](docs/ROADMAP.md) — implementation sequence
 - [HARDWARE.md](docs/HARDWARE.md) — acquisition hardware catalog
+- [Compatibility data](compatibility/README.md) — versioned RTD requirements
+  and evidence vocabulary
 - [DIAGNOSTICS.md](docs/DIAGNOSTICS.md) — native diagnostic survey and normalization research
 - [HARDWARE_VALIDATION.md](docs/HARDWARE_VALIDATION.md) — physical validation gate
 - [REFERENCES.md](docs/REFERENCES.md) — external technical bibliography

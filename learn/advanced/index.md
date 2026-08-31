@@ -6,6 +6,7 @@ claims.
 
 - [Understanding conformance](conformance.md)
 - [Conformance artifacts](conformance-artifacts.md)
+- [Compatibility data](compatibility-data.md)
 - [Portable C11](c11.md)
 - [Cross-language & embedded](cross-language-embedded.md)
 - [Hardware validation](hardware-validation.md)

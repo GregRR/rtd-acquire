@@ -1069,6 +1069,23 @@ full temperature range. The validation record must say which evidence exists.
 The project must not turn electrical-compatibility analysis, range validation, or
 family testing into a stronger claim than the evidence supports.
 
+### 9.3 Machine-readable compatibility data
+
+Versioned compatibility/evidence data lives under `compatibility/`. It is a
+project evidence artifact rather than a runtime API and is deliberately separate
+from deterministic implementation conformance under `conformance/`.
+
+The initial v1 data freezes the six current RTD-family resistance requirements
+and the three independent claim dimensions defined above. Device/configuration
+record sets are added only when their evidence has been explicitly classified; an
+empty record-set list must not be interpreted as implicit support or
+incompatibility.
+
+Machine-readable records must retain explicit unknown/not-assessed states. They
+must not collapse manufacturer support, electrical compatibility, and project
+validation into one `supported` flag. Physical-validation depth also remains
+separate from those compatibility dimensions.
+
 ### RTD-model parity goal
 
 As a project-level goal, `rtd-acquire` should provide at least one supported and
@@ -1169,6 +1186,7 @@ rtd-acquire/
 ├── tests/                # Python/unit/conformance tests
 ├── c/                    # portable C implementation and HAL adapters
 ├── conformance/          # language-neutral fixtures/vectors
+├── compatibility/        # versioned RTD requirements/evidence data
 ├── examples/             # integration and hardware examples
 ├── docs/
 │   ├── DESIGN.md

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "claim_dimensions": [
+    {
+      "id": "manufacturer_support",
+      "label": "Manufacturer-supported",
+      "states": [
+        {
+          "id": "documented_supported",
+          "meaning": "Vendor documentation explicitly supports the assessed family or resistance-input use in the stated configuration."
+        },
+        {
+          "id": "documented_unsupported",
+          "meaning": "Vendor documentation explicitly excludes or disallows the assessed use."
+        },
+        {
+          "id": "not_established",
+          "meaning": "No manufacturer-support claim is established by the recorded evidence."
+        }
+      ]
+    },
+    {
+      "id": "electrical_compatibility",
+      "label": "Electrically compatible",
+      "states": [
+        {
+          "id": "compatible",
+          "meaning": "Documented limits and engineering analysis cover the complete required resistance envelope and stated topology/configuration."
+        },
+        {
+          "id": "incompatible",
+          "meaning": "Documented limits or engineering analysis establish that the assessed configuration cannot cover the stated requirement."
+        },
+        {
+          "id": "not_assessed",
+          "meaning": "Electrical compatibility has not been established in either direction."
+        }
+      ]
+    },
+    {
+      "id": "project_validation",
+      "label": "rtd-acquire validated",
+      "states": [
+        {
+          "id": "validated",
+          "meaning": "Reproducible physical project evidence exists for the assessed hardware/configuration."
+        },
+        {
+          "id": "not_validated",
+          "meaning": "No qualifying physical project validation is recorded for the assessed hardware/configuration."
+        }
+      ]
+    }
+  ],
+  "validation_depths": [
+    {
+      "id": "range_validated",
+      "label": "Range validated",
+      "meaning": "Precision-resistance testing covers representative low, middle, and high points spanning the required acquisition envelope."
+    },
+    {
+      "id": "family_hardware_validated",
+      "label": "Family/hardware validated",
+      "meaning": "The configured path is exercised with the intended RTD family on real hardware with applicable wiring and required native-fault behavior recorded."
+    }
+  ]
+}

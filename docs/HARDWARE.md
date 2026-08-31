@@ -120,6 +120,11 @@ tolerance class, lead arrangement, or rated operating range may be narrower.
 Hardware validation must record the actual sensor and acquisition configuration
 rather than treating this table as a product-rating claim.
 
+The versioned machine-readable counterpart of these requirements is
+`compatibility/v1/rtd_families.json`; the claim-state vocabulary is in
+`compatibility/v1/evidence_model.json`. The JSON data does not add stronger
+support claims than this catalog.
+
 A device need not support all models. Project-wide coverage is the goal. A new
 family first triggers a compatibility/validation review of existing acquisition
 paths; it does not automatically require a new device driver.

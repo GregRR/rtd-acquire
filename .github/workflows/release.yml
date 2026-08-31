@@ -230,6 +230,10 @@ jobs:
           required.update(
               path.as_posix() for path in Path("conformance/v1").glob("*.json")
           )
+          required.update(
+              path.as_posix()
+              for path in Path("compatibility/v1").glob("*.json")
+          )
           missing = sorted(required - names)
           if missing:
               raise SystemExit(f"sdist is missing required files: {missing!r}")

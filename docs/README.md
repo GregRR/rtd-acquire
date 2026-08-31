@@ -6,6 +6,8 @@ here.
 - [DESIGN.md](DESIGN.md) — architecture and public contracts
 - [ROADMAP.md](ROADMAP.md) — implementation sequence
 - [HARDWARE.md](HARDWARE.md) — acquisition hardware catalog
+- [Compatibility data](../compatibility/README.md) — versioned RTD requirements and
+  evidence vocabulary
 - [DIAGNOSTICS.md](DIAGNOSTICS.md) — native diagnostic evidence and normalization
 - [REFERENCES.md](REFERENCES.md) — canonical external technical bibliography
 - [HARDWARE_VALIDATION.md](HARDWARE_VALIDATION.md) — MAX31865 Pi/HERO physical

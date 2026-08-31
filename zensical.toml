@@ -50,6 +50,7 @@ nav = [
     { "Advanced home" = "advanced/index.md" },
     { "Understanding conformance" = "advanced/conformance.md" },
     { "Conformance artifacts" = "advanced/conformance-artifacts.md" },
+    { "Compatibility data" = "advanced/compatibility-data.md" },
     { "Portable C11" = "advanced/c11.md" },
     { "Cross-language & embedded" = "advanced/cross-language-embedded.md" },
     { "Hardware validation" = "advanced/hardware-validation.md" },

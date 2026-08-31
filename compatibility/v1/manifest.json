@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "rtd_family_requirements": {
+    "path": "rtd_families.json"
+  },
+  "evidence_model": {
+    "path": "evidence_model.json"
+  },
+  "compatibility_record_sets": []
+}

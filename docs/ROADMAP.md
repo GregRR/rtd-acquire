@@ -131,8 +131,9 @@ all current `rtd-sensor` built-in RTD families.
       Ni1000 6180, and Ni1000 TK5000 without importing temperature-model logic
       into acquisition drivers; define the compatibility/evidence vocabulary used
       by later validation records.
-- [ ] Add machine-readable 0.3 compatibility/evidence data after the textual
-      contract is stable enough to avoid freezing accidental schema choices.
+- [x] Add versioned machine-readable 0.3 RTD-family requirements and
+      compatibility/evidence vocabulary after the textual contract is stable,
+      leaving device/configuration record sets empty until separately classified.
 - [ ] Extend shared Python/C MAX31865 conformance and threshold coverage to a
       representative ~4.3 kΩ reference network/high-scale configuration.
 - [ ] Classify MAX31865/family configurations as manufacturer-supported,

@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "source": {
+    "project": "rtd-sensor",
+    "repository_ref": "v0.8.0",
+    "version": "0.8.0",
+    "contract_status": "stable",
+    "contract_version": 1,
+    "model_catalog": {
+      "path": "conformance/v1/models.json",
+      "sha256": "7b24f9c5538d090c75e925677347e3b317d4fc6d74d1bb6c9aa885ddc368b3d3"
+    },
+    "characteristic_catalog": {
+      "path": "conformance/v1/characteristics.json",
+      "sha256": "30b2474c511bb057d8440882378d8056035ee8da77dd1417901b9fcb5ca2919b"
+    }
+  },
+  "families": [
+    {
+      "model_id": "pt100",
+      "display_name": "Pt100",
+      "characteristic_id": "iec60751_pt385",
+      "nominal_resistance_ohms": 100.0,
+      "temperature_range_c": {
+        "minimum": -200.0,
+        "maximum": 850.0
+      },
+      "required_resistance_envelope_ohms": {
+        "minimum": 18.52008,
+        "maximum": 390.481125,
+        "bounds_kind": "exact"
+      }
+    },
+    {
+      "model_id": "pt500",
+      "display_name": "Pt500",
+      "characteristic_id": "iec60751_pt385",
+      "nominal_resistance_ohms": 500.0,
+      "temperature_range_c": {
+        "minimum": -200.0,
+        "maximum": 850.0
+      },
+      "required_resistance_envelope_ohms": {
+        "minimum": 92.6004,
+        "maximum": 1952.405625,
+        "bounds_kind": "exact"
+      }
+    },
+    {
+      "model_id": "pt1000",
+      "display_name": "Pt1000",
+      "characteristic_id": "iec60751_pt385",
+      "nominal_resistance_ohms": 1000.0,
+      "temperature_range_c": {
+        "minimum": -200.0,
+        "maximum": 850.0
+      },
+      "required_resistance_envelope_ohms": {
+        "minimum": 185.2008,
+        "maximum": 3904.81125,
+        "bounds_kind": "exact"
+      }
+    },
+    {
+      "model_id": "ni120",
+      "display_name": "Ni120 North American 6720",
+      "characteristic_id": "ni6720_north_american",
+      "nominal_resistance_ohms": 120.0,
+      "temperature_range_c": {
+        "minimum": -80.0,
+        "maximum": 260.0
+      },
+      "required_resistance_envelope_ohms": {
+        "minimum": 66.6,
+        "maximum": 380.3099,
+        "bounds_kind": "rounded"
+      }
+    },
+    {
+      "model_id": "ni1000",
+      "display_name": "Ni1000 6180",
+      "characteristic_id": "ni6180_din43760",
+      "nominal_resistance_ohms": 1000.0,
+      "temperature_range_c": {
+        "minimum": -60.0,
+        "maximum": 250.0
+      },
+      "required_resistance_envelope_ohms": {
+        "minimum": 695.202595,
+        "maximum": 2891.5625,
+        "bounds_kind": "exact"
+      }
+    },
+    {
+      "model_id": "ni1000_tk5000",
+      "display_name": "Ni1000 TK5000",
+      "characteristic_id": "ni5000_tk5000",
+      "nominal_resistance_ohms": 1000.0,
+      "temperature_range_c": {
+        "minimum": -60.0,
+        "maximum": 250.0
+      },
+      "required_resistance_envelope_ohms": {
+        "minimum": 751.79284,
+        "maximum": 2517.265625,
+        "bounds_kind": "exact"
+      }
+    }
+  ]
+}

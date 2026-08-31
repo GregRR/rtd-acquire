@@ -133,8 +133,9 @@ source distribution with `uv build --no-sources`, inspects their contents, and
 installs both artifacts into clean Python 3.11 and 3.14 environments for smoke
 testing. Source-distribution inspection requires the public portable-C headers and
 sources, C/C++ contract and adapter-test support, the Arduino AVR / HERO adapter
-source/example tree, and every `conformance/v1/*.json` artifact present in the
-checkout. Release validation also compiles the staged adapter example with the
+source/example tree, every `conformance/v1/*.json` artifact, and every
+`compatibility/v1/*.json` artifact present in the checkout. Release validation
+also compiles the staged adapter example with the
 Arduino Uno AVR core and verifies that the Raspberry Pi optional extra resolves
 and can import its `spidev` dependency.
 

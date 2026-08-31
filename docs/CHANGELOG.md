@@ -8,6 +8,9 @@ The first public alpha release was `0.1.0a1`.
 
 ### Added
 
+- Add versioned machine-readable compatibility data for the six current
+  `rtd-sensor` parity targets and the independent manufacturer-support,
+  electrical-compatibility, and project-validation claim dimensions.
 - Define full-characteristic resistance envelopes for all six current
   `rtd-sensor` built-in RTD families and the evidence needed to distinguish
   manufacturer support, electrical compatibility, range validation, and real
