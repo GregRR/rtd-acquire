@@ -36,18 +36,23 @@ def test_compatibility_manifest_references_existing_version_one_data() -> None:
     }
 
     referenced_paths: set[str] = set()
-    for key in ("rtd_family_requirements", "evidence_model"):
-        entry = _object(manifest[key])
+
+    def add_referenced_path(entry_value: object) -> None:
+        entry = _object(entry_value)
         assert set(entry) == {"path"}
         path = entry["path"]
         assert isinstance(path, str)
         assert Path(path).name == path
         assert path.endswith(".json")
         assert (_COMPATIBILITY_ROOT / path).is_file()
+        assert path not in referenced_paths
         referenced_paths.add(path)
 
-    record_sets = _list(manifest["compatibility_record_sets"])
-    assert record_sets == []
+    for key in ("rtd_family_requirements", "evidence_model"):
+        add_referenced_path(manifest[key])
+
+    for record_set in _list(manifest["compatibility_record_sets"]):
+        add_referenced_path(record_set)
 
     actual_paths = {
         path.name
@@ -57,10 +62,9 @@ def test_compatibility_manifest_references_existing_version_one_data() -> None:
     assert actual_paths == referenced_paths
 
 
-def test_rtd_family_requirements_are_frozen() -> None:
+def test_rtd_sensor_source_pin_matches_independently_verified_v0_8_0() -> None:
     document = _load_json(_COMPATIBILITY_ROOT / "rtd_families.json")
 
-    assert document["schema_version"] == 1
     assert _object(document["source"]) == {
         "project": "rtd-sensor",
         "repository_ref": "v0.8.0",
@@ -80,6 +84,12 @@ def test_rtd_family_requirements_are_frozen() -> None:
             ),
         },
     }
+
+
+def test_rtd_family_requirements_are_frozen() -> None:
+    document = _load_json(_COMPATIBILITY_ROOT / "rtd_families.json")
+
+    assert document["schema_version"] == 1
 
     families = _list(document["families"])
     observed: dict[str, tuple[float, float, float, float, float, str]] = {}

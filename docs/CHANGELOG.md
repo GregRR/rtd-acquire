@@ -25,6 +25,9 @@ The first public alpha release was `0.1.0a1`.
 
 ### Changed
 
+- Record independent verification of the pinned `rtd-sensor v0.8.0` conformance
+  catalog hashes and harden compatibility-manifest completeness checks for
+  future device/configuration record sets.
 - Clarify that `rtd-acquire` is optional when another system already supplies a
   trustworthy RTD-element resistance in ohms, while temperature-only devices do
   not become resistance backends by reverse-converting their output.

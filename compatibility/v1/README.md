@@ -31,6 +31,21 @@ These values are acquisition requirements only. The dataset does not contain
 Callendar-Van Dusen coefficients, nickel polynomials, inverse algorithms, or any
 other resistance-to-temperature model logic.
 
+### Upstream pin verification
+
+The `rtd-sensor v0.8.0` catalog pin was independently verified against the
+actual Git objects at the immutable `v0.8.0` tag on 2026-08-30. The verified
+SHA-256 digests are:
+
+- `conformance/v1/models.json` —
+  `7b24f9c5538d090c75e925677347e3b317d4fc6d74d1bb6c9aa885ddc368b3d3`
+- `conformance/v1/characteristics.json` —
+  `30b2474c511bb057d8440882378d8056035ee8da77dd1417901b9fcb5ca2919b`
+
+Maintainers must repeat this independent check whenever `repository_ref` or
+either stored catalog digest changes. `docs/DEVELOPMENT.md` records the
+reproducible verification procedure.
+
 ## Evidence model
 
 `evidence_model.json` keeps three claim dimensions independent:
@@ -56,4 +71,7 @@ not collapse these three dimensions into a single `supported` Boolean.
 
 Incompatible structural or semantic changes require a new compatibility-data
 version. New record sets that follow the existing v1 contract may be added to the
-v1 manifest without changing the format version.
+v1 manifest without changing the format version. Each
+`compatibility_record_sets` entry is an object containing exactly one `path` to
+a JSON file in the same version directory; manifest-completeness tests require
+every versioned JSON data file to be referenced exactly once.

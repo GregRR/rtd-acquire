@@ -126,6 +126,39 @@ core API.
 The release candidate should pass the same local gates before a tag is created;
 CI is an independent confirmation, not a substitute for local artifact testing.
 
+## Verify compatibility-data upstream pins
+
+`compatibility/v1/rtd_families.json` pins the stable `rtd-sensor` conformance
+catalogs by immutable Git tag and SHA-256 digest. The stored `v0.8.0` digests
+were independently verified against the actual tagged Git objects on
+2026-08-30.
+
+Whenever the pinned `repository_ref` or either catalog digest changes, repeat
+the independent check against a local `rtd-sensor` checkout rather than copying
+a digest from another manifest:
+
+```bash
+RTD_SENSOR_REPO=../rtd-sensor
+
+git -C "$RTD_SENSOR_REPO" \
+  show v0.8.0:conformance/v1/models.json \
+  | shasum -a 256
+
+git -C "$RTD_SENSOR_REPO" \
+  show v0.8.0:conformance/v1/characteristics.json \
+  | shasum -a 256
+```
+
+For the current pin, the expected hashes are:
+
+```text
+7b24f9c5538d090c75e925677347e3b317d4fc6d74d1bb6c9aa885ddc368b3d3  -
+30b2474c511bb057d8440882378d8056035ee8da77dd1417901b9fcb5ca2919b  -
+```
+
+Update the compatibility data only after the independently computed hashes
+match the values being recorded.
+
 ## Release automation
 
 `.github/workflows/release.yml` validates a release tag, rebuilds the wheel and
