@@ -6,9 +6,9 @@ Run the applicable quality gates before each commit.
 
 ```sh
 uv run pytest
-uv run ruff check src tests
-uv run ruff format --check src tests
-uv run mypy --strict src tests
+uv run ruff check src tests validation
+uv run ruff format --check src tests validation
+uv run mypy --strict src tests validation
 git diff --check
 ```
 

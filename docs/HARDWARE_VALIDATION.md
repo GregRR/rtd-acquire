@@ -487,3 +487,101 @@ The tracked summary should identify the exact compatibility-record ID(s) covered
 platform/runtime path, hardware revisions, resistance points, acceptance
 budgets, and evidence artifacts. Raw captures and calculations may remain under
 `.rtd-acquire-local/` until they are summarized in tracked project evidence.
+
+## Part E — Reproducible validation records and capture helpers
+
+The tracked `validation/v1/` template and helpers standardize local evidence
+capture without making raw bench data part of the public repository. Actual
+runs remain under `.rtd-acquire-local/validation/` until they are reviewed and
+ready to summarize.
+
+### 19. Initialize the local record before final measurements
+
+From the repository root, create a record directory with:
+
+```sh
+uv run --locked python -m validation.create_record <record-id>
+```
+
+The initializer creates:
+
+- `record.md`, copied from the versioned validation template; and
+- `environment.json`, which records UTC creation time, the current
+  `rtd-acquire` commit/package version, Python implementation/version, operating
+  system family/kernel release, and machine architecture.
+
+The environment helper intentionally does **not** collect the hostname or user
+name. Board serial numbers, local paths, operator identity, and other local
+hardware details should be added manually only when they are needed for the
+validation record and appropriate to retain.
+
+Fill in the acceptance budget, hardware configuration, resistance-source
+characterization, compatibility-record IDs, and intended validation depth in
+`record.md` before examining the final result set. The helper does not invent
+those scientific decisions.
+
+### 20. Capture Linux/Python MAX31865 measurements structurally
+
+For Raspberry Pi/Linux MAX31865 work, first ensure the optional hardware
+dependency is installed:
+
+```sh
+uv sync --locked --extra raspberry-pi
+```
+
+Then capture one labeled run into the initialized record directory:
+
+```sh
+uv run --locked python -m validation.capture_max31865 \
+  .rtd-acquire-local/validation/<record-id> \
+  <capture-label> \
+  --spi-path /dev/spidev0.0 \
+  --reference-resistance-ohms 430 \
+  --wire-count 4 \
+  --filter-frequency-hz 60 \
+  --count 20
+```
+
+Use the actual `RREF`, wire count, filter frequency, SPI path, clock, timing,
+and thresholds for the run. Optional CLI arguments allow the non-default SPI
+clock, low/high thresholds, and input-filter time constant to be recorded with
+the capture.
+
+For each requested acquisition attempt, the helper writes either the complete
+public `Measurement` payload or a captured `RtdAcquireError`. It therefore
+preserves successful resistances, status, normalized diagnostics, canonical
+messages, native evidence, and acquisition-operation failures instead of only
+printing the successful values.
+
+Each label produces three files:
+
+- `<label>.measurements.jsonl` — one timestamped structured acquisition attempt
+  per line;
+- `<label>.summary.json` — measurement/error counts, status and diagnostic
+  counts, and resistance mean/sample-standard-deviation/minimum/maximum; and
+- `<label>.capture.json` — the exact capture configuration and SHA-256 digests
+  of the raw and summary files.
+
+The helper refuses to overwrite an existing label. This makes accidental loss
+or silent replacement of physical evidence visible.
+
+### 21. Keep acceptance and promotion decisions explicit
+
+The capture summary is evidence, not a pass/fail oracle. Copy the relevant
+statistics into `record.md`, compare them with the **predeclared** acceptance
+budget, attach any external calculations or instrument records, and record the
+conclusion explicitly.
+
+The helper does not:
+
+- decide whether mean error or repeatability is acceptable;
+- infer an RTD temperature model;
+- convert resistance to temperature;
+- promote `project_validation`;
+- add `range_validated` or `family_hardware_validated`; or
+- alter manufacturer-support/electrical-compatibility claims.
+
+HERO/C serial output, instrument exports, calibration certificates, and custom
+validation harnesses may be stored alongside these files in the same local
+record directory. The tracked template provides common sections for those
+artifacts even when the Python capture helper is not applicable.

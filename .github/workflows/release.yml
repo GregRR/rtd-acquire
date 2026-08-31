@@ -81,13 +81,13 @@ jobs:
         run: uv run --locked pytest
 
       - name: Run Ruff lint
-        run: uv run --locked ruff check src tests
+        run: uv run --locked ruff check src tests validation
 
       - name: Check Ruff formatting
-        run: uv run --locked ruff format --check src tests
+        run: uv run --locked ruff format --check src tests validation
 
       - name: Run mypy
-        run: uv run --locked mypy --strict src tests
+        run: uv run --locked mypy --strict src tests validation
 
       - name: Run portable C contract tests
         run: |
@@ -180,6 +180,7 @@ jobs:
         run: |
           uv run --locked python - <<'PY'
           from pathlib import Path
+          import subprocess
           import tarfile
           import zipfile
 
@@ -233,6 +234,14 @@ jobs:
           required.update(
               path.as_posix()
               for path in Path("compatibility/v1").glob("*.json")
+          )
+          required.update(
+              subprocess.run(
+                  ["git", "ls-files", "--", "validation"],
+                  check=True,
+                  capture_output=True,
+                  text=True,
+              ).stdout.splitlines()
           )
           missing = sorted(required - names)
           if missing:

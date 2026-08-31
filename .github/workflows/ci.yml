@@ -40,15 +40,15 @@ jobs:
 
       - name: Run Ruff lint
         if: matrix.python-version == '3.14'
-        run: uv run --locked ruff check src tests
+        run: uv run --locked ruff check src tests validation
 
       - name: Check Ruff formatting
         if: matrix.python-version == '3.14'
-        run: uv run --locked ruff format --check src tests
+        run: uv run --locked ruff format --check src tests validation
 
       - name: Run mypy
         if: matrix.python-version == '3.14'
-        run: uv run --locked mypy --strict src tests
+        run: uv run --locked mypy --strict src tests validation
 
       - name: Run portable C contract tests
         if: matrix.python-version == '3.14'

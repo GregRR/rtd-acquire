@@ -8,6 +8,10 @@ The first public alpha release was `0.1.0a1`.
 
 ### Added
 
+- Add a versioned local-first physical-validation record template plus repository
+  helpers that initialize reproducibility metadata and capture structured Linux/
+  MAX31865 measurements, summaries, diagnostics, native evidence, and file hashes
+  without copying ad hoc terminal output.
 - Publish a GitHub Pages compatibility matrix for the six current MAX31865
   RTD-family configurations, keeping manufacturer support, electrical
   compatibility, and physical project validation visibly independent.

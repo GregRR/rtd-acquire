@@ -143,7 +143,7 @@ all current `rtd-sensor` built-in RTD families.
       Pages documentation with navigation/cross-links and bibliography updates.
 - [x] Extend the physical validation procedure across representative family
       resistance envelopes and precision low/mid/high reference points.
-- [ ] Add a reproducible validation-results template and small capture helpers so
+- [x] Add a reproducible validation-results template and small capture helpers so
       physical evidence can be recorded without copying ad hoc terminal output.
 - [ ] Record incremental real-hardware evidence as equipment becomes available,
       while keeping untested combinations visibly unvalidated.

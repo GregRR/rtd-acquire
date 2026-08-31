@@ -64,6 +64,7 @@ packages = ["src/rtd_acquire"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 88
@@ -85,4 +86,5 @@ strict = true
 files = [
     "src",
     "tests",
+    "validation",
 ]

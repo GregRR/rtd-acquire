@@ -98,6 +98,37 @@ Validation remains platform- and configuration-scoped: a Pi/Python result does
 not silently validate HERO/C, another `RREF`, another wire count, or another RTD
 family.
 
+## Recording evidence reproducibly
+
+The 0.3 validation workflow includes tracked templates and small repository
+helpers so bench evidence can be retained as structured files rather than
+reconstructed from copied terminal output.
+
+Create a local record first:
+
+```sh
+uv run --locked python -m validation.create_record <record-id>
+```
+
+This creates a versioned `record.md` template and an `environment.json` file
+under `.rtd-acquire-local/validation/<record-id>/`. The automatic environment
+metadata captures software/runtime facts needed for reproduction but does not
+collect the hostname or user name.
+
+For Linux/Python MAX31865 runs, the repository also provides
+`validation.capture_max31865`. It writes every acquisition attempt as JSONL,
+including normalized diagnostics/native evidence or an acquisition error, plus
+a summary JSON file and a capture manifest containing the exact driver/SPI
+configuration and SHA-256 file hashes.
+
+The capture helper intentionally does not decide whether a run passes.
+Acceptance budgets must still be declared before final measurements and the
+reviewed conclusion remains explicit in the validation record.
+
+See the detailed
+[`validation/README.md`](https://github.com/GregRR/rtd-acquire/blob/main/validation/README.md)
+and canonical procedure for commands and file semantics.
+
 ## Do not substitute plausibility for accuracy
 
 A room-temperature Pt100 producing a plausible-looking value is useful as a
