@@ -10,6 +10,9 @@ whether independent implementations produce the same observable behavior.
 Compatibility data records what resistance range an RTD family requires and what
 evidence exists for a hardware/configuration claim.
 
+For the human-readable status view, see the
+[Compatibility matrix](compatibility-matrix.md).
+
 ## Version 1
 
 `compatibility/v1/manifest.json` points to the two foundational datasets plus

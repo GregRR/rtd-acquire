@@ -67,7 +67,8 @@ RTDs (PT100 to PT1000), page 2 specifies the 350 Ω to 10 kΩ recommended `RREF`
 range, page 3 provides the 1.95–2.06 V bias and 0.2–5.75 mA output-current
 limits used in the electrical analysis, and page 10 documents the ratiometric
 acquisition model, platinum reference-resistor guidance, 4-wire behavior, and
-generic resistive-sensor use.
+generic resistive-sensor use. These evidence distinctions and source locators
+are also surfaced in the 0.3 GitHub Pages compatibility matrix.
 
 Raspberry Pi Ltd. (n.d.). *Raspberry Pi computer hardware: Serial peripheral
 interface (SPI)* [Documentation].

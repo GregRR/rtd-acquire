@@ -8,6 +8,9 @@ The first public alpha release was `0.1.0a1`.
 
 ### Added
 
+- Publish a GitHub Pages compatibility matrix for the six current MAX31865
+  RTD-family configurations, keeping manufacturer support, electrical
+  compatibility, and physical project validation visibly independent.
 - Add the first machine-readable device compatibility record set, classifying
   conservative 4-wire MAX31865 reference-network configurations for all six
   current RTD-family parity targets while keeping nickel manufacturer support

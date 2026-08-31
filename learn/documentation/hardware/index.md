@@ -28,3 +28,4 @@ Continue with:
 - [Raspberry Pi / Linux SPI](raspberry-pi.md)
 - [Arduino AVR / HERO adapter](../../api/c/arduino-avr.md)
 - [The acquisition boundary](acquisition-boundary.md)
+- [Compatibility matrix](../../advanced/compatibility-matrix.md)
