@@ -562,8 +562,14 @@ Each label produces three files:
 - `<label>.capture.json` — the exact capture configuration and SHA-256 digests
   of the raw and summary files.
 
+The helper requires the initialized record's `record.md` and version-1
+`environment.json` before it writes a capture. All generated JSON is UTF-8 with
+finite numeric values and deterministic line endings. If a new capture fails
+while writing its three output files, those newly created partial files are
+removed so the same label can be retried.
+
 The helper refuses to overwrite an existing label. This makes accidental loss
-or silent replacement of physical evidence visible.
+or silent replacement of completed physical evidence visible.
 
 ### 21. Keep acceptance and promotion decisions explicit
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -30,6 +31,14 @@ _FIXED_TIME = datetime(2026, 8, 30, 12, 0, tzinfo=UTC)
 
 def _now() -> datetime:
     return _FIXED_TIME
+
+
+def _initialize_record(path: Path) -> None:
+    (path / "record.md").write_text("# record\n", encoding="utf-8")
+    (path / "environment.json").write_text(
+        json.dumps({"schema_version": 1}) + "\n",
+        encoding="utf-8",
+    )
 
 
 def test_environment_metadata_avoids_host_identity(
@@ -166,7 +175,7 @@ def test_capture_and_summary_include_measurements_and_operation_errors() -> None
 def test_write_capture_writes_hash_manifest_and_refuses_overwrite(
     tmp_path: Path,
 ) -> None:
-    (tmp_path / "record.md").write_text("# record\n", encoding="utf-8")
+    _initialize_record(tmp_path)
     rows = capture_measurements(
         SimulatedAcquisitionDevice([Measurement(resistance_ohms=100.0)]),
         count=1,
@@ -185,9 +194,13 @@ def test_write_capture_writes_hash_manifest_and_refuses_overwrite(
     manifest = json.loads(manifest_path.read_text())
     assert manifest["configuration"] == {"device": "MAX31865"}
     assert set(manifest["files"]) == {raw_path.name, summary_path.name}
-    assert all(
-        len(file_metadata["sha256"]) == 64
-        for file_metadata in manifest["files"].values()
+    assert (
+        manifest["files"][raw_path.name]["sha256"]
+        == hashlib.sha256(raw_path.read_bytes()).hexdigest()
+    )
+    assert (
+        manifest["files"][summary_path.name]["sha256"]
+        == hashlib.sha256(summary_path.read_bytes()).hexdigest()
     )
 
     with pytest.raises(FileExistsError, match="already exists"):
@@ -206,10 +219,89 @@ def test_write_capture_requires_initialized_record(tmp_path: Path) -> None:
         now=_now,
     )
 
-    with pytest.raises(FileNotFoundError, match="record.md"):
+    with pytest.raises(FileNotFoundError, match="record.md and environment.json"):
         write_capture(
             record_dir=tmp_path,
             label="pt100-low",
             rows=rows,
             configuration={"device": "MAX31865"},
         )
+
+    (tmp_path / "record.md").write_text("# record\n", encoding="utf-8")
+    with pytest.raises(FileNotFoundError, match="record.md and environment.json"):
+        write_capture(
+            record_dir=tmp_path,
+            label="pt100-low",
+            rows=rows,
+            configuration={"device": "MAX31865"},
+        )
+
+
+def test_write_capture_rejects_invalid_environment_metadata(tmp_path: Path) -> None:
+    (tmp_path / "record.md").write_text("# record\n", encoding="utf-8")
+    (tmp_path / "environment.json").write_text(
+        json.dumps({"schema_version": 2}) + "\n",
+        encoding="utf-8",
+    )
+    rows = capture_measurements(
+        SimulatedAcquisitionDevice([Measurement(resistance_ohms=100.0)]),
+        count=1,
+        now=_now,
+    )
+
+    with pytest.raises(ValueError, match="schema_version 1"):
+        write_capture(
+            record_dir=tmp_path,
+            label="pt100-low",
+            rows=rows,
+            configuration={"device": "MAX31865"},
+        )
+
+
+def test_write_capture_rejects_nonfinite_json_before_writing(tmp_path: Path) -> None:
+    _initialize_record(tmp_path)
+    rows = capture_measurements(
+        SimulatedAcquisitionDevice([Measurement(resistance_ohms=100.0)]),
+        count=1,
+        now=_now,
+    )
+
+    with pytest.raises(ValueError, match="Out of range float values"):
+        write_capture(
+            record_dir=tmp_path,
+            label="pt100-low",
+            rows=rows,
+            configuration={"reference_resistance_ohms": float("nan")},
+        )
+
+    assert not list(tmp_path.glob("pt100-low.*"))
+
+
+def test_write_capture_cleans_partial_outputs_after_write_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _initialize_record(tmp_path)
+    rows = capture_measurements(
+        SimulatedAcquisitionDevice([Measurement(resistance_ohms=100.0)]),
+        count=1,
+        now=_now,
+    )
+    original_write_bytes = Path.write_bytes
+
+    def fail_summary(path: Path, data: bytes) -> int:
+        if path.name.endswith(".summary.json"):
+            raise OSError("simulated write failure")
+        return original_write_bytes(path, data)
+
+    monkeypatch.setattr(Path, "write_bytes", fail_summary)
+
+    with pytest.raises(OSError, match="simulated write failure"):
+        write_capture(
+            record_dir=tmp_path,
+            label="pt100-low",
+            rows=rows,
+            configuration={"device": "MAX31865"},
+        )
+
+    assert not list(tmp_path.glob("pt100-low.*"))

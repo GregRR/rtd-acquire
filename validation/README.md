@@ -37,6 +37,12 @@ The helper writes:
 - `<label>.capture.json` with the exact acquisition configuration and SHA-256
   digests of the capture and summary files.
 
+Capture requires both `record.md` and the initializer's version-1
+`environment.json`. Output is strict UTF-8 JSON with finite numeric values and
+deterministic line endings. If a new capture cannot write all three files, the
+helper removes the partial outputs so the same label can be retried; an existing
+completed label is still never overwritten.
+
 The helper never decides whether a run passes its acceptance budget. That
 judgment remains explicit in the validation record and follows
 `docs/HARDWARE_VALIDATION.md`.

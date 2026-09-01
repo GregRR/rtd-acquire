@@ -121,6 +121,11 @@ including normalized diagnostics/native evidence or an acquisition error, plus
 a summary JSON file and a capture manifest containing the exact driver/SPI
 configuration and SHA-256 file hashes.
 
+A capture is accepted only inside an initialized record that still contains its
+version-1 environment provenance. Generated files use strict finite JSON, and a
+failed new multi-file write is cleaned up so it cannot strand a partial label
+that blocks a retry. Existing completed labels are never overwritten.
+
 The capture helper intentionally does not decide whether a run passes.
 Acceptance budgets must still be declared before final measurements and the
 reviewed conclusion remains explicit in the validation record.

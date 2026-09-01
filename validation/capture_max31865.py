@@ -9,6 +9,7 @@ import math
 import statistics
 from collections import Counter
 from collections.abc import Callable
+from contextlib import suppress
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
@@ -176,12 +177,33 @@ def summarize_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as file:
-        for chunk in iter(lambda: file.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def _sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def _json_bytes(value: object, *, pretty: bool = False) -> bytes:
+    if pretty:
+        text = json.dumps(value, allow_nan=False, indent=2, sort_keys=True)
+    else:
+        text = json.dumps(value, allow_nan=False, sort_keys=True)
+    return (text + "\n").encode("utf-8")
+
+
+def _require_initialized_record(record_dir: Path) -> None:
+    record_path = record_dir / "record.md"
+    environment_path = record_dir / "environment.json"
+    if not record_path.is_file() or not environment_path.is_file():
+        raise FileNotFoundError(
+            "record_dir must contain record.md and environment.json created by "
+            "validation.create_record"
+        )
+
+    try:
+        environment = json.loads(environment_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError("environment.json must contain valid JSON") from exc
+    if not isinstance(environment, dict) or environment.get("schema_version") != 1:
+        raise ValueError("environment.json must use validation schema_version 1")
 
 
 def write_capture(
@@ -194,10 +216,7 @@ def write_capture(
     """Write JSONL capture, summary, and immutable capture manifest."""
 
     label = _safe_label(label)
-    if not (record_dir / "record.md").is_file():
-        raise FileNotFoundError(
-            "record_dir must contain record.md created by validation.create_record"
-        )
+    _require_initialized_record(record_dir)
 
     raw_path = record_dir / f"{label}.measurements.jsonl"
     summary_path = record_dir / f"{label}.summary.json"
@@ -206,25 +225,29 @@ def write_capture(
         if path.exists():
             raise FileExistsError(f"capture output already exists: {path}")
 
-    raw_text = "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
-    raw_path.write_text(raw_text, encoding="utf-8")
     summary = summarize_rows(rows)
-    summary_path.write_text(
-        json.dumps(summary, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    raw_bytes = b"".join(_json_bytes(row) for row in rows)
+    summary_bytes = _json_bytes(summary, pretty=True)
     manifest = {
         "schema_version": 1,
         "configuration": configuration,
         "files": {
-            raw_path.name: {"sha256": _sha256(raw_path)},
-            summary_path.name: {"sha256": _sha256(summary_path)},
+            raw_path.name: {"sha256": _sha256_bytes(raw_bytes)},
+            summary_path.name: {"sha256": _sha256_bytes(summary_bytes)},
         },
     }
-    manifest_path.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    manifest_bytes = _json_bytes(manifest, pretty=True)
+
+    try:
+        raw_path.write_bytes(raw_bytes)
+        summary_path.write_bytes(summary_bytes)
+        manifest_path.write_bytes(manifest_bytes)
+    except Exception:
+        for path in (raw_path, summary_path, manifest_path):
+            with suppress(OSError):
+                path.unlink(missing_ok=True)
+        raise
+
     return raw_path, summary_path, manifest_path
 
 

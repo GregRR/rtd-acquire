@@ -50,6 +50,12 @@ The first public alpha release was `0.1.0a1`.
   multi-channel hardware, with shared physical state below channel-scoped views
   and no generic batch API until concrete device semantics require one.
 
+### Fixed
+
+- Harden validation capture files so an initialized record must retain its
+  environment provenance, non-finite values cannot leak into JSON, and a failed
+  multi-file write removes new partial outputs instead of blocking a clean retry.
+
 ## 0.2.0 - 2026-08-25
 
 ### Added
