@@ -23,3 +23,12 @@ The v1 workflow is:
 The capture helper records public `Measurement` fields, normalized diagnostics,
 and native evidence. It does not interpret RTD temperature models, decide an
 acceptance budget, or automatically promote compatibility claims.
+
+## Source-state provenance
+
+`environment.json` records the current Git commit and `git_worktree_clean` as
+metadata only; no dirty-worktree filenames are stored. Claim-bearing validation
+should have `git_worktree_clean` equal to `true`. A `false` value documents that
+the measurements came from a modified checkout and therefore cannot be
+attributed to the recorded commit alone. `null` means Git state could not be
+determined.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -46,6 +47,7 @@ def test_environment_metadata_avoids_host_identity(
     tmp_path: Path,
 ) -> None:
     monkeypatch.setattr(create_record, "_git_commit", lambda _: "abc123")
+    monkeypatch.setattr(create_record, "_git_worktree_clean", lambda _: True)
     monkeypatch.setattr(create_record, "_package_version", lambda _: "0.3.0")
 
     metadata = create_record.build_environment_metadata(
@@ -56,6 +58,7 @@ def test_environment_metadata_avoids_host_identity(
     assert metadata["created_at_utc"] == "2026-08-30T12:00:00+00:00"
     assert metadata["rtd_acquire"] == {
         "git_commit": "abc123",
+        "git_worktree_clean": True,
         "package_version": "0.3.0",
     }
     runtime = metadata["runtime"]
@@ -71,11 +74,32 @@ def test_environment_metadata_avoids_host_identity(
     assert "hostname" not in json.dumps(metadata).lower()
 
 
+def test_git_worktree_clean_reports_only_cleanliness(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    class _Result:
+        def __init__(self, stdout: str) -> None:
+            self.stdout = stdout
+
+    outputs = iter(["", " M src/rtd_acquire/max31865.py\n"])
+
+    def fake_run(*args: object, **kwargs: object) -> _Result:
+        del args, kwargs
+        return _Result(next(outputs))
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert create_record._git_worktree_clean(tmp_path) is True
+    assert create_record._git_worktree_clean(tmp_path) is False
+
+
 def test_create_record_copies_template_and_refuses_overwrite(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
     monkeypatch.setattr(create_record, "_git_commit", lambda _: "abc123")
+    monkeypatch.setattr(create_record, "_git_worktree_clean", lambda _: True)
     monkeypatch.setattr(create_record, "_package_version", lambda _: "0.3.0")
 
     destination = create_record.create_record(

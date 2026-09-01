@@ -507,13 +507,19 @@ The initializer creates:
 
 - `record.md`, copied from the versioned validation template; and
 - `environment.json`, which records UTC creation time, the current
-  `rtd-acquire` commit/package version, Python implementation/version, operating
-  system family/kernel release, and machine architecture.
+  `rtd-acquire` commit/package version, whether the Git worktree is clean,
+  Python implementation/version, operating system family/kernel release, and
+  machine architecture.
 
-The environment helper intentionally does **not** collect the hostname or user
-name. Board serial numbers, local paths, operator identity, and other local
-hardware details should be added manually only when they are needed for the
-validation record and appropriate to retain.
+The environment helper intentionally does **not** collect the hostname, user
+name, or dirty-worktree filenames. Board serial numbers, local paths, operator
+identity, and other local hardware details should be added manually only when
+they are needed for the validation record and appropriate to retain.
+
+For final claim-bearing validation, require `git_worktree_clean` to be `true`.
+A dirty record can still be useful during bench development, but the recorded
+commit alone does not uniquely identify the code that produced those
+measurements.
 
 Fill in the acceptance budget, hardware configuration, resistance-source
 characterization, compatibility-record IDs, and intended validation depth in

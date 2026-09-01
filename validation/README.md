@@ -4,6 +4,12 @@
 physical-validation evidence. It is not part of the installed `rtd_acquire`
 Python API.
 
+The record initializer captures the current Git commit and a Boolean clean/dirty
+worktree state without storing local filenames. Final claim-bearing validation
+should be run from a clean checkout so the recorded commit identifies the exact
+source under test. A dirty state is preserved as evidence and must not be
+silently described as validation of the recorded commit alone.
+
 Create a local record from the repository root:
 
 ```sh

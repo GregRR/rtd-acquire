@@ -52,6 +52,9 @@ The first public alpha release was `0.1.0a1`.
 
 ### Fixed
 
+- Record clean/dirty Git worktree state in physical-validation provenance so
+  claim-bearing measurements cannot be ambiguously attributed to a commit while
+  uncommitted source changes are present.
 - Harden validation capture files so an initialized record must retain its
   environment provenance, non-finite values cannot leak into JSON, and a failed
   multi-file write removes new partial outputs instead of blocking a clean retry.

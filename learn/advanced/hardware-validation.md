@@ -112,8 +112,11 @@ uv run --locked python -m validation.create_record <record-id>
 
 This creates a versioned `record.md` template and an `environment.json` file
 under `.rtd-acquire-local/validation/<record-id>/`. The automatic environment
-metadata captures software/runtime facts needed for reproduction but does not
-collect the hostname or user name.
+metadata captures software/runtime facts needed for reproduction, including
+whether the Git worktree is clean, but does not collect the hostname, user
+name, or dirty-worktree filenames. Final claim-bearing validation should use a
+clean worktree so the commit identifies the exact source under test; dirty
+records remain useful for development but are not equivalent provenance.
 
 For Linux/Python MAX31865 runs, the repository also provides
 `validation.capture_max31865`. It writes every acquisition attempt as JSONL,

@@ -13,6 +13,7 @@ evidence local until a reviewed project summary is ready.
 - Target evidence depth: `range_validated` / `family_hardware_validated`
 - Platform/runtime path:
 - `rtd-acquire` commit:
+- Git worktree clean (`true` required for final claim-bearing validation):
 - Validation operator/organization, if publication is appropriate:
 
 ## Predeclared acceptance budget

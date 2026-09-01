@@ -37,6 +37,20 @@ def _git_commit(repository_root: Path) -> str | None:
     return value or None
 
 
+def _git_worktree_clean(repository_root: Path) -> bool | None:
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain=v1", "--untracked-files=normal"],
+            cwd=repository_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return not bool(result.stdout.strip())
+
+
 def _package_version(repository_root: Path) -> str | None:
     try:
         return importlib.metadata.version("rtd-acquire")
@@ -65,6 +79,7 @@ def build_environment_metadata(
         "created_at_utc": created_at.astimezone(UTC).isoformat(),
         "rtd_acquire": {
             "git_commit": _git_commit(repository_root),
+            "git_worktree_clean": _git_worktree_clean(repository_root),
             "package_version": _package_version(repository_root),
         },
         "runtime": {
